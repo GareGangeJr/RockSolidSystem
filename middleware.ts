@@ -25,12 +25,21 @@ export async function middleware(request: any) {
   const user = data.user
 
   const path = request.nextUrl.pathname
+
+  // ✅ ALLOW public/static files like /logo123.png, /file.svg, etc.
+  const isPublicFile = /\.(.*)$/.test(path)
+  if (isPublicFile) {
+    return response
+  }
+
   const isLoginPage = path.startsWith("/login")
 
+  // If not logged in, block everything except /login
   if (!user && !isLoginPage) {
     return NextResponse.redirect(new URL("/login", request.url))
   }
 
+  // If logged in, prevent going back to /login
   if (user && isLoginPage) {
     return NextResponse.redirect(new URL("/", request.url))
   }
