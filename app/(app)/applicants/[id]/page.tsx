@@ -9,6 +9,8 @@ type Applicant = {
   status: string | null
   contact_number: string | null
   email: string | null
+  years_of_exp: number | null
+  skills: string | null
 }
 
 export default async function Page({
@@ -84,6 +86,8 @@ export default async function Page({
         <p><b>Status:</b> {a.status}</p>
         <p><b>Contact:</b> {a.contact_number}</p>
         <p><b>Email:</b> {a.email}</p>
+        <p><b>Years of Experience:</b> {a.years_of_exp ?? 0}</p>
+        <p><b>Skills:</b> {a.skills || "—"}</p>
 
         <p className="pt-2"><b>Files:</b></p>
         {files?.length ? (
