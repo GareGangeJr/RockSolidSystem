@@ -1,6 +1,9 @@
 import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { Pencil, Eye } from "lucide-react"
+import DeleteApplicantButton from "@/components/DeleteApplicantButton"
+import { FolderOpen } from "lucide-react"
+
 
 type Applicant = {
   id: number
@@ -42,7 +45,7 @@ export default async function ApplicantsPage() {
         <table className="w-full text-sm">
           <thead className="bg-gray-100">
             <tr>
-            <th className="p-3 text-left">Applicant ID</th>
+              <th className="p-3 text-left">Applicant ID</th>
               <th className="p-3 text-left">Name</th>
               <th className="p-3 text-left">Position</th>
               <th className="p-3 text-left">Status</th>
@@ -55,27 +58,46 @@ export default async function ApplicantsPage() {
           <tbody>
             {applicants?.map((app: Applicant) => (
               <tr key={app.id} className="border-t">
-                <td className="p-3">{`APP-${new Date().getFullYear()}-${app.id}`}</td>
-                <td className="p-3">{app.first_name} {app.last_name} </td>
+                <td className="p-3">
+                  {`APP-${new Date().getFullYear()}-${app.id}`}
+                </td>
+
+                <td className="p-3">
+                  {app.first_name} {app.last_name}
+                </td>
+
                 <td className="p-3">{app.position_applied}</td>
                 <td className="p-3">{app.status}</td>
                 <td className="p-3">{app.contact_number}</td>
                 <td className="p-3">{app.email}</td>
                 <td className="p-3">
-
-                <div className="flex items-center gap-3">
-                <Link
-                   href={`/applicants/${app.id}`}
-                   className="p-1 rounded-md text-black hover:bg-blue-100 hover:text-blue-600 transition"
-                >
-                   <Eye className="w-4 h-4" />
-                </Link>
+                  <div className="flex items-center gap-3">
                   <Link
-                    href={`/applicants/${app.id}/edit`}
-                    className="text-black hover:text-yellow-500 transition duration-200"
+                    href={`/applicants/${app.id}/files`}
+                    className="p-1 rounded-md text-black hover:bg-purple-100 hover:text-purple-600 transition"
+                    title="Files"
                   >
-                    <Pencil className="w-4 h-4" />
+                    <FolderOpen className="w-4 h-4" />
                   </Link>
+
+                    <Link
+                      href={`/applicants/${app.id}`}
+                      className="p-1 rounded-md text-black hover:bg-blue-100 hover:text-blue-600 transition"
+                      title="View"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Link>
+
+                    <Link
+                      href={`/applicants/${app.id}/edit`}
+                      className="p-1 rounded-md text-black hover:bg-yellow-100 hover:text-yellow-600 transition"
+                      title="Edit"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Link>
+
+                    <DeleteApplicantButton id={app.id} />
+
                   </div>
                 </td>
               </tr>
