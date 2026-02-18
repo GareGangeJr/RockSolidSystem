@@ -24,10 +24,18 @@ export default function Sidebar() {
   ]
 
   return (
-    <aside className="w-64 border-r bg-blue-100 min-h-screen">
-      <div className="p-4 border-b">
-        <div className="font-bold text-lg">Rock Solid</div>
-        <div className="text-xs text-grey-500">Recruitment System</div>
+    <aside className="w-64 border-r bg-blue-100 min-h-screen flex flex-col">
+      <img
+         src="/logo123.png"
+         alt="Rock Solid Logo"
+         className="w-32 mx-auto"
+        />
+      
+      <div className="p-6 border-b border-gray-900 text-center">
+          <h1 className="font-bold text-lg leading-5">
+           Rock Solid Manpower <br />
+           Network & Consultancy Inc.
+          </h1>
       </div>
 
       <nav className="p-3 space-y-1">
@@ -40,12 +48,14 @@ export default function Sidebar() {
               key={item.href}
               href={item.href}
               className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm
-              ${active ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"}`}
+              ${active ? "bg-slate-900 text-white" : "text-black hover:bg-slate-100"}`}
             >
+              
               <Icon className="h-4 w-4" />
               {item.name}
             </Link>
           )
+          
         })}
       </nav>
     </aside>

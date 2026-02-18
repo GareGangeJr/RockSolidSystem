@@ -12,9 +12,9 @@ export default function Topbar() {
   }
 
   return (
-    <header className="h-14 border-b bg-white flex items-center justify-between px-4">
-      <div className="text-sm text-slate-600">
-        Rock Solid Manpower – Recruitment Management System
+    <header className="h-14 border-b border-gray-900 bg-white flex items-center justify-between px-4">
+      <div className="text-sm text-grey-600">
+        Rock Solid Manpower Information System
       </div>
 
       <Button size="sm" variant="outline" onClick={logout}>

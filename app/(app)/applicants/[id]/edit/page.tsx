@@ -64,7 +64,7 @@ export default function EditPage() {
       .update({
         first_name: applicant.first_name,
         last_name: applicant.last_name,
-        position_applied: applicant.position_applied, // ✅ fixed
+        position_applied: applicant.position_applied, 
         status: applicant.status,
         contact_number: applicant.contact_number,
         email: applicant.email,
@@ -98,6 +98,10 @@ export default function EditPage() {
   return (
     <div className="p-6 max-w-xl">
       <h1 className="text-2xl font-semibold mb-4">Edit Applicant</h1>
+
+      <Link href="/applicants" className="text px-120 text-blue-600 hover:underline">
+          Back
+        </Link>
 
       <form onSubmit={handleUpdate} className="space-y-3 bg-white shadow p-4 rounded-lg">
         <input
