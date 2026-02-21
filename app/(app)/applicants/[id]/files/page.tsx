@@ -14,7 +14,7 @@ type FileRow = {
   created_at: string
 }
 
-const BUCKET = "applicant files" // <-- YOUR BUCKET NAME (WITH SPACE)
+const BUCKET = "applicant files" 
 
 export default function ApplicantFilesPage() {
   const params = useParams()
@@ -51,14 +51,12 @@ export default function ApplicantFilesPage() {
     return data.signedUrl
   }
 
-  // ✅ VIEW = open in new tab
   async function viewFile(path: string) {
     const url = await getSignedUrl(path)
     if (!url) return
     window.open(url, "_blank")
   }
 
-  // ✅ DOWNLOAD = real download (not just open)
   async function downloadFile(path: string, name: string) {
     const url = await getSignedUrl(path)
     if (!url) return
@@ -79,7 +77,6 @@ export default function ApplicantFilesPage() {
     const ok = confirm("Delete this file?")
     if (!ok) return
 
-    // delete from storage
     const { error: storageError } = await supabase.storage
       .from(BUCKET)
       .remove([path])
@@ -89,7 +86,6 @@ export default function ApplicantFilesPage() {
       return
     }
 
-    // delete row in DB
     const { error: dbError } = await supabase
       .from("applicant_files")
       .delete()

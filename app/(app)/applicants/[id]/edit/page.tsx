@@ -53,6 +53,11 @@ export default async function EditPage({
         </div>
 
         <div>
+          <label className="block text-sm mb-1">Middle Name</label>
+          <input name="middle_name" className="w-full border rounded p-2" defaultValue={a.middle_name ?? ""} />
+        </div>
+        
+        <div>
           <label className="block text-sm mb-1">Last Name</label>
           <input name="last_name" className="w-full border rounded p-2" defaultValue={a.last_name ?? ""} required />
         </div>
@@ -89,6 +94,11 @@ export default async function EditPage({
         <div>
           <label className="block text-sm mb-1">Skills (comma-separated)</label>
           <input name="skills" className="w-full border rounded p-2" placeholder="e.g. Cooking, Child Care, Driving" defaultValue={a.skills ?? ""} />
+        </div>
+
+        <div>
+          <label className="block text-sm mb-1">Notes</label>
+          <input name="notes" className="w-full border rounded p-2" placeholder="Optional notes" defaultValue={a.notes ?? ""} />
         </div>
 
         <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
