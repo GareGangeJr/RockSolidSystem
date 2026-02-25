@@ -9,6 +9,8 @@ import {
   FolderKanban,
   CalendarCheck,
   BarChart3,
+  Activity,
+  Building2,
 } from "lucide-react"
 
 export default function Sidebar() {
@@ -18,7 +20,8 @@ export default function Sidebar() {
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Applicants", href: "/applicants", icon: Users },
     { name: "Job Orders", href: "/job-orders", icon: Briefcase },
-    { name: "201 Files", href: "/201-files", icon: FolderKanban },
+    { name: "Monitoring", href: "/monitoring", icon: Building2 },
+    { name: "Employees", href: "/employees", icon: FolderKanban },
     { name: "Attendance", href: "/attendance", icon: CalendarCheck },
     { name: "Reports", href: "/reports", icon: BarChart3 },
   ]

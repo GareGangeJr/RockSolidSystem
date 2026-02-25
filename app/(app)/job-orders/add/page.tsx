@@ -13,23 +13,40 @@ export default function AddJobOrderPage() {
 
       <form action={addJobOrder} className="bg-white rounded-lg shadow p-6 space-y-3">
         <div>
-          <label className="block text-sm mb-1">Job Title</label>
+          <label className="block text-sm mb-1">Company Name</label>
           <input
-            name="job_title"
+            name="company"
             className="w-full border rounded-md p-2"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm mb-1">Company</label>
-          <input name="company" className="w-full border rounded-md p-2" />
+          <label className="block text-sm mb-1">Country</label>
+          <input name="country" className="w-full border rounded-md p-2" />
         </div>
 
+
+
         <div>
-          <label className="block text-sm mb-1">Slots</label>
+          <label className="block text-sm mb-1">Job Title</label>
+          <input name="job_title" className="w-full border rounded-md p-2" />
+        </div>
+
+
+
+        <div>
+          <label className="block text-sm mb-1">Gender</label>
+          <input name="gender" className="w-full border rounded-md p-2" />
+        </div>
+
+
+
+
+        <div>
+          <label className="block text-sm mb-1">N0. Workers</label>
           <input
-            name="slots"
+            name="no_workers"
             type="number"
             defaultValue={1}
             className="w-full border rounded-md p-2"
@@ -55,6 +72,13 @@ export default function AddJobOrderPage() {
             placeholder="e.g. Cooking, Child Care, Driving"
           />
         </div>
+
+        <div>
+          <label className="block text-sm mb-1">Basic Salary</label>
+          <input name="salary" className="w-full border rounded-md p-2" />
+        </div>
+
+
 
         <div>
           <label className="block text-sm mb-1">Status</label>
