@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
-import { Eye, UserPlus } from "lucide-react"
+import { Eye, Pencil, UserPlus } from "lucide-react"
 import DeleteJobOrderForm from "@/components/DeleteJobOrderForm"
 
 type JobOrder = {
@@ -58,6 +58,13 @@ export default async function JobOrdersPage() {
                 <td className="p-3">{o.status}</td>
                 <td className="p-3">
                   <div className="flex items-center gap-3">
+                    <Link
+                      href={`/job-orders/${o.id}/edit`}
+                      className="p-1 rounded-md text-black hover:bg-yellow-100 hover:text-yellow-600"
+                      title="Edit"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Link>
                     <Link
                       href={`/job-orders/${o.id}`}
                       className="p-1 rounded-md text-black hover:bg-blue-100 hover:text-blue-600"

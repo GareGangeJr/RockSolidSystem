@@ -20,6 +20,30 @@ export async function addJobOrder(formData: FormData) {
   redirect("/job-orders")
 }
 
+export async function updateJobOrder(formData: FormData) {
+  const supabase = await createSupabaseServer()
+  const id = Number(formData.get("id"))
+
+  if (!id) {
+    redirect("/job-orders")
+  }
+
+  await supabase
+    .from("job_orders")
+    .update({
+      job_title: formData.get("job_title") as string,
+      company: formData.get("company") as string,
+      slots: Number(formData.get("slots")) || 1,
+      years_exp_required: Number(formData.get("years_exp_required")) || 0,
+      skills_required: (formData.get("skills_required") as string) || null,
+      status: (formData.get("status") as string) || "Open",
+    })
+    .eq("id", id)
+
+  revalidatePath("/job-orders")
+  redirect("/job-orders")
+}
+
 export async function deleteJobOrder(formData: FormData) {
   const supabase = await createSupabaseServer()
   const id = Number(formData.get("id"))
