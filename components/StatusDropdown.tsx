@@ -11,11 +11,25 @@ type Props = {
 export default function StatusDropdown({ applicantId, currentStatus }: Props) {
   async function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const newStatus = e.target.value
+    
+    // Confirm deployment status changes
+    if (newStatus === "Deployed" || newStatus === "Deployed(With Concerns)") {
+      const confirmed = confirm(
+        `Are you sure you want to change status to "${newStatus}"? This will add the applicant to the Monitoring page.`
+      )
+      if (!confirmed) {
+        e.target.value = currentStatus ?? "New Applicant"
+        return
+      }
+    }
+    
     const { error } = await updateApplicantStatus(applicantId, newStatus)
     if (error) {
-      alert("Error updating status")
+      alert(error.message || "Error updating status")
+      e.target.value = currentStatus ?? "New Applicant"
     } else {
-      alert("Status updated")
+      alert("Status updated successfully!")
+      window.location.reload()
     }
   }
 

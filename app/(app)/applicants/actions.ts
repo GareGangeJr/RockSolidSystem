@@ -110,12 +110,78 @@ export async function addApplicant(formData: FormData) {
 
 export async function updateApplicantStatus(applicantId: number, newStatus: string) {
   const supabase = await createSupabaseServer()
+  
+  // Update applicant status
   const { error } = await supabase
     .from("applicants")
     .update({ status: newStatus })
     .eq("id", applicantId)
+  
+  if (error) {
+    console.error("Error updating applicant status:", error)
+    return { error }
+  }
+  
+  // If status is "Deployed" or "Deployed(With Concerns)", create monitoring record
+  if (newStatus === "Deployed" || newStatus === "Deployed(With Concerns)") {
+    
+    // Find the job order this applicant is matched to
+    const { data: placement, error: placementError } = await supabase
+      .from("placements")
+      .select("job_order_id")
+      .eq("applicant_id", applicantId)
+      .maybeSingle()
+    
+    console.log("Placement found:", placement)
+    
+    if (placement) {
+      // Check if monitoring record already exists
+      const { data: existing } = await supabase
+        .from("monitoring")
+        .select("id")
+        .eq("applicant_id", applicantId)
+        .eq("job_order_id", placement.job_order_id)
+        .maybeSingle()
+      
+      console.log("Existing monitoring:", existing)
+      
+      // Only create if doesn't exist
+      if (!existing) {
+        const { data: newRecord, error: insertError } = await supabase.from("monitoring").insert({
+          applicant_id: applicantId,
+          job_order_id: placement.job_order_id,
+          deployment_status: newStatus,
+          deployment_date: new Date().toISOString().split('T')[0],
+        }).select()
+        
+        console.log("New monitoring record created:", newRecord)
+        console.log("Insert error (if any):", insertError)
+        
+        if (insertError) {
+          return { error: { message: `Error creating monitoring record: ${insertError.message}` } }
+        }
+      } else {
+        // Update existing record
+        const { error: updateError } = await supabase.from("monitoring").update({
+          deployment_status: newStatus,
+          updated_at: new Date().toISOString(),
+        }).eq("id", existing.id)
+        
+        console.log("Monitoring record updated")
+        if (updateError) {
+          return { error: { message: `Error updating monitoring record: ${updateError.message}` } }
+        }
+      }
+      
+      revalidatePath("/monitoring")
+    } else {
+      console.error("No placement found for applicant:", applicantId)
+      return { error: { message: "Cannot deploy: Applicant is not matched to any job order. Please match them to a job order first." } }
+    }
+  }
+  
   revalidatePath("/applicants")
-  return { error }
+  return { error: null }
 }
 
 export async function updateApplicant(formData: FormData) {
