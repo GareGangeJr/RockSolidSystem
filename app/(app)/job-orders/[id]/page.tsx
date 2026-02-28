@@ -32,12 +32,7 @@ export default async function Page({
     <div className="p-6 max-w-xl">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-semibold">View Job Order</h1>
-        <div className="flex items-center gap-3">
-          <Link href={`/job-orders/${o.id}/edit`} className="text-yellow-600 hover:underline">
-            Edit
-          </Link>
-          <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
-        </div>
+        <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
       </div>
 
       <div className="bg-white rounded-lg shadow p-6 space-y-3">
