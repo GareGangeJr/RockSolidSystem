@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
-import { FolderOpen } from "lucide-react"
 
 const v = (x: unknown) => (x != null && x !== "" ? String(x) : "—")
 const d = (x: unknown) => (x != null && String(x).length >= 10 ? String(x).slice(0, 10) : "—")
@@ -40,11 +39,6 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   }
 
   const a = data as Record<string, unknown>
-
-  const { data: files } = await supabase
-    .from("applicant_files")
-    .select("id, file_name")
-    .eq("applicant_id", id)
 
   const labelClass = "block text-xs font-medium text-gray-500"
   const valueClass = "mt-0.5 text-sm text-gray-900"
@@ -247,28 +241,6 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                 <div className="col-span-3"><span className={labelClass}>Interviewer Name</span><p className={valueClass}>{v(a.interviewer_name)}</p></div>
                 <div className="col-span-3"><span className={labelClass}>Date Interviewed</span><p className={valueClass}>{d(a.date_interviewed)}</p></div>
               </div>
-            </div>
-
-            <hr className="border-gray-200" />
-
-            <div>
-              <h2 className={sectionClass}>Files</h2>
-              {files?.length ? (
-                <ul className="list-disc space-y-1 pl-6">
-                  {files.map((f: { id: number; file_name: string }) => (
-                    <li key={f.id}>{f.file_name}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-gray-500">No files</p>
-              )}
-              <Link
-                href={`/applicants/${id}/files`}
-                className="mt-2 inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-              >
-                <FolderOpen className="h-4 w-4" />
-                Manage files
-              </Link>
             </div>
           </div>
         </div>
