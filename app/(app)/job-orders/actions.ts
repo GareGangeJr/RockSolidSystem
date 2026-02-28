@@ -8,11 +8,14 @@ export async function addJobOrder(formData: FormData) {
   const supabase = await createSupabaseServer()
 
   await supabase.from("job_orders").insert({
-    job_title: formData.get("job_title") as string,
     company: formData.get("company") as string,
-    slots: Number(formData.get("slots")) || 1,
+    country: formData.get("country") as string,
+    job_title: formData.get("job_title") as string,
+    gender: formData.get("gender") as string,
+    no_workers: Number(formData.get("no_workers")) || 1,
     years_exp_required: Number(formData.get("years_exp_required")) || 0,
     skills_required: (formData.get("skills_required") as string) || null,
+    salary: formData.get("salary") as string,
     status: (formData.get("status") as string) || "Open",
   })
 
