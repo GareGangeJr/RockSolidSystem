@@ -26,11 +26,11 @@ export default async function JobOrdersPage() {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Job Orders</h1>
         <Link
           href="/job-orders/add"
-          className="bg-blue-600 text-white px-4 py-2 rounded-md"
+          className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
           Add Job Order
         </Link>

@@ -1,12 +1,11 @@
 "use client"
 
-// Step 1: Import tools we need
 import { useState, useMemo } from "react"
 import Link from "next/link"
 import { Eye, Pencil, UserPlus } from "lucide-react"
 import DeleteJobOrderForm from "./DeleteJobOrderForm"
+import { JOB_ORDER_STATUS_OPTIONS } from "@/lib/status-options"
 
-// Step 2: Define what a Job Order looks like
 export type JobOrder = {
   id: number
   created_at: string
@@ -21,46 +20,35 @@ type Props = {
   jobOrders: JobOrder[]
 }
 
-// Step 3: Main component that shows Job Orders with filters
 export default function JobOrdersListWithFilters({ jobOrders }: Props) {
-  // These store what the user types/selects
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("All")
 
-  // Step 4: Filter the list based on search and filters
   const filtered = useMemo(() => {
     let list = jobOrders
     const q = search.trim().toLowerCase()
-
-    // If user typed something, search for it
     if (q) {
       list = list.filter((jo) => {
         const idStr = `jo-${jo.id}`.toLowerCase()
         const company = (jo.company ?? "").toLowerCase()
         const country = (jo.country ?? "").toLowerCase()
         const jobTitle = (jo.job_title ?? "").toLowerCase()
-        // Check if search text is in any of these fields
         return idStr.includes(q) || company.includes(q) || country.includes(q) || jobTitle.includes(q)
       })
     }
-
-    // If user picked a status, filter by it
     if (statusFilter !== "All") {
       list = list.filter((jo) => jo.status?.trim() === statusFilter)
     }
-
     return list
   }, [jobOrders, search, statusFilter])
 
-  // Step 5: Clear all filters button
-  const clearFilters = () => {
+  function clearFilters() {
     setSearch("")
     setStatusFilter("All")
   }
 
   return (
     <div className="space-y-4">
-      {/* Filter controls: search box + dropdowns + clear button */}
       <div className="flex flex-wrap items-center gap-3">
         <input
           type="text"
@@ -75,9 +63,11 @@ export default function JobOrdersListWithFilters({ jobOrders }: Props) {
           className="rounded-md border border-gray-300 px-3 py-2 text-sm"
         >
           <option value="All">Status: All</option>
-          <option value="Open">Open</option>
-          <option value="Filled">Filled</option>
-          <option value="Closed">Closed</option>
+          {JOB_ORDER_STATUS_OPTIONS.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
         </select>
         <button
           type="button"
@@ -88,7 +78,6 @@ export default function JobOrdersListWithFilters({ jobOrders }: Props) {
         </button>
       </div>
 
-      {/* Table showing filtered results */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-100">
