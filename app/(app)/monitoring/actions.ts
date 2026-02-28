@@ -33,3 +33,14 @@ export async function updateMonitoring(formData: FormData) {
   revalidatePath("/monitoring")
   redirect("/monitoring")
 }
+
+export async function deleteMonitoring(formData: FormData) {
+  const supabase = await createSupabaseServer()
+  const id = Number(formData.get("id"))
+  if (!id) redirect("/monitoring")
+
+  await supabase.from("monitoring").delete().eq("id", id)
+
+  revalidatePath("/monitoring")
+  redirect("/monitoring")
+}

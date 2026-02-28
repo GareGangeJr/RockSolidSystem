@@ -1,0 +1,154 @@
+"use client"
+
+// Step 1: Import tools we need
+import { useState, useMemo } from "react"
+import Link from "next/link"
+import { Eye, Pencil, UserPlus } from "lucide-react"
+import DeleteJobOrderForm from "./DeleteJobOrderForm"
+
+// Step 2: Define what a Job Order looks like
+export type JobOrder = {
+  id: number
+  created_at: string
+  company: string | null
+  country: string | null
+  job_title: string | null
+  no_workers: number | null
+  status: string | null
+}
+
+type Props = {
+  jobOrders: JobOrder[]
+}
+
+// Step 3: Main component that shows Job Orders with filters
+export default function JobOrdersListWithFilters({ jobOrders }: Props) {
+  // These store what the user types/selects
+  const [search, setSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState("All")
+
+  // Step 4: Filter the list based on search and filters
+  const filtered = useMemo(() => {
+    let list = jobOrders
+    const q = search.trim().toLowerCase()
+
+    // If user typed something, search for it
+    if (q) {
+      list = list.filter((jo) => {
+        const idStr = `jo-${jo.id}`.toLowerCase()
+        const company = (jo.company ?? "").toLowerCase()
+        const country = (jo.country ?? "").toLowerCase()
+        const jobTitle = (jo.job_title ?? "").toLowerCase()
+        // Check if search text is in any of these fields
+        return idStr.includes(q) || company.includes(q) || country.includes(q) || jobTitle.includes(q)
+      })
+    }
+
+    // If user picked a status, filter by it
+    if (statusFilter !== "All") {
+      list = list.filter((jo) => jo.status?.trim() === statusFilter)
+    }
+
+    return list
+  }, [jobOrders, search, statusFilter])
+
+  // Step 5: Clear all filters button
+  const clearFilters = () => {
+    setSearch("")
+    setStatusFilter("All")
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Filter controls: search box + dropdowns + clear button */}
+      <div className="flex flex-wrap items-center gap-3">
+        <input
+          type="text"
+          placeholder="Search company, country, job title, ID..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="min-w-[280px] max-w-md rounded-md border border-gray-300 px-3 py-2 text-sm"
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+        >
+          <option value="All">Status: All</option>
+          <option value="Open">Open</option>
+          <option value="Filled">Filled</option>
+          <option value="Closed">Closed</option>
+        </select>
+        <button
+          type="button"
+          onClick={clearFilters}
+          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-50"
+        >
+          Clear
+        </button>
+      </div>
+
+      {/* Table showing filtered results */}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-3 text-left">ID</th>
+              <th className="p-3 text-left">Company</th>
+              <th className="p-3 text-left">Country</th>
+              <th className="p-3 text-left">Job Title</th>
+              <th className="p-3 text-left">Workers</th>
+              <th className="p-3 text-left">Status</th>
+              <th className="p-3 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((o) => (
+              <tr key={o.id} className="border-t">
+                <td className="p-3">JO-{o.id}</td>
+                <td className="p-3">{o.company}</td>
+                <td className="p-3">{o.country}</td>
+                <td className="p-3">{o.job_title}</td>
+                <td className="p-3">{o.no_workers}</td>
+                <td className="p-3">{o.status}</td>
+                <td className="p-3">
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href={`/job-orders/${o.id}`}
+                      className="p-1 rounded-md text-black hover:bg-blue-100 hover:text-blue-600"
+                      title="View"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Link>
+                    <Link
+                      href={`/job-orders/${o.id}/match`}
+                      className="p-1 rounded-md text-black hover:bg-green-100 hover:text-green-600"
+                      title="Match Applicants"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                    </Link>
+                    <Link
+                      href={`/job-orders/${o.id}/edit`}
+                      className="p-1 rounded-md text-black hover:bg-yellow-100 hover:text-yellow-600"
+                      title="Edit"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Link>
+                    <DeleteJobOrderForm id={o.id} />
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={7} className="p-6 text-center text-gray-500">
+                  No job orders found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}

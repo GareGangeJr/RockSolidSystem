@@ -48,3 +48,30 @@ export async function deleteMatch(formData: FormData) {
   revalidatePath(`/job-orders/${jobOrderId}/match`)
   redirect(`/job-orders/${jobOrderId}/match`)
 }
+
+export async function updateJobOrder(formData: FormData) {
+  const supabase = await createSupabaseServer()
+
+  const id = Number(formData.get("id"))
+  if (!id) redirect("/job-orders")
+
+  await supabase
+    .from("job_orders")
+    .update({
+      company: formData.get("company") as string,
+      country: formData.get("country") as string,
+      job_title: formData.get("job_title") as string,
+      gender: formData.get("gender") as string,
+      no_workers: Number(formData.get("no_workers")) || 1,
+      years_exp_required: Number(formData.get("years_exp_required")) || 0,
+      skills_required: (formData.get("skills_required") as string) || null,
+      salary: formData.get("salary") as string,
+      status: (formData.get("status") as string) || "Open",
+    })
+    .eq("id", id)
+
+  revalidatePath("/job-orders")
+  revalidatePath(`/job-orders/${id}`)
+  revalidatePath(`/job-orders/${id}/edit`)
+  redirect("/job-orders")
+}
