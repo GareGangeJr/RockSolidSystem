@@ -6,9 +6,10 @@ import DeleteJobOrderForm from "@/components/DeleteJobOrderForm"
 type JobOrder = {
   id: number
   created_at: string
-  job_title: string | null
   company: string | null
-  slots: number | null
+  country: string | null
+  job_title: string | null
+  no_workers: number | null
   status: string | null
 }
 
@@ -41,9 +42,10 @@ export default async function JobOrdersPage() {
           <thead className="bg-gray-100">
             <tr>
               <th className="p-3 text-left">ID</th>
-              <th className="p-3 text-left">Job Title</th>
               <th className="p-3 text-left">Company</th>
-              <th className="p-3 text-left">Slots</th>
+              <th className="p-3 text-left">Country</th>
+              <th className="p-3 text-left">Job Title</th>
+              <th className="p-3 text-left">Workers</th>
               <th className="p-3 text-left">Status</th>
               <th className="p-3 text-left">Actions</th>
             </tr>
@@ -52,9 +54,10 @@ export default async function JobOrdersPage() {
             {orders?.map((o: JobOrder) => (
               <tr key={o.id} className="border-t">
                 <td className="p-3">JO-{o.id}</td>
-                <td className="p-3">{o.job_title}</td>
                 <td className="p-3">{o.company}</td>
-                <td className="p-3">{o.slots}</td>
+                <td className="p-3">{o.country}</td>
+                <td className="p-3">{o.job_title}</td>
+                <td className="p-3">{o.no_workers}</td>
                 <td className="p-3">{o.status}</td>
                 <td className="p-3">
                   <div className="flex items-center gap-3">
@@ -79,7 +82,7 @@ export default async function JobOrdersPage() {
             ))}
             {orders?.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-6 text-center text-gray-500">
+                <td colSpan={7} className="p-6 text-center text-gray-500">
                   No job orders.
                 </td>
               </tr>
