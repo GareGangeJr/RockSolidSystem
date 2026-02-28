@@ -111,7 +111,6 @@ export async function addApplicant(formData: FormData) {
 export async function updateApplicantStatus(applicantId: number, newStatus: string) {
   const supabase = await createSupabaseServer()
   
-  // Update applicant status
   const { error } = await supabase
     .from("applicants")
     .update({ status: newStatus })
@@ -122,10 +121,7 @@ export async function updateApplicantStatus(applicantId: number, newStatus: stri
     return { error }
   }
   
-  // If status is "Deployed" or "Deployed(With Concerns)", create monitoring record
   if (newStatus === "Deployed" || newStatus === "Deployed(With Concerns)") {
-    
-    // Find the job order this applicant is matched to
     const { data: placement, error: placementError } = await supabase
       .from("placements")
       .select("job_order_id")
@@ -135,7 +131,6 @@ export async function updateApplicantStatus(applicantId: number, newStatus: stri
     console.log("Placement found:", placement)
     
     if (placement) {
-      // Check if monitoring record already exists
       const { data: existing } = await supabase
         .from("monitoring")
         .select("id")
@@ -145,7 +140,6 @@ export async function updateApplicantStatus(applicantId: number, newStatus: stri
       
       console.log("Existing monitoring:", existing)
       
-      // Only create if doesn't exist
       if (!existing) {
         const { data: newRecord, error: insertError } = await supabase.from("monitoring").insert({
           applicant_id: applicantId,
@@ -161,7 +155,6 @@ export async function updateApplicantStatus(applicantId: number, newStatus: stri
           return { error: { message: `Error creating monitoring record: ${insertError.message}` } }
         }
       } else {
-        // Update existing record
         const { error: updateError } = await supabase.from("monitoring").update({
           deployment_status: newStatus,
           updated_at: new Date().toISOString(),
@@ -287,5 +280,16 @@ export async function updateApplicant(formData: FormData) {
 
   revalidatePath("/applicants")
   revalidatePath(`/applicants/${id}`)
+  redirect("/applicants")
+}
+
+export async function deleteApplicant(formData: FormData) {
+  const supabase = await createSupabaseServer()
+  const id = Number(formData.get("id"))
+  if (!id) redirect("/applicants")
+
+  await supabase.from("applicants").delete().eq("id", id)
+
+  revalidatePath("/applicants")
   redirect("/applicants")
 }

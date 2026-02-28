@@ -35,9 +35,7 @@ export async function matchToJob(formData: FormData) {
   const supabase = await createSupabaseServer()
   const applicantId = Number(formData.get("applicant_id"))
   const jobOrderId = Number(formData.get("job_order_id"))
-  if (applicantId && jobOrderId) {
-    await supabase.from("placements").insert({ applicant_id: applicantId, job_order_id: jobOrderId })
-  }
+  if (applicantId && jobOrderId) await supabase.from("placements").insert({ applicant_id: applicantId, job_order_id: jobOrderId })
   revalidatePath(`/job-orders/${jobOrderId}/match`)
   redirect(`/job-orders/${jobOrderId}/match`)
 }
@@ -46,9 +44,7 @@ export async function deleteMatch(formData: FormData) {
   const supabase = await createSupabaseServer()
   const applicantId = Number(formData.get("applicant_id"))
   const jobOrderId = Number(formData.get("job_order_id"))
-  if (applicantId && jobOrderId) {
-    await supabase.from("placements").delete().eq("applicant_id", applicantId).eq("job_order_id", jobOrderId)
-  }
+  if (applicantId && jobOrderId) await supabase.from("placements").delete().eq("applicant_id", applicantId).eq("job_order_id", jobOrderId)
   revalidatePath(`/job-orders/${jobOrderId}/match`)
   redirect(`/job-orders/${jobOrderId}/match`)
 }

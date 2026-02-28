@@ -51,16 +51,12 @@ export default function ApplicantsListWithFilters({ applicants }: Props) {
         return idStr.includes(q) || name.includes(q) || pos.includes(q) || contact.includes(q) || email.includes(q)
       })
     }
-    if (typeFilter !== "All") {
-      list = list.filter((app) => (app.applicant_type ?? "").trim() === typeFilter)
-    }
-    if (statusFilter !== "All") {
-      list = list.filter((app) => (app.status ?? "").trim() === statusFilter)
-    }
+    if (typeFilter !== "All") list = list.filter((app) => app.applicant_type?.trim() === typeFilter)
+    if (statusFilter !== "All") list = list.filter((app) => app.status?.trim() === statusFilter)
     return list
   }, [applicants, search, typeFilter, statusFilter])
 
-  function clearFilters() {
+  const clearFilters = () => {
     setSearch("")
     setTypeFilter("All")
     setStatusFilter("All")

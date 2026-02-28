@@ -26,8 +26,6 @@ export default function ApplicantFilesPage() {
   const [loading, setLoading] = useState(true)
 
   async function loadFiles() {
-    setLoading(true)
-
     const { data, error } = await supabase
       .from("applicant_files")
       .select("*")
@@ -41,20 +39,18 @@ export default function ApplicantFilesPage() {
   async function getSignedUrl(path: string) {
     const { data, error } = await supabase.storage
       .from(BUCKET)
-      .createSignedUrl(path, 60) // 60 seconds
+      .createSignedUrl(path, 60)
 
     if (error || !data?.signedUrl) {
       alert("Signed URL failed: " + (error?.message || "unknown error"))
       return null
     }
-
     return data.signedUrl
   }
 
   async function viewFile(path: string) {
     const url = await getSignedUrl(path)
-    if (!url) return
-    window.open(url, "_blank")
+    if (url) window.open(url, "_blank")
   }
 
   async function downloadFile(path: string, name: string) {
@@ -63,7 +59,6 @@ export default function ApplicantFilesPage() {
 
     const res = await fetch(url)
     const blob = await res.blob()
-
     const a = document.createElement("a")
     a.href = URL.createObjectURL(blob)
     a.download = name || "file"
@@ -74,38 +69,25 @@ export default function ApplicantFilesPage() {
   }
 
   async function deleteFile(fileId: number, path: string) {
-    const ok = confirm("Delete this file?")
-    if (!ok) return
+    if (!confirm("Delete this file?")) return
 
-    const { error: storageError } = await supabase.storage
-      .from(BUCKET)
-      .remove([path])
+    const { error: storageError } = await supabase.storage.from(BUCKET).remove([path])
+    if (storageError) return alert("Storage delete failed: " + storageError.message)
 
-    if (storageError) {
-      alert("Storage delete failed: " + storageError.message)
-      return
-    }
-
-    const { error: dbError } = await supabase
-      .from("applicant_files")
-      .delete()
-      .eq("id", fileId)
-
-    if (dbError) {
-      alert("DB delete failed: " + dbError.message)
-      return
-    }
+    const { error: dbError } = await supabase.from("applicant_files").delete().eq("id", fileId)
+    if (dbError) return alert("DB delete failed: " + dbError.message)
 
     loadFiles()
   }
 
   useEffect(() => {
-    if (!isNaN(applicantId)) loadFiles()
+    if (!isNaN(applicantId)) {
+      setLoading(true)
+      loadFiles()
+    }
   }, [applicantId])
 
-  if (isNaN(applicantId)) {
-    return <div className="p-6 text-red-500">Invalid applicant ID</div>
-  }
+  if (isNaN(applicantId)) return <div className="p-6 text-red-500">Invalid applicant ID</div>
 
   return (
     <div className="p-6 max-w-5xl">
@@ -122,11 +104,7 @@ export default function ApplicantFilesPage() {
       </div>
 
       {loading && <div>Loading...</div>}
-
-      {!loading && files.length === 0 && (
-        <div className="text-gray-500">No files uploaded.</div>
-      )}
-
+      {!loading && !files.length && <div className="text-gray-500">No files uploaded.</div>}
       {!loading && files.length > 0 && (
         <div className="bg-white border rounded-lg overflow-hidden">
           <table className="w-full text-sm">

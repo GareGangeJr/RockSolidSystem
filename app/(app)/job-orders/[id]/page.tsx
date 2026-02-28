@@ -10,29 +10,21 @@ export default async function Page({
   const { id } = await params
   const n = Number(id)
 
-  if (Number.isNaN(n)) {
-    return (
-      <div className="p-6">
-        <p className="text-red-500">Invalid ID</p>
-        <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
-      </div>
-    )
-  }
+  if (Number.isNaN(n)) return (
+    <div className="p-6">
+      <p className="text-red-500">Invalid ID</p>
+      <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
+    </div>
+  )
 
-  const { data, error } = await supabase
-    .from("job_orders")
-    .select("*")
-    .eq("id", n)
-    .maybeSingle()
+  const { data, error } = await supabase.from("job_orders").select("*").eq("id", n).maybeSingle()
 
-  if (error || !data) {
-    return (
-      <div className="p-6">
-        <p className="text-red-500">Not found</p>
-        <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
-      </div>
-    )
-  }
+  if (error || !data) return (
+    <div className="p-6">
+      <p className="text-red-500">Not found</p>
+      <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
+    </div>
+  )
 
   const o = data as any
 

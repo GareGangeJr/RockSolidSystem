@@ -80,7 +80,7 @@ export default async function JobOrdersPage() {
                 </td>
               </tr>
             ))}
-            {orders?.length === 0 && (
+            {!orders?.length && (
               <tr>
                 <td colSpan={7} className="p-6 text-center text-gray-500">
                   No job orders.

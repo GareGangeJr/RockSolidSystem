@@ -37,14 +37,12 @@ export default async function Page({
   const { id } = await params
   const n = Number(id)
 
-  if (Number.isNaN(n)) {
-    return (
-      <div className="p-6">
-        <p className="text-red-500">Invalid ID</p>
-        <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
-      </div>
-    )
-  }
+  if (Number.isNaN(n)) return (
+    <div className="p-6">
+      <p className="text-red-500">Invalid ID</p>
+      <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
+    </div>
+  )
 
   const { data: job, error: jobError } = await supabase
     .from("job_orders")
@@ -52,14 +50,12 @@ export default async function Page({
     .eq("id", n)
     .maybeSingle()
 
-  if (jobError || !job) {
-    return (
-      <div className="p-6">
-        <p className="text-red-500">Job order not found</p>
-        <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
-      </div>
-    )
-  }
+  if (jobError || !job) return (
+    <div className="p-6">
+      <p className="text-red-500">Job order not found</p>
+      <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
+    </div>
+  )
 
   const o = job as JobOrder
 

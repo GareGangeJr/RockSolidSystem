@@ -10,47 +10,26 @@ export default async function MonitoringDetailPage({
   const { id } = await params
   const monitoringId = Number(id)
 
-  if (Number.isNaN(monitoringId)) {
-    return (
-      <div className="p-6">
-        <p className="text-red-500">Invalid monitoring ID</p>
-        <Link href="/monitoring" className="text-blue-600 hover:underline">← Back</Link>
-      </div>
-    )
-  }
+  if (Number.isNaN(monitoringId)) return (
+    <div className="p-6">
+      <p className="text-red-500">Invalid monitoring ID</p>
+      <Link href="/monitoring" className="text-blue-600 hover:underline">← Back</Link>
+    </div>
+  )
 
-  const { data: monitoring, error } = await supabase
-    .from("monitoring")
-    .select("*")
-    .eq("id", monitoringId)
-    .maybeSingle()
+  const { data: monitoring, error } = await supabase.from("monitoring").select("*").eq("id", monitoringId).maybeSingle()
 
-  if (error || !monitoring) {
-    return (
-      <div className="p-6">
-        <p className="text-red-500">Record not found</p>
-        <Link href="/monitoring" className="text-blue-600 hover:underline">← Back</Link>
-      </div>
-    )
-  }
+  if (error || !monitoring) return (
+    <div className="p-6">
+      <p className="text-red-500">Record not found</p>
+      <Link href="/monitoring" className="text-blue-600 hover:underline">← Back</Link>
+    </div>
+  )
 
-  const { data: applicant } = await supabase
-    .from("applicants")
-    .select("*")
-    .eq("id", monitoring.applicant_id)
-    .maybeSingle()
+  const { data: applicant } = await supabase.from("applicants").select("*").eq("id", monitoring.applicant_id).maybeSingle()
+  const { data: jobOrder } = await supabase.from("job_orders").select("*").eq("id", monitoring.job_order_id).maybeSingle()
 
-  const { data: jobOrder } = await supabase
-    .from("job_orders")
-    .select("*")
-    .eq("id", monitoring.job_order_id)
-    .maybeSingle()
-
-  const formatDate = (date: string | null) => {
-    if (!date) return "—"
-    return new Date(date).toLocaleDateString()
-  }
-
+  const formatDate = (date: string | null) => date ? new Date(date).toLocaleDateString() : "—"
   const v = (value: any) => value || "—"
 
   return (
@@ -63,7 +42,7 @@ export default async function MonitoringDetailPage({
       </div>
 
       <div className="max-w-4xl space-y-6">
-        {/* Applicant & Job Info */}
+ 
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-4 border-b pb-2">Applicant & Job Information</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
@@ -77,7 +56,6 @@ export default async function MonitoringDetailPage({
           </div>
         </div>
 
-        {/* Deployment Details */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-4 border-b pb-2">Deployment Details</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
@@ -97,7 +75,6 @@ export default async function MonitoringDetailPage({
           </div>
         </div>
 
-        {/* Concerns */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-4 border-b pb-2">Concerns</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
@@ -117,7 +94,6 @@ export default async function MonitoringDetailPage({
           </div>
         </div>
 
-        {/* Return Information */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-4 border-b pb-2">Return Information</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">

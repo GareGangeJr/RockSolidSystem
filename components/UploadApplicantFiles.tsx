@@ -3,12 +3,10 @@
 import { useState } from "react"
 import { createSupabaseBrowser } from "@/lib/supabase/browser"
 
-const MAX_SIZE_MB = 5
-const MAX_SIZE = MAX_SIZE_MB * 1024 * 1024
+const MAX_SIZE = 5 * 1024 * 1024
 const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png"]
 
 export default function UploadApplicantFile({ id }: { id: number }) {
-  const supabase = createSupabaseBrowser()
   const [uploading, setUploading] = useState(false)
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -16,29 +14,17 @@ export default function UploadApplicantFile({ id }: { id: number }) {
     if (!file) return
     e.target.value = ""
 
-    if (file.size > MAX_SIZE) {
-      alert(`File too large. Max is ${MAX_SIZE_MB}MB.`)
-      return
-
-    }
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      alert("Invalid file type. Only PDF, JPG, PNG allowed.")
-      return
-    }
+    if (file.size > MAX_SIZE) return alert("File too large. Max is 5MB.")
+    if (!ALLOWED_TYPES.includes(file.type)) return alert("Invalid file type. Only PDF, JPG, PNG allowed.")
 
     setUploading(true)
+    const supabase = createSupabaseBrowser()
+    const filePath = `${id}/${Date.now()}_${file.name.replace(/\s+/g, "_")}`
 
-    const safeName = file.name.replace(/\s+/g, "_")
-    const filePath = `${id}/${Date.now()}_${safeName}`
-
-    const { error: uploadError } = await supabase.storage
-      .from("applicant files")
-      .upload(filePath, file)
-
+    const { error: uploadError } = await supabase.storage.from("applicant files").upload(filePath, file)
     if (uploadError) {
-      alert("Upload failed: " + uploadError.message)
       setUploading(false)
-      return
+      return alert("Upload failed: " + uploadError.message)
     }
 
     const { error: dbError } = await supabase.from("applicant_files").insert({
@@ -47,15 +33,10 @@ export default function UploadApplicantFile({ id }: { id: number }) {
       file_path: filePath,
     })
 
-    if (dbError) {
-      alert("DB save failed: " + dbError.message)
-      setUploading(false)
-      return
-    }
+    setUploading(false)
+    if (dbError) return alert("DB save failed: " + dbError.message)
 
     alert("File uploaded!")
-    setUploading(false)
-
     window.location.reload()
   }
 
@@ -68,7 +49,6 @@ export default function UploadApplicantFile({ id }: { id: number }) {
         onChange={handleUpload}
         accept=".pdf,.jpg,.jpeg,.png"
       />
-  
       <button
         type="button"
         onClick={() => document.getElementById(`file-${id}`)?.click()}
@@ -83,6 +63,4 @@ export default function UploadApplicantFile({ id }: { id: number }) {
       </button>
     </>
   )
-  
-
 }

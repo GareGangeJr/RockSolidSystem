@@ -9,34 +9,28 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const { id: idParam } = await params
   const id = Number(idParam)
 
-  if (Number.isNaN(id)) {
-    return (
-      <div className="p-6">
-        <p className="font-semibold text-red-500">Invalid applicant ID</p>
-        <Link href="/applicants" className="text-blue-600 hover:underline">Back</Link>
-      </div>
-    )
-  }
+  if (Number.isNaN(id)) return (
+    <div className="p-6">
+      <p className="font-semibold text-red-500">Invalid applicant ID</p>
+      <Link href="/applicants" className="text-blue-600 hover:underline">Back</Link>
+    </div>
+  )
 
   const { data, error } = await supabase.from("applicants").select("*").eq("id", id).maybeSingle()
 
-  if (error) {
-    return (
-      <div className="p-6">
-        <p className="font-semibold text-red-500">Error: {error.message}</p>
-        <Link href="/applicants" className="text-blue-600 hover:underline">Back</Link>
-      </div>
-    )
-  }
+  if (error) return (
+    <div className="p-6">
+      <p className="font-semibold text-red-500">Error: {error.message}</p>
+      <Link href="/applicants" className="text-blue-600 hover:underline">Back</Link>
+    </div>
+  )
 
-  if (!data) {
-    return (
-      <div className="p-6">
-        <p className="font-semibold text-red-500">Applicant not found.</p>
-        <Link href="/applicants" className="text-blue-600 hover:underline">Back</Link>
-      </div>
-    )
-  }
+  if (!data) return (
+    <div className="p-6">
+      <p className="font-semibold text-red-500">Applicant not found.</p>
+      <Link href="/applicants" className="text-blue-600 hover:underline">Back</Link>
+    </div>
+  )
 
   const a = data as Record<string, unknown>
 

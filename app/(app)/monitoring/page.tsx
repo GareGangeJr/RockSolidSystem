@@ -9,14 +9,12 @@ export default async function MonitoringPage() {
     .select("*")
     .order("deployment_date", { ascending: false })
 
-  if (monitoringError) {
-    return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold">Monitoring</h1>
-        <p className="text-red-500">Error: {monitoringError.message}</p>
-      </div>
-    )
-  }
+  if (monitoringError) return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold">Monitoring</h1>
+      <p className="text-red-500">Error: {monitoringError.message}</p>
+    </div>
+  )
 
   const applicantIds = monitoringRecords?.map((r: any) => r.applicant_id) || []
   const jobOrderIds = monitoringRecords?.map((r: any) => r.job_order_id) || []
@@ -37,10 +35,7 @@ export default async function MonitoringPage() {
     return { ...m, applicant, jobOrder }
   }) || []
 
-  const formatDate = (date: string | null) => {
-    if (!date) return "—"
-    return new Date(date).toLocaleDateString()
-  }
+  const formatDate = (date: string | null) => date ? new Date(date).toLocaleDateString() : "—"
 
   return (
     <div className="p-6">
@@ -103,9 +98,6 @@ export default async function MonitoringPage() {
       ) : (
         <div className="bg-white rounded-lg shadow p-8 text-center">
           <p className="text-gray-500">No deployed applicants yet</p>
-          <p className="text-sm text-gray-400 mt-1">
-            Change an applicant's status to "Deployed" to see them here
-          </p>
         </div>
       )}
     </div>

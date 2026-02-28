@@ -10,25 +10,21 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
   const { id } = await params
   const n = Number(id)
 
-  if (Number.isNaN(n)) {
-    return (
-      <div className="p-6">
-        <p className="text-red-500">Invalid ID</p>
-        <Link href="/applicants" className="text-blue-600 hover:underline">Back</Link>
-      </div>
-    )
-  }
+  if (Number.isNaN(n)) return (
+    <div className="p-6">
+      <p className="text-red-500">Invalid ID</p>
+      <Link href="/applicants" className="text-blue-600 hover:underline">Back</Link>
+    </div>
+  )
 
   const { data, error } = await supabase.from("applicants").select("*").eq("id", n).maybeSingle()
 
-  if (error || !data) {
-    return (
-      <div className="p-6">
-        <p className="text-red-500">Applicant not found</p>
-        <Link href="/applicants" className="text-blue-600 hover:underline">Back</Link>
-      </div>
-    )
-  }
+  if (error || !data) return (
+    <div className="p-6">
+      <p className="text-red-500">Applicant not found</p>
+      <Link href="/applicants" className="text-blue-600 hover:underline">Back</Link>
+    </div>
+  )
 
   const a = data as Record<string, unknown>
 

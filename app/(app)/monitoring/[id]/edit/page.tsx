@@ -11,34 +11,23 @@ export default async function EditMonitoringPage({
   const { id } = await params
   const monitoringId = Number(id)
 
-  if (Number.isNaN(monitoringId)) {
-    return (
-      <div className="p-6">
-        <p className="text-red-500">Invalid ID</p>
-        <Link href="/monitoring" className="text-blue-600 hover:underline">← Back</Link>
-      </div>
-    )
-  }
+  if (Number.isNaN(monitoringId)) return (
+    <div className="p-6">
+      <p className="text-red-500">Invalid ID</p>
+      <Link href="/monitoring" className="text-blue-600 hover:underline">← Back</Link>
+    </div>
+  )
 
-  const { data: monitoring } = await supabase
-    .from("monitoring")
-    .select("*")
-    .eq("id", monitoringId)
-    .maybeSingle()
+  const { data: monitoring } = await supabase.from("monitoring").select("*").eq("id", monitoringId).maybeSingle()
 
-  if (!monitoring) {
-    return (
-      <div className="p-6">
-        <p className="text-red-500">Record not found</p>
-        <Link href="/monitoring" className="text-blue-600 hover:underline">← Back</Link>
-      </div>
-    )
-  }
+  if (!monitoring) return (
+    <div className="p-6">
+      <p className="text-red-500">Record not found</p>
+      <Link href="/monitoring" className="text-blue-600 hover:underline">← Back</Link>
+    </div>
+  )
 
-  const formatDateForInput = (date: string | null) => {
-    if (!date) return ""
-    return date.split("T")[0]
-  }
+  const formatDateForInput = (date: string | null) => date ? date.split("T")[0] : ""
 
   return (
     <div className="p-6">
@@ -52,7 +41,6 @@ export default async function EditMonitoringPage({
       <form action={updateMonitoring} className="max-w-2xl space-y-6">
         <input type="hidden" name="id" value={monitoringId} />
 
-        {/* Deployment Details */}
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="font-semibold border-b pb-2">Deployment Details</h2>
           
@@ -91,7 +79,6 @@ export default async function EditMonitoringPage({
           </div>
         </div>
 
-        {/* Concerns */}
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="font-semibold border-b pb-2">Concerns</h2>
           
@@ -127,8 +114,7 @@ export default async function EditMonitoringPage({
             </div>
           </div>
         </div>
-
-        {/* Return Information */}
+        
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="font-semibold border-b pb-2">Return Information</h2>
           

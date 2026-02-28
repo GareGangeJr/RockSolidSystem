@@ -25,7 +25,6 @@ export default function LoginPage() {
 
     if (error) return alert("Login failed: " + error.message)
 
-    // middleware will redirect to /
     window.location.href = "/"
   }
 
