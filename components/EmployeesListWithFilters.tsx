@@ -106,12 +106,7 @@ export default function EmployeesListWithFilters({ employees }: Props) {
                 <td className="p-3">{emp.position ?? "—"}</td>
                 <td className="p-3">{emp.department ?? "—"}</td>
                 <td className="p-3">
-                  <span className={
-                    emp.employment_status === "Active" ? "text-green-600" :
-                    emp.employment_status === "On Leave" ? "text-yellow-600" :
-                    emp.employment_status === "Resigned" ? "text-gray-600" :
-                    emp.employment_status === "Terminated" ? "text-red-600" : ""
-                  }>
+                  <span>
                     {emp.employment_status ?? "—"}
                   </span>
                 </td>

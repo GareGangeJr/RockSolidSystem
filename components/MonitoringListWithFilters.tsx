@@ -150,19 +150,11 @@ export default function MonitoringListWithFilters({ records }: Props) {
                   </td>
                   <td className="p-3">{r.jobOrder?.country || "—"}</td>
                   <td className="p-3">
-                    <span className={r.deployment_status === "Deployed(With Concerns)" ? "text-yellow-600" : "text-green-600"}>
-                      {r.deployment_status}
-                    </span>
+                    <span>{r.deployment_status}</span>
                   </td>
                   <td className="p-3">{formatDate(r.deployment_date)}</td>
                   <td className="p-3">
-                    <span className={
-                      r.concern_status === "Pending" ? "text-yellow-600" :
-                      r.concern_status === "Escalated" ? "text-red-600" :
-                      r.concern_status === "Resolved" ? "text-green-600" : ""
-                    }>
-                      {r.concern_status || "—"}
-                    </span>
+                    <span>{r.concern_status || "—"}</span>
                   </td>
                   <td className="p-3">{formatDate(r.expected_return_date)}</td>
                   <td className="p-3">

@@ -61,9 +61,7 @@ export default async function MonitoringDetailPage({
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-gray-500">Deployment Status</p>
-              <p className={`font-medium ${monitoring.deployment_status === "Deployed(With Concerns)" ? "text-yellow-600" : "text-green-600"}`}>
-                {monitoring.deployment_status}
-              </p>
+              <p className="font-medium">{monitoring.deployment_status}</p>
             </div>
             <div><p className="text-gray-500">Employer Name</p><p className="font-medium">{v(monitoring.employer_name)}</p></div>
             <div><p className="text-gray-500">Contract Duration</p><p className="font-medium">{v(monitoring.contract_duration)}</p></div>
@@ -83,13 +81,7 @@ export default async function MonitoringDetailPage({
             <div className="col-span-2"><p className="text-gray-500">Action Taken</p><p className="font-medium">{v(monitoring.action_taken)}</p></div>
             <div>
               <p className="text-gray-500">Status of Concern</p>
-              <p className={`font-medium ${
-                monitoring.concern_status === "Pending" ? "text-yellow-600" : 
-                monitoring.concern_status === "Resolved" ? "text-green-600" : 
-                monitoring.concern_status === "Escalated" ? "text-red-600" : ""
-              }`}>
-                {v(monitoring.concern_status)}
-              </p>
+              <p className="font-medium">{v(monitoring.concern_status)}</p>
             </div>
           </div>
         </div>

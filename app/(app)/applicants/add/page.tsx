@@ -13,7 +13,7 @@ export default function AddApplicantPage() {
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-900">Add Applicant</h1>
           <Link href="/applicants" className="text-sm text-blue-600 hover:text-blue-800">
-            ← Back to list
+            ← Back to Applicants Page
           </Link>
         </div>
 

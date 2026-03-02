@@ -98,7 +98,7 @@ export default function ApplicantFilesPage() {
           <UploadApplicantFile id={applicantId} />
 
           <Link href="/applicants" className="text-blue-600 hover:underline">
-            Back
+            Back to Applicants Page
           </Link>
         </div>
       </div>
