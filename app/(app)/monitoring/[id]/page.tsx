@@ -30,7 +30,7 @@ export default async function MonitoringDetailPage({
   const { data: jobOrder } = await supabase.from("job_orders").select("*").eq("id", monitoring.job_order_id).maybeSingle()
 
   const formatDate = (date: string | null) => date ? new Date(date).toLocaleDateString() : "—"
-  const v = (value: any) => value || "—"
+  const formatValue = (value: any) => value || "—"
 
   return (
     <div className="p-6">
@@ -47,12 +47,12 @@ export default async function MonitoringDetailPage({
           <h2 className="text-lg font-semibold mb-4 border-b pb-2">Applicant & Job Information</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div><p className="text-gray-500">Applicant Name</p><p className="font-medium">{applicant?.first_name} {applicant?.last_name}</p></div>
-            <div><p className="text-gray-500">Contact</p><p className="font-medium">{v(applicant?.contact_number)}</p></div>
+            <div><p className="text-gray-500">Contact</p><p className="font-medium">{formatValue(applicant?.contact_number)}</p></div>
             <div><p className="text-gray-500">Job Order ID</p><p className="font-medium">JO-{jobOrder?.id}</p></div>
-            <div><p className="text-gray-500">Job Title</p><p className="font-medium">{v(jobOrder?.job_title)}</p></div>
-            <div><p className="text-gray-500">Company</p><p className="font-medium">{v(jobOrder?.company)}</p></div>
-            <div><p className="text-gray-500">Country</p><p className="font-medium">{v(jobOrder?.country)}</p></div>
-            <div><p className="text-gray-500">Passport Number</p><p className="font-medium">{v(applicant?.passport_number)}</p></div>
+            <div><p className="text-gray-500">Job Title</p><p className="font-medium">{formatValue(jobOrder?.job_title)}</p></div>
+            <div><p className="text-gray-500">Company</p><p className="font-medium">{formatValue(jobOrder?.company)}</p></div>
+            <div><p className="text-gray-500">Country</p><p className="font-medium">{formatValue(jobOrder?.country)}</p></div>
+            <div><p className="text-gray-500">Passport Number</p><p className="font-medium">{formatValue(applicant?.passport_number)}</p></div>
           </div>
         </div>
 
@@ -63,12 +63,12 @@ export default async function MonitoringDetailPage({
               <p className="text-gray-500">Deployment Status</p>
               <p className="font-medium">{monitoring.deployment_status}</p>
             </div>
-            <div><p className="text-gray-500">Employer Name</p><p className="font-medium">{v(monitoring.employer_name)}</p></div>
-            <div><p className="text-gray-500">Contract Duration</p><p className="font-medium">{v(monitoring.contract_duration)}</p></div>
-            <div><p className="text-gray-500">Salary Amount</p><p className="font-medium">{v(monitoring.salary_amount)}</p></div>
+            <div><p className="text-gray-500">Employer Name</p><p className="font-medium">{formatValue(monitoring.employer_name)}</p></div>
+            <div><p className="text-gray-500">Contract Duration</p><p className="font-medium">{formatValue(monitoring.contract_duration)}</p></div>
+            <div><p className="text-gray-500">Salary Amount</p><p className="font-medium">{formatValue(monitoring.salary_amount)}</p></div>
             <div><p className="text-gray-500">Date of Departure</p><p className="font-medium">{formatDate(monitoring.date_of_departure)}</p></div>
             <div><p className="text-gray-500">Date of Arrival</p><p className="font-medium">{formatDate(monitoring.date_of_arrival)}</p></div>
-            <div><p className="text-gray-500">Welfare Officer Assigned</p><p className="font-medium">{v(monitoring.welfare_officer)}</p></div>
+            <div><p className="text-gray-500">Welfare Officer Assigned</p><p className="font-medium">{formatValue(monitoring.welfare_officer)}</p></div>
             <div><p className="text-gray-500">Last Status Update</p><p className="font-medium">{formatDate(monitoring.last_status_update)}</p></div>
           </div>
         </div>
@@ -76,12 +76,12 @@ export default async function MonitoringDetailPage({
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-4 border-b pb-2">Concerns</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div><p className="text-gray-500">Type of Concern</p><p className="font-medium">{v(monitoring.concern_type)}</p></div>
+            <div><p className="text-gray-500">Type of Concern</p><p className="font-medium">{formatValue(monitoring.concern_type)}</p></div>
             <div><p className="text-gray-500">Date Reported</p><p className="font-medium">{formatDate(monitoring.concern_date_reported)}</p></div>
-            <div className="col-span-2"><p className="text-gray-500">Action Taken</p><p className="font-medium">{v(monitoring.action_taken)}</p></div>
+            <div className="col-span-2"><p className="text-gray-500">Action Taken</p><p className="font-medium">{formatValue(monitoring.action_taken)}</p></div>
             <div>
               <p className="text-gray-500">Status of Concern</p>
-              <p className="font-medium">{v(monitoring.concern_status)}</p>
+              <p className="font-medium">{formatValue(monitoring.concern_status)}</p>
             </div>
           </div>
         </div>
@@ -91,8 +91,8 @@ export default async function MonitoringDetailPage({
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div><p className="text-gray-500">Expected Return Date</p><p className="font-medium">{formatDate(monitoring.expected_return_date)}</p></div>
             <div><p className="text-gray-500">Actual Return Date</p><p className="font-medium">{formatDate(monitoring.actual_return_date)}</p></div>
-            <div><p className="text-gray-500">Reason for Return</p><p className="font-medium">{v(monitoring.reason_for_return)}</p></div>
-            <div><p className="text-gray-500">Will Extend Contract?</p><p className="font-medium">{v(monitoring.will_extend_contract)}</p></div>
+            <div><p className="text-gray-500">Reason for Return</p><p className="font-medium">{formatValue(monitoring.reason_for_return)}</p></div>
+            <div><p className="text-gray-500">Will Extend Contract?</p><p className="font-medium">{formatValue(monitoring.will_extend_contract)}</p></div>
           </div>
         </div>
       </div>

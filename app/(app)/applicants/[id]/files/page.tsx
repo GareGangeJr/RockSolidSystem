@@ -59,13 +59,13 @@ export default function ApplicantFilesPage() {
 
     const res = await fetch(url)
     const blob = await res.blob()
-    const a = document.createElement("a")
-    a.href = URL.createObjectURL(blob)
-    a.download = name || "file"
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    URL.revokeObjectURL(a.href)
+    const downloadLink = document.createElement("a")
+    downloadLink.href = URL.createObjectURL(blob)
+    downloadLink.download = name || "file"
+    document.body.appendChild(downloadLink)
+    downloadLink.click()
+    downloadLink.remove()
+    URL.revokeObjectURL(downloadLink.href)
   }
 
   async function deleteFile(fileId: number, path: string) {

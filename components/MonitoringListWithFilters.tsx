@@ -1,12 +1,10 @@
 "use client"
 
-// Step 1: Import tools we need
 import { useState, useMemo } from "react"
 import Link from "next/link"
 import { Eye, Pencil } from "lucide-react"
 import DeleteMonitoringForm from "./DeleteMonitoringForm"
 
-// Step 2: Define what a Monitoring record looks like
 export type MonitoringRecord = {
   id: number
   applicant_id: number
@@ -31,59 +29,56 @@ type Props = {
   records: MonitoringRecord[]
 }
 
-// Step 3: Main component that shows Monitoring records with filters
 export default function MonitoringListWithFilters({ records }: Props) {
   // These store what the user types/selects
   const [search, setSearch] = useState("")
   const [deploymentFilter, setDeploymentFilter] = useState("All")
   const [concernFilter, setConcernFilter] = useState("All")
 
-  // Step 4: Filter the list based on search and filters
+
   const filtered = useMemo(() => {
     let list = records
-    const q = search.trim().toLowerCase()
+    const searchQuery = search.trim().toLowerCase()
 
-    // If user typed something, search for it
-    if (q) {
-      list = list.filter((r) => {
-        const applicantName = `${r.applicant?.first_name || ""} ${r.applicant?.last_name || ""}`.toLowerCase()
-        const jobOrderId = `jo-${r.jobOrder?.id || ""}`.toLowerCase()
-        const country = (r.jobOrder?.country ?? "").toLowerCase()
-        const jobTitle = (r.jobOrder?.job_title ?? "").toLowerCase()
-        // Check if search text is in any of these fields
-        return applicantName.includes(q) || jobOrderId.includes(q) || country.includes(q) || jobTitle.includes(q)
+    if (searchQuery) {
+      list = list.filter((record) => {
+        const applicantName = `${record.applicant?.first_name || ""} ${record.applicant?.last_name || ""}`.toLowerCase()
+        const jobOrderId = `jo-${record.jobOrder?.id || ""}`.toLowerCase()
+        const country = (record.jobOrder?.country ?? "").toLowerCase()
+        const jobTitle = (record.jobOrder?.job_title ?? "").toLowerCase()
+  
+        return applicantName.includes(searchQuery) || jobOrderId.includes(searchQuery) || country.includes(searchQuery) || jobTitle.includes(searchQuery)
       })
     }
 
-    // If user picked a deployment status, filter by it
+
     if (deploymentFilter !== "All") {
-      list = list.filter((r) => r.deployment_status?.trim() === deploymentFilter)
+      list = list.filter((record) => record.deployment_status?.trim() === deploymentFilter)
     }
 
-    // If user picked a concern status, filter by it
+   
     if (concernFilter !== "All") {
-      list = list.filter((r) => {
-        if (concernFilter === "None") return !r.concern_status
-        return r.concern_status?.trim() === concernFilter
+      list = list.filter((record) => {
+        if (concernFilter === "None") return !record.concern_status
+        return record.concern_status?.trim() === concernFilter
       })
     }
 
     return list
   }, [records, search, deploymentFilter, concernFilter])
 
-  // Step 5: Clear all filters button
+
   const clearFilters = () => {
     setSearch("")
     setDeploymentFilter("All")
     setConcernFilter("All")
   }
 
-  // Helper function to format dates
+
   const formatDate = (date: string | null) => date ? new Date(date).toLocaleDateString() : "—"
 
   return (
     <div className="space-y-4">
-      {/* Filter controls: search box + dropdowns + clear button */}
       <div className="flex flex-wrap items-center gap-3">
         <input
           type="text"
@@ -121,7 +116,6 @@ export default function MonitoringListWithFilters({ records }: Props) {
         </button>
       </div>
 
-      {/* Table showing filtered results */}
       {filtered.length > 0 ? (
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <table className="w-full text-sm">
@@ -138,42 +132,42 @@ export default function MonitoringListWithFilters({ records }: Props) {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((r) => (
-                <tr key={r.id} className="border-t">
+              {filtered.map((record) => (
+                <tr key={record.id} className="border-t">
                   <td className="p-3">
-                    <div>{r.applicant?.id}</div>
-                    <div className="text-xs text-gray-500">{r.applicant?.first_name} {r.applicant?.last_name}</div>
+                    <div>{record.applicant?.id}</div>
+                    <div className="text-xs text-gray-500">{record.applicant?.first_name} {record.applicant?.last_name}</div>
                   </td>
                   <td className="p-3">
-                    <div>JO-{r.jobOrder?.id}</div>
-                    <div className="text-xs text-gray-500">{r.jobOrder?.job_title || "—"}</div>
+                    <div>JO-{record.jobOrder?.id}</div>
+                    <div className="text-xs text-gray-500">{record.jobOrder?.job_title || "—"}</div>
                   </td>
-                  <td className="p-3">{r.jobOrder?.country || "—"}</td>
+                  <td className="p-3">{record.jobOrder?.country || "—"}</td>
                   <td className="p-3">
-                    <span>{r.deployment_status}</span>
+                    <span>{record.deployment_status}</span>
                   </td>
-                  <td className="p-3">{formatDate(r.deployment_date)}</td>
+                  <td className="p-3">{formatDate(record.deployment_date)}</td>
                   <td className="p-3">
-                    <span>{r.concern_status || "—"}</span>
+                    <span>{record.concern_status || "—"}</span>
                   </td>
-                  <td className="p-3">{formatDate(r.expected_return_date)}</td>
+                  <td className="p-3">{formatDate(record.expected_return_date)}</td>
                   <td className="p-3">
                     <div className="flex items-center gap-3">
                       <Link
-                        href={`/monitoring/${r.id}`}
+                        href={`/monitoring/${record.id}`}
                         className="p-1 rounded-md text-black hover:bg-blue-100 hover:text-blue-600"
                         title="View"
                       >
                         <Eye className="w-4 h-4" />
                       </Link>
                       <Link
-                        href={`/monitoring/${r.id}/edit`}
+                        href={`/monitoring/${record.id}/edit`}
                         className="p-1 rounded-md text-black hover:bg-yellow-100 hover:text-yellow-600"
                         title="Edit"
                       >
                         <Pencil className="w-4 h-4" />
                       </Link>
-                      <DeleteMonitoringForm id={r.id} />
+                      <DeleteMonitoringForm id={record.id} />
                     </div>
                   </td>
                 </tr>

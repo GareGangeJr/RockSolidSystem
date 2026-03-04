@@ -2,7 +2,7 @@ import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { updateJobOrder } from "../../actions"
 
-const v = (x: unknown) => (x != null ? String(x) : "")
+const formatValue = (x: unknown) => (x != null ? String(x) : "")
 
 export default async function EditJobOrderPage({
   params,
@@ -11,16 +11,16 @@ export default async function EditJobOrderPage({
 }) {
   const supabase = await createSupabaseServer()
   const { id } = await params
-  const n = Number(id)
+  const numericId = Number(id)
 
-  if (Number.isNaN(n)) return (
+  if (Number.isNaN(numericId)) return (
     <div className="p-6">
       <p className="text-red-500">Invalid ID</p>
       <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
     </div>
   )
 
-  const { data, error } = await supabase.from("job_orders").select("*").eq("id", n).maybeSingle()
+  const { data, error } = await supabase.from("job_orders").select("*").eq("id", numericId).maybeSingle()
 
   if (error || !data) return (
     <div className="p-6">
@@ -43,22 +43,22 @@ export default async function EditJobOrderPage({
 
         <div>
           <label className="block text-sm mb-1">Company Name</label>
-          <input name="company" defaultValue={v(data.company)} className="w-full border rounded-md p-2" required />
+          <input name="company" defaultValue={formatValue(data.company)} className="w-full border rounded-md p-2" required />
         </div>
 
         <div>
           <label className="block text-sm mb-1">Country</label>
-          <input name="country" defaultValue={v(data.country)} className="w-full border rounded-md p-2" />
+          <input name="country" defaultValue={formatValue(data.country)} className="w-full border rounded-md p-2" />
         </div>
 
         <div>
           <label className="block text-sm mb-1">Job Title</label>
-          <input name="job_title" defaultValue={v(data.job_title)} className="w-full border rounded-md p-2" />
+          <input name="job_title" defaultValue={formatValue(data.job_title)} className="w-full border rounded-md p-2" />
         </div>
 
         <div>
           <label className="block text-sm mb-1">Gender</label>
-          <select name="gender" defaultValue={v(data.gender)} className="w-full border rounded-md p-2">
+          <select name="gender" defaultValue={formatValue(data.gender)} className="w-full border rounded-md p-2">
             <option value="">Select Gender</option>
             <option value="Male">Male</option>
             <option value="Female">Female</option>
@@ -92,7 +92,7 @@ export default async function EditJobOrderPage({
           <label className="block text-sm mb-1">Skills Required</label>
           <input
             name="skills_required"
-            defaultValue={v(data.skills_required)}
+            defaultValue={formatValue(data.skills_required)}
             className="w-full border rounded-md p-2"
             placeholder="e.g. Cooking, Cleaning"
           />
@@ -100,12 +100,12 @@ export default async function EditJobOrderPage({
 
         <div>
           <label className="block text-sm mb-1">Basic Salary</label>
-          <input name="salary" defaultValue={v(data.salary)} className="w-full border rounded-md p-2" placeholder="e.g. 1500 SAR" />
+          <input name="salary" defaultValue={formatValue(data.salary)} className="w-full border rounded-md p-2" placeholder="e.g. 1500 SAR" />
         </div>
 
         <div>
           <label className="block text-sm mb-1">Status</label>
-          <select name="status" defaultValue={v(data.status) || "Open"} className="w-full border rounded-md p-2">
+          <select name="status" defaultValue={formatValue(data.status) || "Open"} className="w-full border rounded-md p-2">
             <option>Open</option>
             <option>Filled</option>
             <option>Closed</option>

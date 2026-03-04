@@ -29,20 +29,20 @@ export default function EmployeesListWithFilters({ employees }: Props) {
 
   const filtered = useMemo(() => {
     let list = employees
-    const q = search.trim().toLowerCase()
+    const searchQuery = search.trim().toLowerCase()
 
-    if (q) {
-      list = list.filter((emp) => {
-        const empNum = (emp.employee_number ?? "").toLowerCase()
-        const name = [emp.first_name, emp.middle_name, emp.last_name].filter(Boolean).join(" ").toLowerCase()
-        const position = (emp.position ?? "").toLowerCase()
-        const contact = (emp.contact_number ?? "").toLowerCase()
-        const email = (emp.email ?? "").toLowerCase()
-        return empNum.includes(q) || name.includes(q) || position.includes(q) || contact.includes(q) || email.includes(q)
+    if (searchQuery) {
+      list = list.filter((employee) => {
+        const empNum = (employee.employee_number ?? "").toLowerCase()
+        const name = [employee.first_name, employee.middle_name, employee.last_name].filter(Boolean).join(" ").toLowerCase()
+        const position = (employee.position ?? "").toLowerCase()
+        const contact = (employee.contact_number ?? "").toLowerCase()
+        const email = (employee.email ?? "").toLowerCase()
+        return empNum.includes(searchQuery) || name.includes(searchQuery) || position.includes(searchQuery) || contact.includes(searchQuery) || email.includes(searchQuery)
       })
     }
 
-    if (statusFilter !== "All") list = list.filter((emp) => emp.employment_status?.trim() === statusFilter)
+    if (statusFilter !== "All") list = list.filter((employee) => employee.employment_status?.trim() === statusFilter)
 
     return list
   }, [employees, search, statusFilter])
@@ -97,47 +97,47 @@ export default function EmployeesListWithFilters({ employees }: Props) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((emp) => (
-              <tr key={emp.id} className="border-t border-gray-100">
-                <td className="p-3">{emp.employee_number ?? "—"}</td>
+            {filtered.map((employee) => (
+              <tr key={employee.id} className="border-t border-gray-100">
+                <td className="p-3">{employee.employee_number ?? "—"}</td>
                 <td className="p-3">
-                  {[emp.first_name, emp.middle_name, emp.last_name].filter(Boolean).join(" ")}
+                  {[employee.first_name, employee.middle_name, employee.last_name].filter(Boolean).join(" ")}
                 </td>
-                <td className="p-3">{emp.position ?? "—"}</td>
-                <td className="p-3">{emp.department ?? "—"}</td>
+                <td className="p-3">{employee.position ?? "—"}</td>
+                <td className="p-3">{employee.department ?? "—"}</td>
                 <td className="p-3">
                   <span>
-                    {emp.employment_status ?? "—"}
+                    {employee.employment_status ?? "—"}
                   </span>
                 </td>
-                <td className="p-3">{emp.contact_number ?? "—"}</td>
+                <td className="p-3">{employee.contact_number ?? "—"}</td>
                 <td className="p-3">
-                  {emp.date_hired ? new Date(emp.date_hired).toLocaleDateString() : "—"}
+                  {employee.date_hired ? new Date(employee.date_hired).toLocaleDateString() : "—"}
                 </td>
                 <td className="p-3">
                   <div className="flex items-center gap-2">
                     <Link
-                      href={`/employees/${emp.id}/files`}
+                      href={`/employees/${employee.id}/files`}
                       className="rounded p-1 text-gray-600 hover:bg-purple-100 hover:text-purple-600"
                       title="Files"
                     >
                       <FolderOpen className="h-4 w-4" />
                     </Link>
                     <Link
-                      href={`/employees/${emp.id}`}
+                      href={`/employees/${employee.id}`}
                       className="rounded p-1 text-gray-600 hover:bg-blue-100 hover:text-blue-600"
                       title="View"
                     >
                       <Eye className="h-4 w-4" />
                     </Link>
                     <Link
-                      href={`/employees/${emp.id}/edit`}
+                      href={`/employees/${employee.id}/edit`}
                       className="rounded p-1 text-gray-600 hover:bg-yellow-100 hover:text-yellow-600"
                       title="Edit"
                     >
                       <Pencil className="h-4 w-4" />
                     </Link>
-                    <DeleteEmployeeForm id={emp.id} />
+                    <DeleteEmployeeForm id={employee.id} />
                   </div>
                 </td>
               </tr>

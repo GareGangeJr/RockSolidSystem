@@ -20,10 +20,10 @@ type Applicant = {
   skills: string | null
 }
 
-function matches(a: Applicant, job: JobOrder): boolean {
-  if ((a.years_of_exp ?? 0) < (job.years_exp_required ?? 0)) return false
+function matches(applicant: Applicant, job: JobOrder): boolean {
+  if ((applicant.years_of_exp ?? 0) < (job.years_exp_required ?? 0)) return false
   const jobSkills = (job.skills_required || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean)
-  const appSkills = (a.skills || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean)
+  const appSkills = (applicant.skills || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean)
   if (jobSkills.length > 0 && !jobSkills.some((s) => appSkills.includes(s))) return false
   return true
 }
@@ -35,9 +35,9 @@ export default async function Page({
 }) {
   const supabase = await createSupabaseServer()
   const { id } = await params
-  const n = Number(id)
+  const numericId = Number(id)
 
-  if (Number.isNaN(n)) return (
+  if (Number.isNaN(numericId)) return (
     <div className="p-6">
       <p className="text-red-500">Invalid ID</p>
       <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
@@ -47,7 +47,7 @@ export default async function Page({
   const { data: job, error: jobError } = await supabase
     .from("job_orders")
     .select("id, job_title, company, years_exp_required, skills_required")
-    .eq("id", n)
+    .eq("id", numericId)
     .maybeSingle()
 
   if (jobError || !job) return (
@@ -57,12 +57,12 @@ export default async function Page({
     </div>
   )
 
-  const o = job as JobOrder
+  const jobOrder = job as JobOrder
 
   const { data: placements } = await supabase
     .from("placements")
     .select("applicant_id")
-    .eq("job_order_id", n)
+    .eq("job_order_id", numericId)
 
   const matchedIds = (placements || []).map((p) => p.applicant_id)
 
@@ -71,32 +71,32 @@ export default async function Page({
     .select("id, first_name, last_name, position_applied, years_of_exp, skills")
 
   const all = (applicants || []) as Applicant[]
-  const matched = all.filter((a) => matchedIds.includes(a.id))
-  const suggested = all.filter((a) => matches(a, o) && !matchedIds.includes(a.id))
-  const others = all.filter((a) => !matches(a, o) && !matchedIds.includes(a.id))
+  const matched = all.filter((applicant) => matchedIds.includes(applicant.id))
+  const suggested = all.filter((applicant) => matches(applicant, jobOrder) && !matchedIds.includes(applicant.id))
+  const others = all.filter((applicant) => !matches(applicant, jobOrder) && !matchedIds.includes(applicant.id))
 
   return (
     <div className="p-6 max-w-3xl">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-semibold">Match Applicants — JO-{o.id}</h1>
+        <h1 className="text-2xl font-semibold">Match Applicants — JO-{jobOrder.id}</h1>
         <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
       </div>
 
-      <p className="text-gray-600 mb-6">{o.job_title} at {o.company}</p>
+      <p className="text-gray-600 mb-6">{jobOrder.job_title} at {jobOrder.company}</p>
 
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-2">Matched Applicants</h2>
         {matched.length ? (
           <ul className="bg-white border rounded-lg divide-y">
-            {matched.map((a) => (
-              <li key={a.id} className="p-3 flex items-center justify-between">
+            {matched.map((applicant) => (
+              <li key={applicant.id} className="p-3 flex items-center justify-between">
                 <span>
-                  <Link href={`/applicants/${a.id}`} className="text-blue-600 hover:underline">
-                    {a.first_name} {a.last_name}
+                  <Link href={`/applicants/${applicant.id}`} className="text-blue-600 hover:underline">
+                    {applicant.first_name} {applicant.last_name}
                   </Link>
-                  <span className="text-gray-600 ml-2">— JO-{o.id} • {o.job_title}</span>
+                  <span className="text-gray-600 ml-2">— JO-{jobOrder.id} • {jobOrder.job_title}</span>
                 </span>
-                <DeleteMatchForm applicantId={a.id} jobOrderId={o.id} />
+                <DeleteMatchForm applicantId={applicant.id} jobOrderId={jobOrder.id} />
               </li>
             ))}
           </ul>
@@ -109,17 +109,17 @@ export default async function Page({
         <h2 className="text-lg font-semibold mb-2">Suggested Applicants</h2>
         {suggested.length ? (
           <ul className="bg-white border rounded-lg divide-y">
-            {suggested.map((a) => (
-              <li key={a.id} className="p-3 flex items-center justify-between">
+            {suggested.map((applicant) => (
+              <li key={applicant.id} className="p-3 flex items-center justify-between">
                 <span>
-                  <Link href={`/applicants/${a.id}`} className="text-blue-600 hover:underline">
-                    {a.first_name} {a.last_name}
+                  <Link href={`/applicants/${applicant.id}`} className="text-blue-600 hover:underline">
+                    {applicant.first_name} {applicant.last_name}
                   </Link>
                   <span className="text-gray-600 ml-2">
-                    — {a.position_applied} ({a.years_of_exp ?? 0} yrs) {a.skills && `• ${a.skills}`}
+                    — {applicant.position_applied} ({applicant.years_of_exp ?? 0} yrs) {applicant.skills && `• ${applicant.skills}`}
                   </span>
                 </span>
-                <MatchToJobForm applicantId={a.id} jobOrderId={o.id} />
+                <MatchToJobForm applicantId={applicant.id} jobOrderId={jobOrder.id} />
               </li>
             ))}
           </ul>
@@ -132,17 +132,17 @@ export default async function Page({
         <h2 className="text-lg font-semibold mb-2">All Other Applicants</h2>
         {others.length ? (
           <ul className="bg-white border rounded-lg divide-y">
-            {others.map((a) => (
-              <li key={a.id} className="p-3 flex items-center justify-between">
+            {others.map((applicant) => (
+              <li key={applicant.id} className="p-3 flex items-center justify-between">
                 <span>
-                  <Link href={`/applicants/${a.id}`} className="text-blue-600 hover:underline">
-                    {a.first_name} {a.last_name}
+                  <Link href={`/applicants/${applicant.id}`} className="text-blue-600 hover:underline">
+                    {applicant.first_name} {applicant.last_name}
                   </Link>
                   <span className="text-gray-600 ml-2">
-                    — {a.position_applied} ({a.years_of_exp ?? 0} yrs) {a.skills && `• ${a.skills}`}
+                    — {applicant.position_applied} ({applicant.years_of_exp ?? 0} yrs) {applicant.skills && `• ${applicant.skills}`}
                   </span>
                 </span>
-                <MatchToJobForm applicantId={a.id} jobOrderId={o.id} />
+                <MatchToJobForm applicantId={applicant.id} jobOrderId={jobOrder.id} />
               </li>
             ))}
           </ul>

@@ -7,7 +7,7 @@ import { useState } from "react"
 export default function AddEmployeePage() {
   const [error, setError] = useState("")
 
-  const handleSubmit = async (formData: FormData) => {
+  const onSubmitForm = async (formData: FormData) => {
     const result = await addEmployee(formData)
     if (result?.error) {
       setError(result.error)
@@ -15,9 +15,9 @@ export default function AddEmployeePage() {
     }
   }
 
-  const inputClass = "mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-  const labelClass = "block text-sm font-medium text-gray-700"
-  const sectionClass = "mb-3 border-b border-gray-100 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-500"
+  const inputFieldStyles = "mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+  const labelStyles = "block text-sm font-medium text-gray-700"
+  const sectionHeaderStyles = "mb-3 border-b border-gray-100 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-500"
 
   return (
     <div className="min-h-screen bg-slate-50 p-6">
@@ -35,27 +35,27 @@ export default function AddEmployeePage() {
           </div>
         )}
 
-        <form action={handleSubmit} className="rounded-lg border border-gray-200 bg-white shadow-sm">
+        <form action={onSubmitForm} className="rounded-lg border border-gray-200 bg-white shadow-sm">
           <div className="space-y-6 p-6">
             
             <div>
-              <h2 className={sectionClass}>Employment Information</h2>
+              <h2 className={sectionHeaderStyles}>Employment Information</h2>
               <div className="grid grid-cols-12 gap-4">
                 <div className="col-span-12 md:col-span-6">
-                  <label className={labelClass}>Position/Job Title</label>
-                  <input name="position" className={inputClass} required />
+                  <label className={labelStyles}>Position/Job Title</label>
+                  <input name="position" className={inputFieldStyles} required />
                 </div>
                 <div className="col-span-12 md:col-span-6">
-                  <label className={labelClass}>Department</label>
-                  <input name="department" className={inputClass} placeholder="e.g. HR, Operations" />
+                  <label className={labelStyles}>Department</label>
+                  <input name="department" className={inputFieldStyles} placeholder="e.g. HR, Operations" />
                 </div>
                 <div className="col-span-12 md:col-span-4">
-                  <label className={labelClass}>Date Hired</label>
-                  <input name="date_hired" type="date" className={inputClass} />
+                  <label className={labelStyles}>Date Hired</label>
+                  <input name="date_hired" type="date" className={inputFieldStyles} />
                 </div>
                 <div className="col-span-12 md:col-span-4">
-                  <label className={labelClass}>Employment Status</label>
-                  <select name="employment_status" className={inputClass} defaultValue="Active">
+                  <label className={labelStyles}>Employment Status</label>
+                  <select name="employment_status" className={inputFieldStyles} defaultValue="Active">
                     <option value="Active">Active</option>
                     <option value="On Leave">On Leave</option>
                     <option value="Resigned">Resigned</option>
@@ -63,8 +63,8 @@ export default function AddEmployeePage() {
                   </select>
                 </div>
                 <div className="col-span-12 md:col-span-4">
-                  <label className={labelClass}>Employment Type</label>
-                  <select name="employment_type" className={inputClass}>
+                  <label className={labelStyles}>Employment Type</label>
+                  <select name="employment_type" className={inputFieldStyles}>
                     <option value="">Select Type</option>
                     <option value="Full-time">Full-time</option>
                     <option value="Part-time">Part-time</option>
@@ -77,35 +77,35 @@ export default function AddEmployeePage() {
             <hr className="border-gray-200" />
 
             <div>
-              <h2 className={sectionClass}>Personal Information</h2>
+              <h2 className={sectionHeaderStyles}>Personal Information</h2>
               <div className="grid grid-cols-12 gap-4">
                 <div className="col-span-12 md:col-span-4">
-                  <label className={labelClass}>Last Name</label>
-                  <input name="last_name" className={inputClass} required />
+                  <label className={labelStyles}>Last Name</label>
+                  <input name="last_name" className={inputFieldStyles} required />
                 </div>
                 <div className="col-span-12 md:col-span-4">
-                  <label className={labelClass}>First Name</label>
-                  <input name="first_name" className={inputClass} required />
+                  <label className={labelStyles}>First Name</label>
+                  <input name="first_name" className={inputFieldStyles} required />
                 </div>
                 <div className="col-span-12 md:col-span-4">
-                  <label className={labelClass}>Middle Name</label>
-                  <input name="middle_name" className={inputClass} />
+                  <label className={labelStyles}>Middle Name</label>
+                  <input name="middle_name" className={inputFieldStyles} />
                 </div>
                 <div className="col-span-12 md:col-span-3">
-                  <label className={labelClass}>Date of Birth</label>
-                  <input name="date_of_birth" type="date" className={inputClass} />
+                  <label className={labelStyles}>Date of Birth</label>
+                  <input name="date_of_birth" type="date" className={inputFieldStyles} />
                 </div>
                 <div className="col-span-12 md:col-span-3">
-                  <label className={labelClass}>Gender</label>
-                  <select name="gender" className={inputClass}>
+                  <label className={labelStyles}>Gender</label>
+                  <select name="gender" className={inputFieldStyles}>
                     <option value="">Select</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                   </select>
                 </div>
                 <div className="col-span-12 md:col-span-3">
-                  <label className={labelClass}>Civil Status</label>
-                  <select name="civil_status" className={inputClass}>
+                  <label className={labelStyles}>Civil Status</label>
+                  <select name="civil_status" className={inputFieldStyles}>
                     <option value="">Select</option>
                     <option value="Single">Single</option>
                     <option value="Married">Married</option>
@@ -114,16 +114,16 @@ export default function AddEmployeePage() {
                   </select>
                 </div>
                 <div className="col-span-12 md:col-span-3">
-                  <label className={labelClass}>Contact Number</label>
-                  <input name="contact_number" className={inputClass} required />
+                  <label className={labelStyles}>Contact Number</label>
+                  <input name="contact_number" className={inputFieldStyles} required />
                 </div>
                 <div className="col-span-12 md:col-span-6">
-                  <label className={labelClass}>Email</label>
-                  <input name="email" type="email" className={inputClass} required />
+                  <label className={labelStyles}>Email</label>
+                  <input name="email" type="email" className={inputFieldStyles} required />
                 </div>
                 <div className="col-span-12">
-                  <label className={labelClass}>Current Address</label>
-                  <input name="current_address" className={inputClass} />
+                  <label className={labelStyles}>Current Address</label>
+                  <input name="current_address" className={inputFieldStyles} />
                 </div>
               </div>
             </div>
@@ -131,23 +131,23 @@ export default function AddEmployeePage() {
             <hr className="border-gray-200" />
 
             <div>
-              <h2 className={sectionClass}>Government IDs</h2>
+              <h2 className={sectionHeaderStyles}>Government IDs</h2>
               <div className="grid grid-cols-12 gap-4">
                 <div className="col-span-12 md:col-span-6">
-                  <label className={labelClass}>SSS Number</label>
-                  <input name="sss_number" className={inputClass} />
+                  <label className={labelStyles}>SSS Number</label>
+                  <input name="sss_number" className={inputFieldStyles} />
                 </div>
                 <div className="col-span-12 md:col-span-6">
-                  <label className={labelClass}>PhilHealth Number</label>
-                  <input name="philhealth_number" className={inputClass} />
+                  <label className={labelStyles}>PhilHealth Number</label>
+                  <input name="philhealth_number" className={inputFieldStyles} />
                 </div>
                 <div className="col-span-12 md:col-span-6">
-                  <label className={labelClass}>Pag-IBIG Number</label>
-                  <input name="pagibig_number" className={inputClass} />
+                  <label className={labelStyles}>Pag-IBIG Number</label>
+                  <input name="pagibig_number" className={inputFieldStyles} />
                 </div>
                 <div className="col-span-12 md:col-span-6">
-                  <label className={labelClass}>TIN Number</label>
-                  <input name="tin_number" className={inputClass} />
+                  <label className={labelStyles}>TIN Number</label>
+                  <input name="tin_number" className={inputFieldStyles} />
                 </div>
               </div>
             </div>
@@ -155,15 +155,15 @@ export default function AddEmployeePage() {
             <hr className="border-gray-200" />
 
             <div>
-              <h2 className={sectionClass}>Compensation</h2>
+              <h2 className={sectionHeaderStyles}>Compensation</h2>
               <div className="grid grid-cols-12 gap-4">
                 <div className="col-span-12 md:col-span-6">
-                  <label className={labelClass}>Basic Salary</label>
-                  <input name="basic_salary" className={inputClass} placeholder="e.g. 25,000 PHP" />
+                  <label className={labelStyles}>Basic Salary</label>
+                  <input name="basic_salary" className={inputFieldStyles} placeholder="e.g. 25,000 PHP" />
                 </div>
                 <div className="col-span-12 md:col-span-6">
-                  <label className={labelClass}>Allowances</label>
-                  <input name="allowances" className={inputClass} placeholder="e.g. Transportation, Housing" />
+                  <label className={labelStyles}>Allowances</label>
+                  <input name="allowances" className={inputFieldStyles} placeholder="e.g. Transportation, Housing" />
                 </div>
               </div>
             </div>
@@ -171,19 +171,19 @@ export default function AddEmployeePage() {
             <hr className="border-gray-200" />
 
             <div>
-              <h2 className={sectionClass}>Emergency Contact</h2>
+              <h2 className={sectionHeaderStyles}>Emergency Contact</h2>
               <div className="grid grid-cols-12 gap-4">
                 <div className="col-span-12 md:col-span-5">
-                  <label className={labelClass}>Name</label>
-                  <input name="emergency_contact_name" className={inputClass} />
+                  <label className={labelStyles}>Name</label>
+                  <input name="emergency_contact_name" className={inputFieldStyles} />
                 </div>
                 <div className="col-span-12 md:col-span-3">
-                  <label className={labelClass}>Relationship</label>
-                  <input name="emergency_contact_relationship" className={inputClass} />
+                  <label className={labelStyles}>Relationship</label>
+                  <input name="emergency_contact_relationship" className={inputFieldStyles} />
                 </div>
                 <div className="col-span-12 md:col-span-4">
-                  <label className={labelClass}>Contact Number</label>
-                  <input name="emergency_contact_number" className={inputClass} />
+                  <label className={labelStyles}>Contact Number</label>
+                  <input name="emergency_contact_number" className={inputFieldStyles} />
                 </div>
               </div>
             </div>
@@ -191,19 +191,19 @@ export default function AddEmployeePage() {
             <hr className="border-gray-200" />
 
             <div>
-              <h2 className={sectionClass}>Contract Details</h2>
+              <h2 className={sectionHeaderStyles}>Contract Details</h2>
               <div className="grid grid-cols-12 gap-4">
                 <div className="col-span-12 md:col-span-6">
-                  <label className={labelClass}>Contract Start Date</label>
-                  <input name="contract_start_date" type="date" className={inputClass} />
+                  <label className={labelStyles}>Contract Start Date</label>
+                  <input name="contract_start_date" type="date" className={inputFieldStyles} />
                 </div>
                 <div className="col-span-12 md:col-span-6">
-                  <label className={labelClass}>Contract End Date</label>
-                  <input name="contract_end_date" type="date" className={inputClass} />
+                  <label className={labelStyles}>Contract End Date</label>
+                  <input name="contract_end_date" type="date" className={inputFieldStyles} />
                 </div>
                 <div className="col-span-12">
-                  <label className={labelClass}>Notes/Remarks</label>
-                  <textarea name="notes" rows={3} className={inputClass}></textarea>
+                  <label className={labelStyles}>Notes/Remarks</label>
+                  <textarea name="notes" rows={3} className={inputFieldStyles}></textarea>
                 </div>
               </div>
             </div>

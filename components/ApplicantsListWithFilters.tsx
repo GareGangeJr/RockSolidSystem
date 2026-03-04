@@ -40,19 +40,19 @@ export default function ApplicantsListWithFilters({ applicants }: Props) {
 
   const filtered = useMemo(() => {
     let list = applicants
-    const q = search.trim().toLowerCase()
-    if (q) {
-      list = list.filter((app) => {
-        const idStr = `app-${new Date().getFullYear()}-${app.id}`.toLowerCase()
-        const name = [app.first_name, app.middle_name, app.last_name].filter(Boolean).join(" ").toLowerCase()
-        const pos = (app.position_applied ?? "").toLowerCase()
-        const contact = (app.contact_number ?? "").toLowerCase()
-        const email = (app.email ?? "").toLowerCase()
-        return idStr.includes(q) || name.includes(q) || pos.includes(q) || contact.includes(q) || email.includes(q)
+    const searchQuery = search.trim().toLowerCase()
+    if (searchQuery) {
+      list = list.filter((applicant) => {
+        const idStr = `app-${new Date().getFullYear()}-${applicant.id}`.toLowerCase()
+        const name = [applicant.first_name, applicant.middle_name, applicant.last_name].filter(Boolean).join(" ").toLowerCase()
+        const pos = (applicant.position_applied ?? "").toLowerCase()
+        const contact = (applicant.contact_number ?? "").toLowerCase()
+        const email = (applicant.email ?? "").toLowerCase()
+        return idStr.includes(searchQuery) || name.includes(searchQuery) || pos.includes(searchQuery) || contact.includes(searchQuery) || email.includes(searchQuery)
       })
     }
-    if (typeFilter !== "All") list = list.filter((app) => app.applicant_type?.trim() === typeFilter)
-    if (statusFilter !== "All") list = list.filter((app) => app.status?.trim() === statusFilter)
+    if (typeFilter !== "All") list = list.filter((applicant) => applicant.applicant_type?.trim() === typeFilter)
+    if (statusFilter !== "All") list = list.filter((applicant) => applicant.status?.trim() === statusFilter)
     return list
   }, [applicants, search, typeFilter, statusFilter])
 
@@ -117,46 +117,46 @@ export default function ApplicantsListWithFilters({ applicants }: Props) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((app) => (
-              <tr key={app.id} className="border-t border-gray-100">
+            {filtered.map((applicant) => (
+              <tr key={applicant.id} className="border-t border-gray-100">
                 <td className="p-3">
-                  {`APP-${new Date().getFullYear()}-${app.id}`}
+                  {`APP-${new Date().getFullYear()}-${applicant.id}`}
                 </td>
                 <td className="p-3">
-                  {[app.first_name, app.middle_name, app.last_name].filter(Boolean).join(" ")}
+                  {[applicant.first_name, applicant.middle_name, applicant.last_name].filter(Boolean).join(" ")}
                 </td>
-                <td className="p-3">{app.position_applied ?? "—"}</td>
-                <td className="p-3">{app.applicant_type ?? "—"}</td>
+                <td className="p-3">{applicant.position_applied ?? "—"}</td>
+                <td className="p-3">{applicant.applicant_type ?? "—"}</td>
                 <td className="p-3">
-                  <StatusDropdown applicantId={app.id} currentStatus={app.status} />
+                  <StatusDropdown applicantId={applicant.id} currentStatus={applicant.status} />
                 </td>
-                <td className="p-3">{app.contact_number ?? "—"}</td>
-                <td className="p-3">{app.email ?? "—"}</td>
-                <td className="p-3">{formatDate(app.date_applied, app.created_at)}</td>
+                <td className="p-3">{applicant.contact_number ?? "—"}</td>
+                <td className="p-3">{applicant.email ?? "—"}</td>
+                <td className="p-3">{formatDate(applicant.date_applied, applicant.created_at)}</td>
                 <td className="p-3">
                   <div className="flex items-center gap-2">
                     <Link
-                      href={`/applicants/${app.id}/files`}
+                      href={`/applicants/${applicant.id}/files`}
                       className="rounded p-1 text-gray-600 hover:bg-purple-100 hover:text-purple-600"
                       title="Files"
                     >
                       <FolderOpen className="h-4 w-4" />
                     </Link>
                     <Link
-                      href={`/applicants/${app.id}`}
+                      href={`/applicants/${applicant.id}`}
                       className="rounded p-1 text-gray-600 hover:bg-blue-100 hover:text-blue-600"
                       title="View"
                     >
                       <Eye className="h-4 w-4" />
                     </Link>
                     <Link
-                      href={`/applicants/${app.id}/edit`}
+                      href={`/applicants/${applicant.id}/edit`}
                       className="rounded p-1 text-gray-600 hover:bg-yellow-100 hover:text-yellow-600"
                       title="Edit"
                     >
                       <Pencil className="h-4 w-4" />
                     </Link>
-                    <DeleteApplicantButton id={app.id} />
+                    <DeleteApplicantButton id={applicant.id} />
                   </div>
                 </td>
               </tr>

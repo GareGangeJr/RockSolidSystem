@@ -26,18 +26,18 @@ export default function JobOrdersListWithFilters({ jobOrders }: Props) {
 
   const filtered = useMemo(() => {
     let list = jobOrders
-    const q = search.trim().toLowerCase()
-    if (q) {
-      list = list.filter((jo) => {
-        const idStr = `jo-${jo.id}`.toLowerCase()
-        const company = (jo.company ?? "").toLowerCase()
-        const country = (jo.country ?? "").toLowerCase()
-        const jobTitle = (jo.job_title ?? "").toLowerCase()
-        return idStr.includes(q) || company.includes(q) || country.includes(q) || jobTitle.includes(q)
+    const searchQuery = search.trim().toLowerCase()
+    if (searchQuery) {
+      list = list.filter((jobOrder) => {
+        const idStr = `jo-${jobOrder.id}`.toLowerCase()
+        const company = (jobOrder.company ?? "").toLowerCase()
+        const country = (jobOrder.country ?? "").toLowerCase()
+        const jobTitle = (jobOrder.job_title ?? "").toLowerCase()
+        return idStr.includes(searchQuery) || company.includes(searchQuery) || country.includes(searchQuery) || jobTitle.includes(searchQuery)
       })
     }
     if (statusFilter !== "All") {
-      list = list.filter((jo) => jo.status?.trim() === statusFilter)
+      list = list.filter((jobOrder) => jobOrder.status?.trim() === statusFilter)
     }
     return list
   }, [jobOrders, search, statusFilter])
@@ -92,38 +92,38 @@ export default function JobOrdersListWithFilters({ jobOrders }: Props) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((o) => (
-              <tr key={o.id} className="border-t">
-                <td className="p-3">JO-{o.id}</td>
-                <td className="p-3">{o.company}</td>
-                <td className="p-3">{o.country}</td>
-                <td className="p-3">{o.job_title}</td>
-                <td className="p-3">{o.no_workers}</td>
-                <td className="p-3">{o.status}</td>
+            {filtered.map((jobOrder) => (
+              <tr key={jobOrder.id} className="border-t">
+                <td className="p-3">JO-{jobOrder.id}</td>
+                <td className="p-3">{jobOrder.company}</td>
+                <td className="p-3">{jobOrder.country}</td>
+                <td className="p-3">{jobOrder.job_title}</td>
+                <td className="p-3">{jobOrder.no_workers}</td>
+                <td className="p-3">{jobOrder.status}</td>
                 <td className="p-3">
                   <div className="flex items-center gap-3">
                     <Link
-                      href={`/job-orders/${o.id}`}
+                      href={`/job-orders/${jobOrder.id}`}
                       className="p-1 rounded-md text-black hover:bg-blue-100 hover:text-blue-600"
                       title="View"
                     >
                       <Eye className="w-4 h-4" />
                     </Link>
                     <Link
-                      href={`/job-orders/${o.id}/match`}
+                      href={`/job-orders/${jobOrder.id}/match`}
                       className="p-1 rounded-md text-black hover:bg-green-100 hover:text-green-600"
                       title="Match Applicants"
                     >
                       <UserPlus className="w-4 h-4" />
                     </Link>
                     <Link
-                      href={`/job-orders/${o.id}/edit`}
+                      href={`/job-orders/${jobOrder.id}/edit`}
                       className="p-1 rounded-md text-black hover:bg-yellow-100 hover:text-yellow-600"
                       title="Edit"
                     >
                       <Pencil className="w-4 h-4" />
                     </Link>
-                    <DeleteJobOrderForm id={o.id} />
+                    <DeleteJobOrderForm id={jobOrder.id} />
                   </div>
                 </td>
               </tr>
