@@ -1,9 +1,30 @@
-export default function Home() {
+import { createSupabaseServer } from "@/lib/supabase/server"
+
+export default async function Home() {
+  const supabase = await createSupabaseServer()
+
+  const [{ count: totalApplicants }, { count: deployed }, { count: docsOnProcess }, { count: forBooking }] =
+    await Promise.all([
+      supabase.from("applicants").select("*", { count: "exact", head: true }),
+      supabase
+        .from("applicants")
+        .select("*", { count: "exact", head: true })
+        .in("status", ["Deployed", "Deployed(With Concerns)"]),
+      supabase
+        .from("applicants")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "Docs on Process"),
+      supabase
+        .from("applicants")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "For Booking"),
+    ])
+
   const stats = [
-    { title: "Total Applicants", value: 120 },
-    { title: "Deployed", value: 45 },
-    { title: "For Processing", value: 30 },
-    { title: "For Deployment", value: 15 },
+    { title: "Total Applicants", value: totalApplicants ?? 0 },
+    { title: "Deployed", value: deployed ?? 0 },
+    { title: "Docs on Process", value: docsOnProcess ?? 0 },
+    { title: "For Booking", value: forBooking ?? 0 },
   ]
 
   return (
@@ -28,4 +49,3 @@ export default function Home() {
     </div>
   )
 }
-  
