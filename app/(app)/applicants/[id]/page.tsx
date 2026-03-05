@@ -1,17 +1,17 @@
 import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 
-const formatValue = (x: unknown) => (x != null && x !== "" ? String(x) : "—")
-const formatDate = (x: unknown) => (x != null && String(x).length >= 10 ? String(x).slice(0, 10) : "—")
+const formatValue = (x: unknown) => (x != null && x !== "" ? String(x) : "--")
+const formatDate = (x: unknown) => (x != null && String(x).length >= 10 ? String(x).slice(0, 10) : "--")
 
 function getAgeFromDob(dob: unknown): string {
-  if (!dob || String(dob).length < 10) return "—"
+  if (!dob || String(dob).length < 10) return "--"
   const birth = new Date(String(dob).slice(0, 10))
   const today = new Date()
   let age = today.getFullYear() - birth.getFullYear()
   const m = today.getMonth() - birth.getMonth()
   if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--
-  return age < 0 ? "—" : String(age)
+  return age < 0 ? "--" : String(age)
 }
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
@@ -89,7 +89,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                 </div>
                 <div className="col-span-12 md:col-span-4">
                   <span className={labelStyles}>Date Applied</span>
-                  <p className={valueStyles}>{formatDate(applicant.date_applied) !== "—" ? formatDate(applicant.date_applied) : formatDate(applicant.created_at)}</p>
+                  <p className={valueStyles}>{formatDate(applicant.date_applied) !== "--" ? formatDate(applicant.date_applied) : formatDate(applicant.created_at)}</p>
                 </div>
               </div>
             </div>
@@ -112,6 +112,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                 <div className="col-span-4"><span className={labelStyles}>Place of Birth</span><p className={valueStyles}>{formatValue(applicant.place_of_birth)}</p></div>
                 <div className="col-span-3"><span className={labelStyles}>Religion</span><p className={valueStyles}>{formatValue(applicant.religion)}</p></div>
                 <div className="col-span-3"><span className={labelStyles}>Civil Status</span><p className={valueStyles}>{formatValue(applicant.civil_status)}</p></div>
+                <div className="col-span-3"><span className={labelStyles}>Sex</span><p className={valueStyles}>{formatValue(applicant.gender)}</p></div>
                 <div className="col-span-3"><span className={labelStyles}>Height (cm)</span><p className={valueStyles}>{formatValue(applicant.height_cm)}</p></div>
                 <div className="col-span-3"><span className={labelStyles}>Weight (kg)</span><p className={valueStyles}>{formatValue(applicant.weight_kg)}</p></div>
                 <div className="col-span-3"><span className={labelStyles}>Facebook Account</span><p className={valueStyles}>{formatValue(applicant.facebook_account)}</p></div>

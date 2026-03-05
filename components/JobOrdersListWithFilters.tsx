@@ -82,7 +82,7 @@ export default function JobOrdersListWithFilters({ jobOrders }: Props) {
         <table className="w-full text-sm">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-3 text-left">ID</th>
+              <th className="p-3 text-left">Job Order ID</th>
               <th className="p-3 text-left">Company</th>
               <th className="p-3 text-left">Country</th>
               <th className="p-3 text-left">Job Title</th>

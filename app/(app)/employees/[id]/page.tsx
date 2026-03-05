@@ -1,8 +1,8 @@
 import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 
-const formatValue = (x: unknown) => (x != null && x !== "" ? String(x) : "—")
-const formatDate = (x: unknown) => (x != null && String(x).length >= 10 ? String(x).slice(0, 10) : "—")
+const formatValue = (x: unknown) => (x != null && x !== "" ? String(x) : "--")
+const formatDate = (x: unknown) => (x != null && String(x).length >= 10 ? String(x).slice(0, 10) : "--")
 
 export default async function ViewEmployeePage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createSupabaseServer()

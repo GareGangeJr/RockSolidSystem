@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { addApplicant } from "../actions"
-import { STATUS_OPTIONS, APPLICANT_TYPE_OPTIONS, POSITION_OPTIONS, BRANCH_OPTIONS, COUNTRY_OPTIONS, CIVIL_STATUS_OPTIONS, SPEAKING_LEVEL_OPTIONS } from "@/lib/status-options"
+import { STATUS_OPTIONS, APPLICANT_TYPE_OPTIONS, POSITION_OPTIONS, BRANCH_OPTIONS, COUNTRY_OPTIONS, CIVIL_STATUS_OPTIONS, GENDER_OPTIONS, SPEAKING_LEVEL_OPTIONS } from "@/lib/status-options"
 import { WorkExperienceForm } from "@/components/applicants/work-experience-form"
 
 export default function AddApplicantPage() {
@@ -115,6 +115,15 @@ export default function AddApplicantPage() {
                   <select name="civil_status" className={inputFieldStyles}>
                     <option value="">Select civil status...</option>
                     {CIVIL_STATUS_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-span-12 md:col-span-3">
+                  <label className={labelStyles}>Sex</label>
+                  <select name="gender" className={inputFieldStyles}>
+                    <option value="">Select sex</option>
+                    {GENDER_OPTIONS.map((opt) => (
                       <option key={opt} value={opt}>{opt}</option>
                     ))}
                   </select>
@@ -329,7 +338,7 @@ export default function AddApplicantPage() {
                   </div>
                   <div>
                     <label className={labelStyles}>Skills (comma-separated)</label>
-                    <input name="skills" className={inputFieldStyles} placeholder="e.g. Cooking, Child Care, Driving" />
+                    <input name="skills" className={inputFieldStyles} placeholder="Ex: Cooking, Child Care, Driving" />
                   </div>
                   <div>
                     <label className={labelStyles}>Notes</label>

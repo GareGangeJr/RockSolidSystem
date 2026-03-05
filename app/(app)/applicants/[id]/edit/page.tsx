@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { updateApplicant } from "../../actions"
-import { STATUS_OPTIONS, APPLICANT_TYPE_OPTIONS, POSITION_OPTIONS, BRANCH_OPTIONS, COUNTRY_OPTIONS, CIVIL_STATUS_OPTIONS, SPEAKING_LEVEL_OPTIONS } from "@/lib/status-options"
+import { STATUS_OPTIONS, APPLICANT_TYPE_OPTIONS, POSITION_OPTIONS, BRANCH_OPTIONS, COUNTRY_OPTIONS, CIVIL_STATUS_OPTIONS, GENDER_OPTIONS, SPEAKING_LEVEL_OPTIONS } from "@/lib/status-options"
 import { WorkExperienceForm } from "@/components/applicants/work-experience-form"
 
 const formatValue = (x: unknown): string => (x != null && x !== "" ? String(x) : "")
@@ -141,6 +141,15 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
                   <select name="civil_status" className={inputFieldStyles} defaultValue={formatValue(applicant.civil_status)}>
                     <option value="">Select civil status...</option>
                     {CIVIL_STATUS_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-span-12 md:col-span-3">
+                  <label className={labelStyles}>Sex</label>
+                  <select name="gender" className={inputFieldStyles} defaultValue={formatValue(applicant.gender)}>
+                    <option value="">Select sex...</option>
+                    {GENDER_OPTIONS.map((opt) => (
                       <option key={opt} value={opt}>{opt}</option>
                     ))}
                   </select>

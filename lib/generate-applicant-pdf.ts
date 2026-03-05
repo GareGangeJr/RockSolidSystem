@@ -1,16 +1,16 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib"
 
-const formatValue = (x: unknown) => (x != null && x !== "" ? String(x) : "—")
-const formatDate = (x: unknown) => (x != null && String(x).length >= 10 ? String(x).slice(0, 10) : "—")
+const formatValue = (x: unknown) => (x != null && x !== "" ? String(x) : "--")
+const formatDate = (x: unknown) => (x != null && String(x).length >= 10 ? String(x).slice(0, 10) : "--")
 
 function getAgeFromDob(dob: unknown): string {
-  if (!dob || String(dob).length < 10) return "—"
+  if (!dob || String(dob).length < 10) return "--"
   const birth = new Date(String(dob).slice(0, 10))
   const today = new Date()
   let age = today.getFullYear() - birth.getFullYear()
   const m = today.getMonth() - birth.getMonth()
   if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--
-  return age < 0 ? "—" : String(age)
+  return age < 0 ? "--" : String(age)
 }
 
 type WorkExp = { country?: string; company?: string; position?: string; date_started?: string; date_ended?: string }
@@ -111,6 +111,7 @@ export async function applicantToPdf(applicant: Record<string, unknown>): Promis
   add("Place of Birth", applicant.place_of_birth)
   add("Religion", applicant.religion)
   add("Civil Status", applicant.civil_status)
+  add("Sex", applicant.gender)
   add("Height (cm)", applicant.height_cm)
   add("Weight (kg)", applicant.weight_kg)
   add("Facebook Account", applicant.facebook_account)

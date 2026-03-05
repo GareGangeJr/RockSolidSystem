@@ -73,9 +73,9 @@ export default function MonitoringListWithFilters({ records }: Props) {
   }
 
 
-  const formatDate = (date: string | null) => date ? new Date(date).toLocaleDateString() : "—"
+  const formatDate = (date: string | null) => date ? new Date(date).toLocaleDateString() : "--"
   const formatApplicantId = (id: number | undefined) =>
-    id != null ? `APP-${new Date().getFullYear()}-${id}` : "—"
+    id != null ? `APP-${new Date().getFullYear()}-${id}` : "--"
 
   return (
     <div className="space-y-4">
@@ -121,8 +121,8 @@ export default function MonitoringListWithFilters({ records }: Props) {
           <table className="w-full text-sm">
             <thead className="bg-gray-100">
               <tr>
-                <th className="p-3 text-left">Applicant</th>
-                <th className="p-3 text-left">Job Order</th>
+                <th className="p-3 text-left">Applicant ID & Name</th>
+                <th className="p-3 text-left">Job Order ID & Title</th>
                 <th className="p-3 text-left">Country</th>
                 <th className="p-3 text-left">Deployment Status</th>
                 <th className="p-3 text-left">Deployed Date</th>
@@ -140,15 +140,15 @@ export default function MonitoringListWithFilters({ records }: Props) {
                   </td>
                   <td className="p-3">
                     <div>JO-{record.jobOrder?.id}</div>
-                    <div className="text-xs text-gray-500">{record.jobOrder?.job_title || "—"}</div>
+                    <div className="text-xs text-gray-500">{record.jobOrder?.job_title || "--"}</div>
                   </td>
-                  <td className="p-3">{record.jobOrder?.country || "—"}</td>
+                  <td className="p-3">{record.jobOrder?.country || "--"}</td>
                   <td className="p-3">
                     <span>{record.deployment_status}</span>
                   </td>
                   <td className="p-3">{formatDate(record.deployment_date)}</td>
                   <td className="p-3">
-                    <span>{record.concern_status || "—"}</span>
+                    <span>{record.concern_status || "--"}</span>
                   </td>
                   <td className="p-3">{formatDate(record.expected_return_date)}</td>
                   <td className="p-3">

@@ -50,6 +50,8 @@ export const COUNTRY_OPTIONS = [
   "Oman",
 ] as const
 
+export const GENDER_OPTIONS = ["Male", "Female"] as const
+
 export const CIVIL_STATUS_OPTIONS = [
   "Single",
   "Married",

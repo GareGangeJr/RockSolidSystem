@@ -78,7 +78,7 @@ export default async function Page({
   return (
     <div className="p-6 max-w-3xl">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-semibold">Match Applicants — JO-{jobOrder.id}</h1>
+        <h1 className="text-2xl font-semibold">Match Applicants - JO-{jobOrder.id}</h1>
         <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
       </div>
 

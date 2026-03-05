@@ -27,7 +27,7 @@ type Props = {
 
 function formatDate(dateApplied: string | null, createdAt: string | null): string {
   const val = dateApplied ?? createdAt
-  if (!val) return "—"
+  if (!val) return "--"
   const s = String(val)
   if (s.length >= 10) return s.slice(0, 10)
   return s
@@ -126,15 +126,15 @@ export default function ApplicantsListWithFilters({ applicants }: Props) {
                 <td className="p-3">
                   {[applicant.first_name, applicant.middle_name, applicant.last_name].filter(Boolean).join(" ")}
                 </td>
-                <td className="p-3">{applicant.position_applied ?? "—"}</td>
-                <td className="p-3">{applicant.applicant_type ?? "—"}</td>
+                <td className="p-3">{applicant.position_applied ?? "--"}</td>
+                <td className="p-3">{applicant.applicant_type ?? "--"}</td>
                 <td className="p-3">
                   <StatusDropdown applicantId={applicant.id} currentStatus={applicant.status} />
                 </td>
                 <td className="p-3 max-w-[200px] truncate" title={applicant.notes ?? undefined}>
-                  {applicant.notes ?? "—"}
+                  {applicant.notes ?? "--"}
                 </td>
-                <td className="p-3">{applicant.contact_number ?? "—"}</td>
+                <td className="p-3">{applicant.contact_number ?? "--"}</td>
                 <td className="p-3">{formatDate(applicant.date_applied, applicant.created_at)}</td>
                 <td className="p-3">
                   <div className="flex items-center gap-2">

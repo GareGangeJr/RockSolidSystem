@@ -88,7 +88,7 @@ export default function EmployeesListWithFilters({ employees }: Props) {
         <table className="w-full text-sm">
           <thead className="bg-gray-50">
             <tr>
-              <th className="p-3 text-left font-medium">Employee #</th>
+              <th className="p-3 text-left font-medium">Employee ID</th>
               <th className="p-3 text-left font-medium">Name</th>
               <th className="p-3 text-left font-medium">Position</th>
               <th className="p-3 text-left font-medium">Department</th>
@@ -101,18 +101,18 @@ export default function EmployeesListWithFilters({ employees }: Props) {
           <tbody>
             {filtered.map((employee) => (
               <tr key={employee.id} className="border-t border-gray-100">
-                <td className="p-3">{employee.employee_number ?? "—"}</td>
+                <td className="p-3">{employee.employee_number ?? "--"}</td>
                 <td className="p-3">
                   {[employee.first_name, employee.middle_name, employee.last_name].filter(Boolean).join(" ")}
                 </td>
-                <td className="p-3">{employee.position ?? "—"}</td>
-                <td className="p-3">{employee.department ?? "—"}</td>
+                <td className="p-3">{employee.position ?? "--"}</td>
+                <td className="p-3">{employee.department ?? "--"}</td>
                 <td className="p-3">
                   <EmployeeStatusDropdown employeeId={employee.id} currentStatus={employee.employment_status} />
                 </td>
-                <td className="p-3">{employee.contact_number ?? "—"}</td>
+                <td className="p-3">{employee.contact_number ?? "--"}</td>
                 <td className="p-3">
-                  {employee.date_hired ? new Date(employee.date_hired).toLocaleDateString() : "—"}
+                  {employee.date_hired ? new Date(employee.date_hired).toLocaleDateString() : "--"}
                 </td>
                 <td className="p-3">
                   <div className="flex items-center gap-2">

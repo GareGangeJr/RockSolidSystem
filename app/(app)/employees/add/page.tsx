@@ -47,7 +47,7 @@ export default function AddEmployeePage() {
                 </div>
                 <div className="col-span-12 md:col-span-6">
                   <label className={labelStyles}>Department</label>
-                  <input name="department" className={inputFieldStyles} placeholder="e.g. HR, Operations" />
+                  <input name="department" className={inputFieldStyles} placeholder="Ex: HR, Operations" />
                 </div>
                 <div className="col-span-12 md:col-span-4">
                   <label className={labelStyles}>Date Hired</label>
@@ -159,11 +159,11 @@ export default function AddEmployeePage() {
               <div className="grid grid-cols-12 gap-4">
                 <div className="col-span-12 md:col-span-6">
                   <label className={labelStyles}>Basic Salary</label>
-                  <input name="basic_salary" className={inputFieldStyles} placeholder="e.g. 25,000 PHP" />
+                  <input name="basic_salary" className={inputFieldStyles} placeholder="Ex: 25,000 PHP" />
                 </div>
                 <div className="col-span-12 md:col-span-6">
                   <label className={labelStyles}>Allowances</label>
-                  <input name="allowances" className={inputFieldStyles} placeholder="e.g. Transportation, Housing" />
+                  <input name="allowances" className={inputFieldStyles} placeholder="Ex: Transportation, Housing" />
                 </div>
               </div>
             </div>
