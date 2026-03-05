@@ -1,7 +1,8 @@
 import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { updateApplicant } from "../../actions"
-import { STATUS_OPTIONS, APPLICANT_TYPE_OPTIONS } from "@/lib/status-options"
+import { STATUS_OPTIONS, APPLICANT_TYPE_OPTIONS, POSITION_OPTIONS, BRANCH_OPTIONS, COUNTRY_OPTIONS, CIVIL_STATUS_OPTIONS, SPEAKING_LEVEL_OPTIONS } from "@/lib/status-options"
+import { WorkExperienceForm } from "@/components/applicants/work-experience-form"
 
 const formatValue = (x: unknown): string => (x != null && x !== "" ? String(x) : "")
 
@@ -49,19 +50,39 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
                             <div className="grid grid-cols-12 gap-4">
                 <div className="col-span-12 md:col-span-6">
                   <label className={labelStyles}>Position Applied For</label>
-                  <input name="position_applied" className={inputFieldStyles} required defaultValue={formatValue(applicant.position_applied)} />
+                  <select name="position_applied" className={inputFieldStyles} required defaultValue={formatValue(applicant.position_applied)}>
+                    <option value="">Select position...</option>
+                    {POSITION_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="col-span-12 md:col-span-6">
                   <label className={labelStyles}>Second Choice</label>
-                  <input name="second_choice_position" className={inputFieldStyles} defaultValue={formatValue(applicant.second_choice_position)} />
+                  <select name="second_choice_position" className={inputFieldStyles} defaultValue={formatValue(applicant.second_choice_position)}>
+                    <option value="">Select position...</option>
+                    {POSITION_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="col-span-12 md:col-span-6">
                   <label className={labelStyles}>Preferred Branch</label>
-                  <input name="preferred_branch" className={inputFieldStyles} defaultValue={formatValue(applicant.preferred_branch)} />
+                  <select name="preferred_branch" className={inputFieldStyles} defaultValue={formatValue(applicant.preferred_branch)}>
+                    <option value="">Select branch...</option>
+                    {BRANCH_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="col-span-12 md:col-span-6">
                   <label className={labelStyles}>Country Applying For</label>
-                  <input name="country_applying_for" className={inputFieldStyles} defaultValue={formatValue(applicant.country_applying_for)} />
+                  <select name="country_applying_for" className={inputFieldStyles} defaultValue={formatValue(applicant.country_applying_for)}>
+                    <option value="">Select country...</option>
+                    {COUNTRY_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
@@ -104,16 +125,8 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
                   <input name="email" type="email" className={inputFieldStyles} defaultValue={formatValue(applicant.email)} />
                 </div>
                 <div className="col-span-12 md:col-span-3">
-                  <label className={labelStyles}>Active Email</label>
-                  <input name="active_email" type="email" className={inputFieldStyles} defaultValue={formatValue(applicant.active_email)} />
-                </div>
-                <div className="col-span-12 md:col-span-3">
                   <label className={labelStyles}>Date of Birth</label>
                   <input name="date_of_birth" type="date" className={inputFieldStyles} defaultValue={formatValue(applicant.date_of_birth)?.slice(0, 10) ?? ""} />
-                </div>
-                <div className="col-span-12 md:col-span-2">
-                  <label className={labelStyles}>Age</label>
-                  <input name="age" type="number" className={inputFieldStyles} defaultValue={applicant.age != null ? String(applicant.age) : ""} />
                 </div>
                 <div className="col-span-12 md:col-span-4">
                   <label className={labelStyles}>Place of Birth</label>
@@ -125,7 +138,12 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
                 </div>
                 <div className="col-span-12 md:col-span-3">
                   <label className={labelStyles}>Civil Status</label>
-                  <input name="civil_status" className={inputFieldStyles} defaultValue={formatValue(applicant.civil_status)} />
+                  <select name="civil_status" className={inputFieldStyles} defaultValue={formatValue(applicant.civil_status)}>
+                    <option value="">Select civil status...</option>
+                    {CIVIL_STATUS_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="col-span-12 md:col-span-3">
                   <label className={labelStyles}>Height (cm)</label>
@@ -322,35 +340,15 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
 
             <div>
               <h2 className={sectionHeaderStyles}>Work Experience</h2>
-              <div className="space-y-4">
-                {[1, 2, 3].map((workIndex) => (
-                  <div key={workIndex} className="rounded-md border border-gray-200 p-4">
-                    <div className="mb-3 text-xs font-bold text-gray-600">WORK {workIndex}</div>
-                    <div className="grid grid-cols-12 gap-4">
-                      <div className="col-span-12 md:col-span-3">
-                        <label className={labelStyles}>Country</label>
-                        <input name={`work${workIndex}_country`} className={inputFieldStyles} defaultValue={formatValue(applicant[`work${workIndex}_country`])} />
-                      </div>
-                      <div className="col-span-12 md:col-span-5">
-                        <label className={labelStyles}>Company</label>
-                        <input name={`work${workIndex}_company`} className={inputFieldStyles} defaultValue={formatValue(applicant[`work${workIndex}_company`])} />
-                      </div>
-                      <div className="col-span-12 md:col-span-4">
-                        <label className={labelStyles}>Position</label>
-                        <input name={`work${workIndex}_position`} className={inputFieldStyles} defaultValue={formatValue(applicant[`work${workIndex}_position`])} />
-                      </div>
-                      <div className="col-span-12 md:col-span-3">
-                        <label className={labelStyles}>Date Started</label>
-                        <input name={`work${workIndex}_date_started`} type="date" className={inputFieldStyles} defaultValue={formatValue(applicant[`work${workIndex}_date_started`])?.slice(0, 10) ?? ""} />
-                      </div>
-                      <div className="col-span-12 md:col-span-3">
-                        <label className={labelStyles}>Date Ended</label>
-                        <input name={`work${workIndex}_date_ended`} type="date" className={inputFieldStyles} defaultValue={formatValue(applicant[`work${workIndex}_date_ended`])?.slice(0, 10) ?? ""} />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <WorkExperienceForm
+                initial={((applicant.work_experiences as { country?: string; company?: string; position?: string; date_started?: string; date_ended?: string }[]) ?? []).map((w) => ({
+                  country: formatValue(w.country),
+                  company: formatValue(w.company),
+                  position: formatValue(w.position),
+                  date_started: formatValue(w.date_started)?.slice(0, 10) ?? "",
+                  date_ended: formatValue(w.date_ended)?.slice(0, 10) ?? "",
+                }))}
+              />
             </div>
 
             <hr className="border-gray-200" />
@@ -378,11 +376,21 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
                 <div className="space-y-4">
                   <div>
                     <label className={labelStyles}>English Level</label>
-                    <input name="english_level" className={inputFieldStyles} defaultValue={formatValue(applicant.english_level)} />
+                    <select name="english_level" className={inputFieldStyles} defaultValue={formatValue(applicant.english_level)}>
+                      <option value="">Select level</option>
+                      {SPEAKING_LEVEL_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className={labelStyles}>Arabic Level</label>
-                    <input name="arabic_level" className={inputFieldStyles} defaultValue={formatValue(applicant.arabic_level)} />
+                    <select name="arabic_level" className={inputFieldStyles} defaultValue={formatValue(applicant.arabic_level)}>
+                      <option value="">Select level</option>
+                      {SPEAKING_LEVEL_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </div>

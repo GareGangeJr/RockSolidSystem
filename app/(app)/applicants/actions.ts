@@ -6,9 +6,40 @@ import { redirect } from "next/navigation"
 
 const getOptionalString = (formData: FormData, key: string) => (formData.get(key) as string) || ""
 
+type WorkExperienceItem = {
+  country?: string
+  company?: string
+  position?: string
+  date_started?: string
+  date_ended?: string
+}
+
+function parseWorkExperiences(formData: FormData): WorkExperienceItem[] {
+  const raw = formData.get("work_experiences") as string | null
+  if (!raw) return []
+  try {
+    const parsed = JSON.parse(raw) as WorkExperienceItem[]
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+function getAgeFromDob(dob: string | null): number | null {
+  if (!dob) return null
+  const birth = new Date(dob)
+  const today = new Date()
+  let age = today.getFullYear() - birth.getFullYear()
+  const m = today.getMonth() - birth.getMonth()
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--
+  return age < 0 ? null : age
+}
+
 export async function addApplicant(formData: FormData) {
   const supabase = await createSupabaseServer()
-  await supabase.from("applicants").insert({
+  const works = parseWorkExperiences(formData).filter((w) => w.country || w.company || w.position || w.date_started || w.date_ended)
+
+  const { error: insertError } = await supabase.from("applicants").insert({
     first_name: formData.get("first_name") as string,
     last_name: formData.get("last_name") as string,
     middle_name: (formData.get("middle_name") as string) || null,
@@ -27,9 +58,8 @@ export async function addApplicant(formData: FormData) {
     current_address: getOptionalString(formData, "current_address"),
     provincial_address: getOptionalString(formData, "provincial_address"),
     active_cellphone: getOptionalString(formData, "active_cellphone"),
-    active_email: getOptionalString(formData, "active_email"),
     date_of_birth: formData.get("date_of_birth") || null,
-    age: Number(formData.get("age")) || null,
+    age: getAgeFromDob((formData.get("date_of_birth") as string) || null),
     place_of_birth: getOptionalString(formData, "place_of_birth"),
     religion: getOptionalString(formData, "religion"),
     civil_status: getOptionalString(formData, "civil_status"),
@@ -75,22 +105,6 @@ export async function addApplicant(formData: FormData) {
     college_school: getOptionalString(formData, "college_school"),
     college_year_graduated: getOptionalString(formData, "college_year_graduated"),
 
-    work1_country: getOptionalString(formData, "work1_country"),
-    work1_company: getOptionalString(formData, "work1_company"),
-    work1_position: getOptionalString(formData, "work1_position"),
-    work1_date_started: formData.get("work1_date_started") || null,
-    work1_date_ended: formData.get("work1_date_ended") || null,
-    work2_country: getOptionalString(formData, "work2_country"),
-    work2_company: getOptionalString(formData, "work2_company"),
-    work2_position: getOptionalString(formData, "work2_position"),
-    work2_date_started: formData.get("work2_date_started") || null,
-    work2_date_ended: formData.get("work2_date_ended") || null,
-    work3_country: getOptionalString(formData, "work3_country"),
-    work3_company: getOptionalString(formData, "work3_company"),
-    work3_position: getOptionalString(formData, "work3_position"),
-    work3_date_started: formData.get("work3_date_started") || null,
-    work3_date_ended: formData.get("work3_date_ended") || null,
-
     english_level: getOptionalString(formData, "english_level"),
     arabic_level: getOptionalString(formData, "arabic_level"),
     passport_number: getOptionalString(formData, "passport_number"),
@@ -101,11 +115,19 @@ export async function addApplicant(formData: FormData) {
     interview_remarks: getOptionalString(formData, "interview_remarks"),
     interviewer_name: getOptionalString(formData, "interviewer_name"),
     date_interviewed: formData.get("date_interviewed") || null,
-    date_applied: formData.get("date_applied") || null
+    date_applied: formData.get("date_applied") || null,
+
+    work_experiences: works
   })
 
+  if (insertError) {
+    console.error("Error inserting applicant:", insertError)
+    revalidatePath("/applicants")
+    redirect("/applicants")
+  }
+
   revalidatePath("/applicants")
-  redirect("/applicants")
+  redirect("/applicants?success=added")
 }
 
 export async function updateApplicantStatus(applicantId: number, newStatus: string) {
@@ -128,8 +150,6 @@ export async function updateApplicantStatus(applicantId: number, newStatus: stri
       .eq("applicant_id", applicantId)
       .maybeSingle()
     
-    console.log("Placement found:", placement)
-    
     if (placement) {
       const { data: existing } = await supabase
         .from("monitoring")
@@ -138,8 +158,6 @@ export async function updateApplicantStatus(applicantId: number, newStatus: stri
         .eq("job_order_id", placement.job_order_id)
         .maybeSingle()
       
-      console.log("Existing monitoring:", existing)
-      
       if (!existing) {
         const { data: newRecord, error: insertError } = await supabase.from("monitoring").insert({
           applicant_id: applicantId,
@@ -147,9 +165,6 @@ export async function updateApplicantStatus(applicantId: number, newStatus: stri
           deployment_status: newStatus,
           deployment_date: new Date().toISOString().split('T')[0],
         }).select()
-        
-        console.log("New monitoring record created:", newRecord)
-        console.log("Insert error (if any):", insertError)
         
         if (insertError) {
           return { error: { message: `Error creating monitoring record: ${insertError.message}` } }
@@ -160,7 +175,6 @@ export async function updateApplicantStatus(applicantId: number, newStatus: stri
           updated_at: new Date().toISOString(),
         }).eq("id", existing.id)
         
-        console.log("Monitoring record updated")
         if (updateError) {
           return { error: { message: `Error updating monitoring record: ${updateError.message}` } }
         }
@@ -201,9 +215,8 @@ export async function updateApplicant(formData: FormData) {
     current_address: formData.get("current_address") as string,
     provincial_address: formData.get("provincial_address") as string,
     active_cellphone: formData.get("active_cellphone") as string,
-    active_email: formData.get("active_email") as string,
     date_of_birth: formData.get("date_of_birth") || null,
-    age: Number(formData.get("age")) || null,
+    age: getAgeFromDob((formData.get("date_of_birth") as string) || null),
     place_of_birth: formData.get("place_of_birth") as string,
     religion: formData.get("religion") as string,
     civil_status: formData.get("civil_status") as string,
@@ -249,22 +262,6 @@ export async function updateApplicant(formData: FormData) {
     college_school: getOptionalString(formData, "college_school"),
     college_year_graduated: getOptionalString(formData, "college_year_graduated"),
 
-    work1_country: getOptionalString(formData, "work1_country"),
-    work1_company: getOptionalString(formData, "work1_company"),
-    work1_position: getOptionalString(formData, "work1_position"),
-    work1_date_started: formData.get("work1_date_started") || null,
-    work1_date_ended: formData.get("work1_date_ended") || null,
-    work2_country: getOptionalString(formData, "work2_country"),
-    work2_company: getOptionalString(formData, "work2_company"),
-    work2_position: getOptionalString(formData, "work2_position"),
-    work2_date_started: formData.get("work2_date_started") || null,
-    work2_date_ended: formData.get("work2_date_ended") || null,
-    work3_country: getOptionalString(formData, "work3_country"),
-    work3_company: getOptionalString(formData, "work3_company"),
-    work3_position: getOptionalString(formData, "work3_position"),
-    work3_date_started: formData.get("work3_date_started") || null,
-    work3_date_ended: formData.get("work3_date_ended") || null,
-
     english_level: getOptionalString(formData, "english_level"),
     arabic_level: getOptionalString(formData, "arabic_level"),
     passport_number: getOptionalString(formData, "passport_number"),
@@ -275,21 +272,12 @@ export async function updateApplicant(formData: FormData) {
     interview_remarks: getOptionalString(formData, "interview_remarks"),
     interviewer_name: getOptionalString(formData, "interviewer_name"),
     date_interviewed: formData.get("date_interviewed") || null,
-    date_applied: formData.get("date_applied") || null
+    date_applied: formData.get("date_applied") || null,
+
+    work_experiences: parseWorkExperiences(formData).filter((w) => w.country || w.company || w.position || w.date_started || w.date_ended)
   }).eq("id", id)
 
   revalidatePath("/applicants")
   revalidatePath(`/applicants/${id}`)
-  redirect("/applicants")
-}
-
-export async function deleteApplicant(formData: FormData) {
-  const supabase = await createSupabaseServer()
-  const id = Number(formData.get("id"))
-  if (!id) redirect("/applicants")
-
-  await supabase.from("applicants").delete().eq("id", id)
-
-  revalidatePath("/applicants")
-  redirect("/applicants")
+  redirect("/applicants?success=updated")
 }

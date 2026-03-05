@@ -3,7 +3,6 @@
 import { useState, useMemo } from "react"
 import Link from "next/link"
 import { Eye, Pencil } from "lucide-react"
-import DeleteMonitoringForm from "./DeleteMonitoringForm"
 
 export type MonitoringRecord = {
   id: number
@@ -30,7 +29,6 @@ type Props = {
 }
 
 export default function MonitoringListWithFilters({ records }: Props) {
-  // These store what the user types/selects
   const [search, setSearch] = useState("")
   const [deploymentFilter, setDeploymentFilter] = useState("All")
   const [concernFilter, setConcernFilter] = useState("All")
@@ -129,7 +127,7 @@ export default function MonitoringListWithFilters({ records }: Props) {
                 <th className="p-3 text-left">Deployment Status</th>
                 <th className="p-3 text-left">Deployed Date</th>
                 <th className="p-3 text-left">Concern Status</th>
-                <th className="p-3 text-left">Return Date</th>
+                <th className="p-3 text-left"> ETA Return Date</th>
                 <th className="p-3 text-left">Actions</th>
               </tr>
             </thead>
@@ -169,7 +167,6 @@ export default function MonitoringListWithFilters({ records }: Props) {
                       >
                         <Pencil className="w-4 h-4" />
                       </Link>
-                      <DeleteMonitoringForm id={record.id} />
                     </div>
                   </td>
                 </tr>

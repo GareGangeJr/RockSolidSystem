@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { addApplicant } from "../actions"
-import { STATUS_OPTIONS, APPLICANT_TYPE_OPTIONS } from "@/lib/status-options"
+import { STATUS_OPTIONS, APPLICANT_TYPE_OPTIONS, POSITION_OPTIONS, BRANCH_OPTIONS, COUNTRY_OPTIONS, CIVIL_STATUS_OPTIONS, SPEAKING_LEVEL_OPTIONS } from "@/lib/status-options"
+import { WorkExperienceForm } from "@/components/applicants/work-experience-form"
 
 export default function AddApplicantPage() {
   const inputFieldStyles = "mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -23,19 +24,39 @@ export default function AddApplicantPage() {
               <div className="grid grid-cols-12 gap-4">
                 <div className="col-span-12 md:col-span-6">
                   <label className={labelStyles}>Position Applied For</label>
-                  <input name="position_applied" className={inputFieldStyles} required />
+                  <select name="position_applied" className={inputFieldStyles} required>
+                    <option value="">Select Position</option>
+                    {POSITION_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="col-span-12 md:col-span-6">
                   <label className={labelStyles}>Second Choice</label>
-                  <input name="second_choice_position" className={inputFieldStyles} />
+                  <select name="second_choice_position" className={inputFieldStyles}>
+                    <option value="">Select Position</option>
+                    {POSITION_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="col-span-12 md:col-span-6">
                   <label className={labelStyles}>Preferred Branch</label>
-                  <input name="preferred_branch" className={inputFieldStyles} />
+                  <select name="preferred_branch" className={inputFieldStyles}>
+                    <option value="">Select Branch</option>
+                    {BRANCH_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="col-span-12 md:col-span-6">
                   <label className={labelStyles}>Country Applying For</label>
-                  <input name="country_applying_for" className={inputFieldStyles} />
+                  <select name="country_applying_for" className={inputFieldStyles}>
+                    <option value="">Select Country</option>
+                    {COUNTRY_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
@@ -78,16 +99,8 @@ export default function AddApplicantPage() {
                   <input name="email" type="email" className={inputFieldStyles} />
                 </div>
                 <div className="col-span-12 md:col-span-3">
-                  <label className={labelStyles}>Active Email</label>
-                  <input name="active_email" type="email" className={inputFieldStyles} />
-                </div>
-                <div className="col-span-12 md:col-span-3">
                   <label className={labelStyles}>Date of Birth</label>
                   <input name="date_of_birth" type="date" className={inputFieldStyles} />
-                </div>
-                <div className="col-span-12 md:col-span-2">
-                  <label className={labelStyles}>Age</label>
-                  <input name="age" type="number" className={inputFieldStyles} />
                 </div>
                 <div className="col-span-12 md:col-span-4">
                   <label className={labelStyles}>Place of Birth</label>
@@ -99,7 +112,12 @@ export default function AddApplicantPage() {
                 </div>
                 <div className="col-span-12 md:col-span-3">
                   <label className={labelStyles}>Civil Status</label>
-                  <input name="civil_status" className={inputFieldStyles} />
+                  <select name="civil_status" className={inputFieldStyles}>
+                    <option value="">Select civil status...</option>
+                    {CIVIL_STATUS_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="col-span-12 md:col-span-3">
                   <label className={labelStyles}>Height (cm)</label>
@@ -296,35 +314,7 @@ export default function AddApplicantPage() {
 
             <div>
               <h2 className={sectionHeaderStyles}>Work Experience</h2>
-              <div className="space-y-4">
-                {[1, 2, 3].map((n) => (
-                  <div key={n} className="rounded-md border border-gray-200 p-4">
-                    <div className="mb-3 text-xs font-bold text-gray-600">WORK {n}</div>
-                    <div className="grid grid-cols-12 gap-4">
-                      <div className="col-span-12 md:col-span-3">
-                        <label className={labelStyles}>Country</label>
-                        <input name={`work${n}_country`} className={inputFieldStyles} />
-                      </div>
-                      <div className="col-span-12 md:col-span-5">
-                        <label className={labelStyles}>Company</label>
-                        <input name={`work${n}_company`} className={inputFieldStyles} />
-                      </div>
-                      <div className="col-span-12 md:col-span-4">
-                        <label className={labelStyles}>Position</label>
-                        <input name={`work${n}_position`} className={inputFieldStyles} />
-                      </div>
-                      <div className="col-span-12 md:col-span-3">
-                        <label className={labelStyles}>Date Started</label>
-                        <input name={`work${n}_date_started`} type="date" className={inputFieldStyles} />
-                      </div>
-                      <div className="col-span-12 md:col-span-3">
-                        <label className={labelStyles}>Date Ended</label>
-                        <input name={`work${n}_date_ended`} type="date" className={inputFieldStyles} />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <WorkExperienceForm />
             </div>
 
             <hr className="border-gray-200" />
@@ -352,11 +342,21 @@ export default function AddApplicantPage() {
                 <div className="space-y-4">
                   <div>
                     <label className={labelStyles}>English Level</label>
-                    <input name="english_level" className={inputFieldStyles} />
+                    <select name="english_level" className={inputFieldStyles}>
+                      <option value="">Select level</option>
+                      {SPEAKING_LEVEL_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className={labelStyles}>Arabic Level</label>
-                    <input name="arabic_level" className={inputFieldStyles} />
+                    <select name="arabic_level" className={inputFieldStyles}>
+                      <option value="">Select level</option>
+                      {SPEAKING_LEVEL_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </div>

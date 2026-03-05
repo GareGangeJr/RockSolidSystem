@@ -85,7 +85,14 @@ export default async function Page({
       <p className="text-gray-600 mb-6">{jobOrder.job_title} at {jobOrder.company}</p>
 
       <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-2">Matched Applicants</h2>
+        <div className="flex items-center justify-between gap-4 mb-2">
+          <h2 className="text-lg font-semibold">Matched Applicants</h2>
+          {matched.length > 0 && (
+            <a href={`/api/job-orders/${jobOrder.id}/compile`} download className="px-3 py-1.5 rounded border text-sm hover:border-blue-500 hover:text-blue-600 transition-colors">
+              Compile & Download
+            </a>
+          )}
+        </div>
         {matched.length ? (
           <ul className="bg-white border rounded-lg divide-y">
             {matched.map((applicant) => (

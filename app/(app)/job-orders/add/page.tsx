@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { addJobOrder } from "../actions"
+import { COUNTRY_OPTIONS } from "@/lib/status-options"
 
 export default function AddJobOrderPage() {
   return (
@@ -19,7 +20,12 @@ export default function AddJobOrderPage() {
 
         <div>
           <label className="block text-sm mb-1">Country</label>
-          <input name="country" className="w-full border rounded-md p-2" />
+          <select name="country" className="w-full border rounded-md p-2">
+            <option value="">Select country...</option>
+            {COUNTRY_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -59,10 +65,10 @@ export default function AddJobOrderPage() {
 
         <div>
           <label className="block text-sm mb-1">Status</label>
-          <select name="status" className="w-full border rounded-md p-2">
-            <option>Open</option>
-            <option>Filled</option>
-            <option>Closed</option>
+          <select name="status" className="w-full border rounded-md p-2" defaultValue="Open">
+            <option value="Open">Open</option>
+            <option value="Filled">Filled</option>
+            <option value="Closed">Closed</option>
           </select>
         </div>
 

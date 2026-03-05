@@ -3,7 +3,8 @@
 import { useState, useMemo } from "react"
 import Link from "next/link"
 import { Eye, Pencil, FolderOpen } from "lucide-react"
-import DeleteEmployeeForm from "./DeleteEmployeeForm"
+import EmployeeStatusDropdown from "./EmployeeStatusDropdown"
+import CreateEmployeeLoginButton from "./CreateEmployeeLoginButton"
 
 export type Employee = {
   id: number
@@ -17,6 +18,7 @@ export type Employee = {
   contact_number: string | null
   email: string | null
   date_hired: string | null
+  auth_user_id: string | null
 }
 
 type Props = {
@@ -106,9 +108,7 @@ export default function EmployeesListWithFilters({ employees }: Props) {
                 <td className="p-3">{employee.position ?? "—"}</td>
                 <td className="p-3">{employee.department ?? "—"}</td>
                 <td className="p-3">
-                  <span>
-                    {employee.employment_status ?? "—"}
-                  </span>
+                  <EmployeeStatusDropdown employeeId={employee.id} currentStatus={employee.employment_status} />
                 </td>
                 <td className="p-3">{employee.contact_number ?? "—"}</td>
                 <td className="p-3">
@@ -137,7 +137,12 @@ export default function EmployeesListWithFilters({ employees }: Props) {
                     >
                       <Pencil className="h-4 w-4" />
                     </Link>
-                    <DeleteEmployeeForm id={employee.id} />
+                    {!employee.auth_user_id && employee.email && (
+                      <CreateEmployeeLoginButton
+                        employeeId={employee.id}
+                        employeeName={[employee.first_name, employee.last_name].filter(Boolean).join(" ") || "Employee"}
+                      />
+                    )}
                   </div>
                 </td>
               </tr>

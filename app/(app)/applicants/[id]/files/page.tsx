@@ -36,7 +36,7 @@ export default function ApplicantFilesPage() {
     setLoading(false)
   }
 
-  async function getSignedUrl(path: string) {
+  async function signedUrl(path: string) {
     const { data, error } = await supabase.storage
       .from(BUCKET)
       .createSignedUrl(path, 60)
@@ -49,12 +49,12 @@ export default function ApplicantFilesPage() {
   }
 
   async function viewFile(path: string) {
-    const url = await getSignedUrl(path)
+    const url = await signedUrl(path)
     if (url) window.open(url, "_blank")
   }
 
   async function downloadFile(path: string, name: string) {
-    const url = await getSignedUrl(path)
+    const url = await signedUrl(path)
     if (!url) return
 
     const res = await fetch(url)

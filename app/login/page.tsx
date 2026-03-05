@@ -38,7 +38,7 @@ export default function LoginPage() {
          src="/logo123.png" 
          alt="Rock Solid Logo" 
          className="w-24 mx-auto mb-4"
-         onError={() => console.log("Image not found")} 
+         onError={() => {}} 
         />
         <h1 className="text-2xl font-bold">Rock Solid Manpower System</h1>
         <p className="text-sm text-gray-500">

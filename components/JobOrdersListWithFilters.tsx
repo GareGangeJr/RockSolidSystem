@@ -3,8 +3,8 @@
 import { useState, useMemo } from "react"
 import Link from "next/link"
 import { Eye, Pencil, UserPlus } from "lucide-react"
-import DeleteJobOrderForm from "./DeleteJobOrderForm"
 import { JOB_ORDER_STATUS_OPTIONS } from "@/lib/status-options"
+import JobOrderStatusDropdown from "./JobOrderStatusDropdown"
 
 export type JobOrder = {
   id: number
@@ -99,7 +99,9 @@ export default function JobOrdersListWithFilters({ jobOrders }: Props) {
                 <td className="p-3">{jobOrder.country}</td>
                 <td className="p-3">{jobOrder.job_title}</td>
                 <td className="p-3">{jobOrder.no_workers}</td>
-                <td className="p-3">{jobOrder.status}</td>
+                <td className="p-3">
+                  <JobOrderStatusDropdown jobOrderId={jobOrder.id} currentStatus={jobOrder.status} />
+                </td>
                 <td className="p-3">
                   <div className="flex items-center gap-3">
                     <Link
@@ -123,7 +125,6 @@ export default function JobOrdersListWithFilters({ jobOrders }: Props) {
                     >
                       <Pencil className="w-4 h-4" />
                     </Link>
-                    <DeleteJobOrderForm id={jobOrder.id} />
                   </div>
                 </td>
               </tr>

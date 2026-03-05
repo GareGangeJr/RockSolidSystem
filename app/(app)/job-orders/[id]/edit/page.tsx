@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { updateJobOrder } from "../../actions"
+import { COUNTRY_OPTIONS } from "@/lib/status-options"
 
 const formatValue = (x: unknown) => (x != null ? String(x) : "")
 
@@ -48,7 +49,12 @@ export default async function EditJobOrderPage({
 
         <div>
           <label className="block text-sm mb-1">Country</label>
-          <input name="country" defaultValue={formatValue(data.country)} className="w-full border rounded-md p-2" />
+          <select name="country" defaultValue={formatValue(data.country)} className="w-full border rounded-md p-2">
+            <option value="">Select country...</option>
+            {COUNTRY_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -106,9 +112,9 @@ export default async function EditJobOrderPage({
         <div>
           <label className="block text-sm mb-1">Status</label>
           <select name="status" defaultValue={formatValue(data.status) || "Open"} className="w-full border rounded-md p-2">
-            <option>Open</option>
-            <option>Filled</option>
-            <option>Closed</option>
+            <option value="Open">Open</option>
+            <option value="Filled">Filled</option>
+            <option value="Closed">Closed</option>
           </select>
         </div>
 

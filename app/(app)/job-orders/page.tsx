@@ -2,7 +2,8 @@ import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import JobOrdersListWithFilters from "@/components/JobOrdersListWithFilters"
 
-export default async function JobOrdersPage() {
+export default async function JobOrdersPage({ searchParams }: { searchParams: Promise<{ success?: string }> }) {
+  const { success } = await searchParams
   const supabase = await createSupabaseServer()
 
   const { data: orders, error } = await supabase
@@ -26,6 +27,16 @@ export default async function JobOrdersPage() {
 
   return (
     <div className="p-6">
+      {success === "added" && (
+        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">
+          Job order added successfully.
+        </div>
+      )}
+      {success === "updated" && (
+        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">
+          Job order updated successfully.
+        </div>
+      )}
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Job Orders</h1>
         <Link

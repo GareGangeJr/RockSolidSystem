@@ -2,7 +2,8 @@ import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import ApplicantsListWithFilters from "@/components/ApplicantsListWithFilters"
 
-export default async function ApplicantsPage() {
+export default async function ApplicantsPage({ searchParams }: { searchParams: Promise<{ success?: string }> }) {
+  const { success } = await searchParams
   const supabase = await createSupabaseServer()
 
   const { data: applicants, error } = await supabase
@@ -23,6 +24,7 @@ export default async function ApplicantsPage() {
     position_applied: a.position_applied ?? null,
     applicant_type: a.applicant_type ?? null,
     status: a.status ?? null,
+    notes: a.notes ?? null,
     contact_number: a.contact_number ?? null,
     email: a.email ?? null,
     date_applied: a.date_applied ?? null,
@@ -30,6 +32,16 @@ export default async function ApplicantsPage() {
 
   return (
     <div className="p-6">
+      {success === "added" && (
+        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">
+          Applicant added successfully.
+        </div>
+      )}
+      {success === "updated" && (
+        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">
+          Applicant updated successfully.
+        </div>
+      )}
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Applicants</h1>
         <Link

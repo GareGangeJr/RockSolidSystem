@@ -4,31 +4,46 @@ import { createSupabaseServer } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
+const getStr = (formData: FormData, key: string) => (formData.get(key) as string) ?? ""
+const getStrOrNull = (formData: FormData, key: string) => {
+  const v = formData.get(key) as string | null
+  return (v != null && v.trim() !== "") ? v : null
+}
+
 export async function addJobOrder(formData: FormData) {
   const supabase = await createSupabaseServer()
 
-  await supabase.from("job_orders").insert({
-    company: formData.get("company") as string,
-    country: formData.get("country") as string,
-    job_title: formData.get("job_title") as string,
-    gender: formData.get("gender") as string,
-    no_workers: Number(formData.get("no_workers")) || 1,
-    years_exp_required: Number(formData.get("years_exp_required")) || 0,
-    skills_required: (formData.get("skills_required") as string) || null,
-    salary: formData.get("salary") as string,
-    status: (formData.get("status") as string) || "Open",
+  const { error } = await supabase.from("job_orders").insert({
+    company: getStr(formData, "company"),
+    country: getStrOrNull(formData, "country"),
+    job_title: getStr(formData, "job_title"),
+    gender: getStrOrNull(formData, "gender") ?? "Any",
+    no_workers: Math.max(1, Number(formData.get("no_workers")) || 1),
+    years_exp_required: Math.max(0, Number(formData.get("years_exp_required")) || 0),
+    skills_required: getStrOrNull(formData, "skills_required"),
+    salary: getStr(formData, "salary"),
+    status: getStr(formData, "status") || "Open",
   })
 
+  if (error) {
+    console.error("Error adding job order:", error)
+    revalidatePath("/job-orders")
+    redirect("/job-orders")
+  }
+
   revalidatePath("/job-orders")
-  redirect("/job-orders")
+  redirect("/job-orders?success=added")
 }
 
-export async function deleteJobOrder(formData: FormData) {
+export async function updateJobOrderStatus(jobOrderId: number, newStatus: string) {
   const supabase = await createSupabaseServer()
-  const id = Number(formData.get("id"))
-  if (id) await supabase.from("job_orders").delete().eq("id", id)
+  const { error } = await supabase.from("job_orders").update({ status: newStatus }).eq("id", jobOrderId)
+  if (error) {
+    console.error("Error updating job order status:", error)
+    return { error: { message: error.message } }
+  }
   revalidatePath("/job-orders")
-  redirect("/job-orders")
+  return { error: null }
 }
 
 export async function matchToJob(formData: FormData) {
@@ -55,23 +70,29 @@ export async function updateJobOrder(formData: FormData) {
   const id = Number(formData.get("id"))
   if (!id) redirect("/job-orders")
 
-  await supabase
+  const { error } = await supabase
     .from("job_orders")
     .update({
-      company: formData.get("company") as string,
-      country: formData.get("country") as string,
-      job_title: formData.get("job_title") as string,
-      gender: formData.get("gender") as string,
-      no_workers: Number(formData.get("no_workers")) || 1,
-      years_exp_required: Number(formData.get("years_exp_required")) || 0,
-      skills_required: (formData.get("skills_required") as string) || null,
-      salary: formData.get("salary") as string,
-      status: (formData.get("status") as string) || "Open",
+      company: getStr(formData, "company"),
+      country: getStrOrNull(formData, "country"),
+      job_title: getStr(formData, "job_title"),
+      gender: getStrOrNull(formData, "gender") ?? "Any",
+      no_workers: Math.max(1, Number(formData.get("no_workers")) || 1),
+      years_exp_required: Math.max(0, Number(formData.get("years_exp_required")) || 0),
+      skills_required: getStrOrNull(formData, "skills_required"),
+      salary: getStr(formData, "salary"),
+      status: getStr(formData, "status") || "Open",
     })
     .eq("id", id)
+
+  if (error) {
+    console.error("Error updating job order:", error)
+    revalidatePath("/job-orders")
+    redirect("/job-orders")
+  }
 
   revalidatePath("/job-orders")
   revalidatePath(`/job-orders/${id}`)
   revalidatePath(`/job-orders/${id}/edit`)
-  redirect("/job-orders")
+  redirect("/job-orders?success=updated")
 }

@@ -1,6 +1,7 @@
 "use server"
 
 import { createSupabaseServer } from "@/lib/supabase/server"
+import { createSupabaseAdmin } from "@/lib/supabase/admin"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
@@ -68,9 +69,8 @@ export async function addEmployee(formData: FormData) {
     return { error: insertError.message }
   }
 
-  console.log("✅ Employee added successfully:", data)
   revalidatePath("/employees")
-  redirect("/employees")
+  redirect("/employees?success=added")
 }
 
 export async function updateEmployee(formData: FormData) {
@@ -114,16 +114,44 @@ export async function updateEmployee(formData: FormData) {
 
   revalidatePath("/employees")
   revalidatePath(`/employees/${id}`)
-  redirect("/employees")
+  redirect("/employees?success=updated")
 }
 
-export async function deleteEmployee(formData: FormData) {
+export async function updateEmployeeStatus(employeeId: number, newStatus: string) {
   const supabase = await createSupabaseServer()
-  const id = Number(formData.get("id"))
-  if (!id) redirect("/employees")
-
-  await supabase.from("employees").delete().eq("id", id)
-
+  const { error } = await supabase
+    .from("employees")
+    .update({ employment_status: newStatus })
+    .eq("id", employeeId)
+  if (error) return { error }
   revalidatePath("/employees")
-  redirect("/employees")
+  revalidatePath(`/employees/${employeeId}`)
+  return {}
+}
+
+export async function createEmployeeLogin(employeeId: number, password: string) {
+  const admin = createSupabaseAdmin()
+  const supabase = await createSupabaseServer()
+
+  const { data: emp, error: empError } = await supabase
+    .from("employees")
+    .select("id, email, auth_user_id")
+    .eq("id", employeeId)
+    .single()
+
+  if (empError || !emp) return { error: { message: "Employee not found" } }
+  if (!emp.email?.trim()) return { error: { message: "Employee has no email" } }
+  if (emp.auth_user_id) return { error: { message: "Employee already has login" } }
+
+  const { data: authData, error: authError } = await admin.auth.admin.createUser({
+    email: emp.email.trim(),
+    password,
+    email_confirm: true,
+  })
+
+  if (authError || !authData.user) return { error: authError || { message: "Failed to create user" } }
+
+  await supabase.from("employees").update({ auth_user_id: authData.user.id }).eq("id", employeeId)
+  revalidatePath("/employees")
+  return {}
 }

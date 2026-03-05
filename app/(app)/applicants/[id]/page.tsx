@@ -4,6 +4,16 @@ import { createSupabaseServer } from "@/lib/supabase/server"
 const formatValue = (x: unknown) => (x != null && x !== "" ? String(x) : "—")
 const formatDate = (x: unknown) => (x != null && String(x).length >= 10 ? String(x).slice(0, 10) : "—")
 
+function getAgeFromDob(dob: unknown): string {
+  if (!dob || String(dob).length < 10) return "—"
+  const birth = new Date(String(dob).slice(0, 10))
+  const today = new Date()
+  let age = today.getFullYear() - birth.getFullYear()
+  const m = today.getMonth() - birth.getMonth()
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--
+  return age < 0 ? "—" : String(age)
+}
+
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createSupabaseServer()
   const { id: idParam } = await params
@@ -97,9 +107,8 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                 <div className="col-span-3"><span className={labelStyles}>Contact Number</span><p className={valueStyles}>{formatValue(applicant.contact_number)}</p></div>
                 <div className="col-span-3"><span className={labelStyles}>Active Cellphone</span><p className={valueStyles}>{formatValue(applicant.active_cellphone)}</p></div>
                 <div className="col-span-3"><span className={labelStyles}>Email</span><p className={valueStyles}>{formatValue(applicant.email)}</p></div>
-                <div className="col-span-3"><span className={labelStyles}>Active Email</span><p className={valueStyles}>{formatValue(applicant.active_email)}</p></div>
                 <div className="col-span-3"><span className={labelStyles}>Date of Birth</span><p className={valueStyles}>{formatDate(applicant.date_of_birth)}</p></div>
-                <div className="col-span-2"><span className={labelStyles}>Age</span><p className={valueStyles}>{formatValue(applicant.age)}</p></div>
+                <div className="col-span-2"><span className={labelStyles}>Age</span><p className={valueStyles}>{getAgeFromDob(applicant.date_of_birth)}</p></div>
                 <div className="col-span-4"><span className={labelStyles}>Place of Birth</span><p className={valueStyles}>{formatValue(applicant.place_of_birth)}</p></div>
                 <div className="col-span-3"><span className={labelStyles}>Religion</span><p className={valueStyles}>{formatValue(applicant.religion)}</p></div>
                 <div className="col-span-3"><span className={labelStyles}>Civil Status</span><p className={valueStyles}>{formatValue(applicant.civil_status)}</p></div>
@@ -182,18 +191,22 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             <div>
               <h2 className={sectionHeaderStyles}>Work Experience</h2>
               <div className="space-y-4">
-                {[1, 2, 3].map((workIndex) => (
-                  <div key={workIndex} className="rounded-md border border-gray-200 p-4">
-                    <div className="mb-2 text-xs font-bold text-gray-600">WORK {workIndex}</div>
-                    <div className={gridLayoutStyles}>
-                      <div className="col-span-3"><span className={labelStyles}>Country</span><p className={valueStyles}>{formatValue(applicant[`work${workIndex}_country`])}</p></div>
-                      <div className="col-span-5"><span className={labelStyles}>Company</span><p className={valueStyles}>{formatValue(applicant[`work${workIndex}_company`])}</p></div>
-                      <div className="col-span-4"><span className={labelStyles}>Position</span><p className={valueStyles}>{formatValue(applicant[`work${workIndex}_position`])}</p></div>
-                      <div className="col-span-3"><span className={labelStyles}>Date Started</span><p className={valueStyles}>{formatDate(applicant[`work${workIndex}_date_started`])}</p></div>
-                      <div className="col-span-3"><span className={labelStyles}>Date Ended</span><p className={valueStyles}>{formatDate(applicant[`work${workIndex}_date_ended`])}</p></div>
+                {((applicant.work_experiences as { country?: string; company?: string; position?: string; date_started?: string; date_ended?: string }[]) ?? []).length === 0 ? (
+                  <p className="text-sm text-gray-500">No work experience recorded.</p>
+                ) : (
+                  ((applicant.work_experiences as { country?: string; company?: string; position?: string; date_started?: string; date_ended?: string }[]) ?? []).map((w, idx) => (
+                    <div key={idx} className="rounded-md border border-gray-200 p-4">
+                      <div className="mb-2 text-xs font-bold text-gray-600">WORK {idx + 1}</div>
+                      <div className={gridLayoutStyles}>
+                        <div className="col-span-3"><span className={labelStyles}>Country</span><p className={valueStyles}>{formatValue(w.country)}</p></div>
+                        <div className="col-span-5"><span className={labelStyles}>Company</span><p className={valueStyles}>{formatValue(w.company)}</p></div>
+                        <div className="col-span-4"><span className={labelStyles}>Position</span><p className={valueStyles}>{formatValue(w.position)}</p></div>
+                        <div className="col-span-3"><span className={labelStyles}>Date Started</span><p className={valueStyles}>{formatDate(w.date_started)}</p></div>
+                        <div className="col-span-3"><span className={labelStyles}>Date Ended</span><p className={valueStyles}>{formatDate(w.date_ended)}</p></div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
 

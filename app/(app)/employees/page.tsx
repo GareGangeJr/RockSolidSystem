@@ -2,7 +2,8 @@ import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import EmployeesListWithFilters from "@/components/EmployeesListWithFilters"
 
-export default async function EmployeesPage() {
+export default async function EmployeesPage({ searchParams }: { searchParams: Promise<{ success?: string }> }) {
+  const { success } = await searchParams
   const supabase = await createSupabaseServer()
 
   const { data: employees, error } = await supabase
@@ -26,10 +27,17 @@ export default async function EmployeesPage() {
     contact_number: e.contact_number ?? null,
     email: e.email ?? null,
     date_hired: e.date_hired ?? null,
+    auth_user_id: e.auth_user_id ?? null,
   }))
 
   return (
     <div className="p-6">
+      {success === "added" && (
+        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">Employee saved successfully.</div>
+      )}
+      {success === "updated" && (
+        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">Employee updated successfully.</div>
+      )}
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Employees</h1>
         <Link

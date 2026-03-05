@@ -3,7 +3,6 @@
 import { useState, useMemo } from "react"
 import Link from "next/link"
 import { Pencil, Eye, FolderOpen } from "lucide-react"
-import DeleteApplicantButton from "./DeleteApplicantButton"
 import StatusDropdown from "./StatusDropdown"
 import { STATUS_OPTIONS, APPLICANT_TYPE_OPTIONS } from "@/lib/status-options"
 
@@ -16,6 +15,7 @@ export type Applicant = {
   position_applied: string | null
   applicant_type: string | null
   status: string | null
+  notes: string | null
   contact_number: string | null
   email: string | null
   date_applied: string | null
@@ -48,7 +48,8 @@ export default function ApplicantsListWithFilters({ applicants }: Props) {
         const pos = (applicant.position_applied ?? "").toLowerCase()
         const contact = (applicant.contact_number ?? "").toLowerCase()
         const email = (applicant.email ?? "").toLowerCase()
-        return idStr.includes(searchQuery) || name.includes(searchQuery) || pos.includes(searchQuery) || contact.includes(searchQuery) || email.includes(searchQuery)
+        const notes = (applicant.notes ?? "").toLowerCase()
+        return idStr.includes(searchQuery) || name.includes(searchQuery) || pos.includes(searchQuery) || contact.includes(searchQuery) || email.includes(searchQuery) || notes.includes(searchQuery)
       })
     }
     if (typeFilter !== "All") list = list.filter((applicant) => applicant.applicant_type?.trim() === typeFilter)
@@ -67,7 +68,7 @@ export default function ApplicantsListWithFilters({ applicants }: Props) {
       <div className="flex flex-wrap items-center gap-3">
         <input
           type="text"
-          placeholder="Search name, applicant ID, position, contact, email..."
+          placeholder="Search name, ID, position, contact, email, notes..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="min-w-[280px] max-w-md rounded-md border border-gray-300 px-3 py-2 text-sm"
@@ -110,8 +111,8 @@ export default function ApplicantsListWithFilters({ applicants }: Props) {
               <th className="p-3 text-left font-medium">Position</th>
               <th className="p-3 text-left font-medium">Type</th>
               <th className="p-3 text-left font-medium">Status</th>
+              <th className="p-3 text-left font-medium">Notes</th>
               <th className="p-3 text-left font-medium">Contact</th>
-              <th className="p-3 text-left font-medium">Email</th>
               <th className="p-3 text-left font-medium">Date Applied</th>
               <th className="p-3 text-left font-medium">Actions</th>
             </tr>
@@ -130,8 +131,10 @@ export default function ApplicantsListWithFilters({ applicants }: Props) {
                 <td className="p-3">
                   <StatusDropdown applicantId={applicant.id} currentStatus={applicant.status} />
                 </td>
+                <td className="p-3 max-w-[200px] truncate" title={applicant.notes ?? undefined}>
+                  {applicant.notes ?? "—"}
+                </td>
                 <td className="p-3">{applicant.contact_number ?? "—"}</td>
-                <td className="p-3">{applicant.email ?? "—"}</td>
                 <td className="p-3">{formatDate(applicant.date_applied, applicant.created_at)}</td>
                 <td className="p-3">
                   <div className="flex items-center gap-2">
@@ -156,7 +159,6 @@ export default function ApplicantsListWithFilters({ applicants }: Props) {
                     >
                       <Pencil className="h-4 w-4" />
                     </Link>
-                    <DeleteApplicantButton id={applicant.id} />
                   </div>
                 </td>
               </tr>
