@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Eye, Pencil, FolderOpen } from "lucide-react"
 import EmployeeStatusDropdown from "./EmployeeStatusDropdown"
 import CreateEmployeeLoginButton from "./CreateEmployeeLoginButton"
+import DisableEmployeeLoginButton from "./DisableEmployeeLoginButton"
 
 export type Employee = {
   id: number
@@ -139,6 +140,12 @@ export default function EmployeesListWithFilters({ employees }: Props) {
                     </Link>
                     {!employee.auth_user_id && employee.email && (
                       <CreateEmployeeLoginButton
+                        employeeId={employee.id}
+                        employeeName={[employee.first_name, employee.last_name].filter(Boolean).join(" ") || "Employee"}
+                      />
+                    )}
+                    {employee.auth_user_id && (
+                      <DisableEmployeeLoginButton
                         employeeId={employee.id}
                         employeeName={[employee.first_name, employee.last_name].filter(Boolean).join(" ") || "Employee"}
                       />

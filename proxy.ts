@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
+import { canAccessPath, getAccessRole } from "@/lib/user-role"
 
 export async function proxy(request: any) {
   const response = NextResponse.next()
@@ -25,6 +26,8 @@ export async function proxy(request: any) {
   const user = data.user
 
   const path = request.nextUrl.pathname
+  const isServerAction = request.headers.has("next-action")
+  const isRscRequest = request.headers.has("rsc")
 
   const isPublicFile = /\.(.*)$/.test(path)
   if (isPublicFile) {
@@ -32,13 +35,21 @@ export async function proxy(request: any) {
   }
 
   const isLoginPage = path.startsWith("/login")
+  const isApplyPortal = path.startsWith("/apply")
 
-  if (!user && !isLoginPage) {
+  if (!user && !isLoginPage && !isApplyPortal) {
     return NextResponse.redirect(new URL("/login", request.url))
   }
 
-  if (user && isLoginPage) {
+  if (user && isLoginPage && !isServerAction && !isRscRequest) {
     return NextResponse.redirect(new URL("/", request.url))
+  }
+
+  if (user && !isApplyPortal && !isLoginPage) {
+    const role = await getAccessRole(supabase, user.id)
+    if (role === "staff" && !canAccessPath(role, path)) {
+      return NextResponse.redirect(new URL("/", request.url))
+    }
   }
 
   return response

@@ -1,5 +1,5 @@
-import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
+import { BackButton } from "@/components/BackButton"
 
 const formatValue = (x: unknown) => (x != null && x !== "" ? String(x) : "--")
 const formatDate = (x: unknown) => (x != null && String(x).length >= 10 ? String(x).slice(0, 10) : "--")
@@ -12,7 +12,7 @@ export default async function ViewEmployeePage({ params }: { params: Promise<{ i
   if (Number.isNaN(id)) return (
     <div className="p-6">
       <p className="font-semibold text-red-500">Invalid employee ID</p>
-      <Link href="/employees" className="text-blue-600 hover:underline">Back</Link>
+      <BackButton href="/employees" />
     </div>
   )
 
@@ -21,7 +21,7 @@ export default async function ViewEmployeePage({ params }: { params: Promise<{ i
   if (error || !data) return (
     <div className="p-6">
       <p className="font-semibold text-red-500">Employee not found</p>
-      <Link href="/employees" className="text-blue-600 hover:underline">Back</Link>
+      <BackButton href="/employees" />
     </div>
   )
 
@@ -37,9 +37,7 @@ export default async function ViewEmployeePage({ params }: { params: Promise<{ i
       <div className="mx-auto max-w-4xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-900">View Employee</h1>
-          <Link href="/employees" className="text-sm text-blue-600 hover:text-blue-800">
-            ← Back to list
-          </Link>
+          <BackButton href="/employees" />
         </div>
 
         <div className="rounded-lg border border-gray-200 bg-white shadow-sm">

@@ -1,10 +1,10 @@
 "use client"
 
-import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { createSupabaseBrowser } from "@/lib/supabase/browser"
 import UploadApplicantFile from "@/components/UploadApplicantFiles"
+import { BackButton } from "@/components/BackButton"
 
 type FileRow = {
   id: number
@@ -14,7 +14,20 @@ type FileRow = {
   created_at: string
 }
 
-const BUCKET = "applicant files" 
+type FilePreview = {
+  url: string
+  name: string
+  type: "image" | "pdf"
+}
+
+const BUCKET = "applicant files"
+
+function getPreviewType(fileName: string): "image" | "pdf" | null {
+  const lower = fileName.toLowerCase()
+  if (lower.endsWith(".pdf")) return "pdf"
+  if (/\.(jpe?g|png|gif|webp)$/.test(lower)) return "image"
+  return null
+}
 
 export default function ApplicantFilesPage() {
   const params = useParams()
@@ -24,6 +37,8 @@ export default function ApplicantFilesPage() {
 
   const [files, setFiles] = useState<FileRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [preview, setPreview] = useState<FilePreview | null>(null)
+  const [viewLoading, setViewLoading] = useState(false)
 
   async function loadFiles() {
     const { data, error } = await supabase
@@ -48,10 +63,33 @@ export default function ApplicantFilesPage() {
     return data.signedUrl
   }
 
-  async function viewFile(path: string) {
+  async function viewFile(path: string, name: string) {
+    const previewType = getPreviewType(name)
+    if (!previewType) {
+      alert("Preview is only available for PDF, JPG, and PNG files. Use Download instead.")
+      return
+    }
+
+    setViewLoading(true)
     const url = await signedUrl(path)
-    if (url) window.open(url, "_blank")
+    setViewLoading(false)
+    if (url) setPreview({ url, name, type: previewType })
   }
+
+  useEffect(() => {
+    if (!preview) return
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setPreview(null)
+    }
+
+    document.body.style.overflow = "hidden"
+    window.addEventListener("keydown", onKeyDown)
+    return () => {
+      document.body.style.overflow = ""
+      window.removeEventListener("keydown", onKeyDown)
+    }
+  }, [preview])
 
   async function downloadFile(path: string, name: string) {
     const url = await signedUrl(path)
@@ -97,9 +135,7 @@ export default function ApplicantFilesPage() {
         <div className="flex items-center gap-3">
           <UploadApplicantFile id={applicantId} />
 
-          <Link href="/applicants" className="text-blue-600 hover:underline">
-            Back to Applicants Page
-          </Link>
+          <BackButton href="/applicants" />
         </div>
       </div>
 
@@ -128,8 +164,8 @@ export default function ApplicantFilesPage() {
                       <button
                         type="button"
                         className="px-3 py-1 rounded-md border hover:bg-blue-50 hover:text-blue-700"
-                        onClick={() => viewFile(f.file_path || "")}
-                        disabled={!f.file_path}
+                        onClick={() => viewFile(f.file_path || "", f.file_name || "file")}
+                        disabled={!f.file_path || viewLoading}
                       >
                         View
                       </button>
@@ -159,6 +195,40 @@ export default function ApplicantFilesPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {preview && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setPreview(null)}
+        >
+          <div
+            className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg bg-white shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b px-4 py-3">
+              <h2 className="truncate pr-4 text-sm font-medium text-gray-900">{preview.name}</h2>
+              <button
+                type="button"
+                onClick={() => setPreview(null)}
+                className="rounded-md border px-3 py-1 text-sm hover:bg-gray-50"
+              >
+                Close
+              </button>
+            </div>
+            <div className="overflow-auto p-4">
+              {preview.type === "image" ? (
+                <img
+                  src={preview.url}
+                  alt={preview.name}
+                  className="mx-auto max-h-[75vh] max-w-full object-contain"
+                />
+              ) : (
+                <iframe src={preview.url} title={preview.name} className="h-[75vh] w-full rounded border" />
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

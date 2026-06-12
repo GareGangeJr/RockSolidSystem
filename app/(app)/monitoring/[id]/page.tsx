@@ -1,5 +1,5 @@
-import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
+import { BackButton } from "@/components/BackButton"
 
 const formatValue = (x: unknown) => (x != null && x !== "" ? String(x) : "--")
 const formatDate = (x: unknown) => (x != null && String(x).length >= 10 ? String(x).slice(0, 10) : "--")
@@ -16,7 +16,7 @@ export default async function MonitoringDetailPage({
   if (Number.isNaN(monitoringId)) return (
     <div className="p-6">
       <p className="font-semibold text-red-500">Invalid monitoring ID</p>
-      <Link href="/monitoring" className="text-blue-600 hover:underline">Back</Link>
+      <BackButton href="/monitoring" />
     </div>
   )
 
@@ -25,7 +25,7 @@ export default async function MonitoringDetailPage({
   if (error || !monitoring) return (
     <div className="p-6">
       <p className="font-semibold text-red-500">Record not found</p>
-      <Link href="/monitoring" className="text-blue-600 hover:underline">Back</Link>
+      <BackButton href="/monitoring" />
     </div>
   )
 
@@ -42,9 +42,7 @@ export default async function MonitoringDetailPage({
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-900">View Monitoring</h1>
-          <Link href="/monitoring" className="text-sm text-blue-600 hover:text-blue-800">
-            ← Back to Monitoring Center
-          </Link>
+          <BackButton href="/monitoring" />
         </div>
 
         <div className="rounded-lg border border-gray-200 bg-white shadow-sm">

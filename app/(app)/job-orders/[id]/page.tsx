@@ -1,5 +1,5 @@
-import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
+import { BackButton } from "@/components/BackButton"
 
 const formatValue = (x: unknown) => (x != null && x !== "" ? String(x) : "--")
 
@@ -15,7 +15,7 @@ export default async function Page({
   if (Number.isNaN(numericId)) return (
     <div className="p-6">
       <p className="font-semibold text-red-500">Invalid ID</p>
-      <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
+      <BackButton href="/job-orders" />
     </div>
   )
 
@@ -24,7 +24,7 @@ export default async function Page({
   if (error || !data) return (
     <div className="p-6">
       <p className="font-semibold text-red-500">Not found</p>
-      <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
+      <BackButton href="/job-orders" />
     </div>
   )
 
@@ -40,9 +40,7 @@ export default async function Page({
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-900">View Job Order</h1>
-          <Link href="/job-orders" className="text-sm text-blue-600 hover:text-blue-800">
-            ← Back to Job Orders
-          </Link>
+          <BackButton href="/job-orders" />
         </div>
 
         <div className="rounded-lg border border-gray-200 bg-white shadow-sm">

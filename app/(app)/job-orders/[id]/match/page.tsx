@@ -2,6 +2,8 @@ import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import MatchToJobForm from "@/components/MatchToJobForm"
 import DeleteMatchForm from "@/components/DeleteMatchForm"
+import CompileDownloadButton from "@/components/CompileDownloadButton"
+import { BackButton } from "@/components/BackButton"
 
 type JobOrder = {
   id: number
@@ -30,17 +32,20 @@ function matches(applicant: Applicant, job: JobOrder): boolean {
 
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ error?: string; success?: string; message?: string }>
 }) {
   const supabase = await createSupabaseServer()
   const { id } = await params
+  const { error, success, message } = await searchParams
   const numericId = Number(id)
 
   if (Number.isNaN(numericId)) return (
     <div className="p-6">
       <p className="text-red-500">Invalid ID</p>
-      <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
+      <BackButton href="/job-orders" />
     </div>
   )
 
@@ -53,7 +58,7 @@ export default async function Page({
   if (jobError || !job) return (
     <div className="p-6">
       <p className="text-red-500">Job order not found</p>
-      <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
+      <BackButton href="/job-orders" />
     </div>
   )
 
@@ -79,19 +84,29 @@ export default async function Page({
     <div className="p-6 max-w-3xl">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-semibold">Match Applicants - JO-{jobOrder.id}</h1>
-        <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
+        <BackButton href="/job-orders" />
       </div>
 
       <p className="text-gray-600 mb-6">{jobOrder.job_title} at {jobOrder.company}</p>
 
+      {success === "matched" && (
+        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">
+          Applicant matched. Status set to Selected if applicable.
+        </div>
+      )}
+      {success === "unmatched" && (
+        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">
+          Match removed.
+        </div>
+      )}
+      {error === "match" && message && (
+        <div className="mb-4 rounded-md bg-red-100 px-4 py-3 text-red-800">{decodeURIComponent(message)}</div>
+      )}
+
       <div className="mb-6">
         <div className="flex items-center justify-between gap-4 mb-2">
           <h2 className="text-lg font-semibold">Matched Applicants</h2>
-          {matched.length > 0 && (
-            <a href={`/api/job-orders/${jobOrder.id}/compile`} download className="px-3 py-1.5 rounded border text-sm hover:border-blue-500 hover:text-blue-600 transition-colors">
-              Compile & Download
-            </a>
-          )}
+          {matched.length > 0 && <CompileDownloadButton jobOrderId={jobOrder.id} />}
         </div>
         {matched.length ? (
           <ul className="bg-white border rounded-lg divide-y">

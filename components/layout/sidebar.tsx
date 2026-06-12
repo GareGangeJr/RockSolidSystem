@@ -9,56 +9,60 @@ import {
   FolderKanban,
   CalendarCheck,
   BarChart3,
-  Activity,
   Building2,
+  type LucideIcon,
 } from "lucide-react"
+import type { AccessRole } from "@/lib/user-role"
 
-export default function Sidebar() {
+type NavItem = {
+  name: string
+  href: string
+  icon: LucideIcon
+  roles: AccessRole[]
+}
+
+const NAV: NavItem[] = [
+  { name: "Dashboard", href: "/", icon: LayoutDashboard, roles: ["admin", "staff"] },
+  { name: "Applicants", href: "/applicants", icon: Users, roles: ["admin", "staff"] },
+  { name: "Job Orders", href: "/job-orders", icon: Briefcase, roles: ["admin", "staff"] },
+  { name: "Monitoring", href: "/monitoring", icon: Building2, roles: ["admin", "staff"] },
+  { name: "Employees", href: "/employees", icon: FolderKanban, roles: ["admin"] },
+  { name: "Attendance", href: "/attendance", icon: CalendarCheck, roles: ["admin", "staff"] },
+  { name: "Reports", href: "/reports", icon: BarChart3, roles: ["admin"] },
+]
+
+export default function Sidebar({ role }: { role: AccessRole }) {
   const pathname = usePathname()
-
-  const nav = [
-    { name: "Dashboard", href: "/", icon: LayoutDashboard },
-    { name: "Applicants", href: "/applicants", icon: Users },
-    { name: "Job Orders", href: "/job-orders", icon: Briefcase },
-    { name: "Monitoring", href: "/monitoring", icon: Building2 },
-    { name: "Employees", href: "/employees", icon: FolderKanban },
-    { name: "Attendance", href: "/attendance", icon: CalendarCheck },
-    { name: "Reports", href: "/reports", icon: BarChart3 },
-  ]
+  const nav = NAV.filter((item) => item.roles.includes(role))
 
   return (
     <aside className="w-64 border-r bg-blue-100 min-h-screen flex flex-col">
-      <img
-         src="/logo123.png"
-         alt="Rock Solid Logo"
-         className="w-32 mx-auto"
-        />
-      
+      <img src="/logo123.png" alt="Rock Solid Logo" className="w-32 mx-auto" />
+
       <div className="p-6 border-b border-gray-900 text-center">
-          <h1 className="font-bold text-lg leading-5">
-           Rock Solid Manpower <br />
-           Network & Consultancy Inc.
-          </h1>
+        <h1 className="font-bold text-lg leading-5">
+          Rock Solid Manpower <br />
+          Network & Consultancy Inc.
+        </h1>
       </div>
 
       <nav className="p-3 space-y-1">
         {nav.map((item) => {
-          const active = pathname === item.href
+          const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
           const Icon = item.icon
 
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm
-              ${active ? "bg-slate-900 text-white" : "text-black hover:bg-slate-100"}`}
+              className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm ${
+                active ? "bg-slate-900 text-white" : "text-black hover:bg-slate-100"
+              }`}
             >
-              
               <Icon className="h-4 w-4" />
               {item.name}
             </Link>
           )
-          
         })}
       </nav>
     </aside>

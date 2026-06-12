@@ -1,6 +1,6 @@
-import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { updateMonitoring } from "../../actions"
+import { BackButton } from "@/components/BackButton"
 
 const formatValue = (x: unknown): string => (x != null && x !== "" ? String(x) : "")
 const formatDateForInput = (date: string | null) => (date ? date.split("T")[0] : "")
@@ -17,7 +17,7 @@ export default async function EditMonitoringPage({
   if (Number.isNaN(monitoringId)) return (
     <div className="p-6">
       <p className="font-semibold text-red-500">Invalid ID</p>
-      <Link href="/monitoring" className="text-blue-600 hover:underline">Back</Link>
+      <BackButton href="/monitoring" />
     </div>
   )
 
@@ -26,7 +26,7 @@ export default async function EditMonitoringPage({
   if (error || !monitoring) return (
     <div className="p-6">
       <p className="font-semibold text-red-500">Record not found</p>
-      <Link href="/monitoring" className="text-blue-600 hover:underline">Back</Link>
+      <BackButton href="/monitoring" />
     </div>
   )
 
@@ -40,9 +40,7 @@ export default async function EditMonitoringPage({
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-900">Edit Monitoring</h1>
-          <Link href="/monitoring" className="text-sm text-blue-600 hover:text-blue-800">
-            ← Back to Monitoring Center
-          </Link>
+          <BackButton href="/monitoring" />
         </div>
 
         <form action={updateMonitoring} className="rounded-lg border border-gray-200 bg-white shadow-sm">
@@ -53,7 +51,7 @@ export default async function EditMonitoringPage({
               <div className={gridLayoutStyles}>
                 <div className="col-span-12 md:col-span-4">
                   <label className={labelStyles}>Deployment Status</label>
-                  <select name="deployment_status" defaultValue={monitoring.deployment_status} className={inputFieldStyles}>
+                  <select name="deployment_status" defaultValue={monitoring.deployment_status || "Deployed"} className={inputFieldStyles}>
                 <option value="Deployed">Deployed</option>
                 <option value="Deployed(With Concerns)">Deployed(With Concerns)</option>
               </select>

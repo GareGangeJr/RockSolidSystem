@@ -2,10 +2,60 @@
 
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { createSupabaseAdmin } from "@/lib/supabase/admin"
+import { generateEmployeePassword } from "@/lib/generate-employee-password"
+import { requireAdmin } from "@/lib/require-role"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
+const INACTIVE_EMPLOYMENT_STATUSES = new Set(["Resigned", "Terminated"])
+
+async function syncEmployeeLoginAccess(employeeId: number, employmentStatus: string) {
+  const admin = createSupabaseAdmin()
+  const supabase = await createSupabaseServer()
+
+  const { data: emp } = await supabase
+    .from("employees")
+    .select("auth_user_id")
+    .eq("id", employeeId)
+    .maybeSingle()
+
+  if (!emp?.auth_user_id) return {}
+
+  const { error } = await admin.auth.admin.updateUserById(emp.auth_user_id, {
+    ban_duration: INACTIVE_EMPLOYMENT_STATUSES.has(employmentStatus) ? "876000h" : "none",
+  })
+
+  if (error) return { error: { message: error.message } }
+  return {}
+}
+
+export async function checkEmployeeLoginAllowed() {
+  const supabase = await createSupabaseServer()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { allowed: true as const }
+
+  const { data: emp } = await supabase
+    .from("employees")
+    .select("employment_status")
+    .eq("auth_user_id", user.id)
+    .maybeSingle()
+
+  if (!emp) return { allowed: true as const }
+
+  if (INACTIVE_EMPLOYMENT_STATUSES.has(emp.employment_status ?? "")) {
+    return {
+      allowed: false as const,
+      message: "This login has been disabled because the employee is no longer active.",
+    }
+  }
+
+  return { allowed: true as const }
+}
+
 export async function addEmployee(formData: FormData) {
+  await requireAdmin()
   const supabase = await createSupabaseServer()
 
   // Auto-generate employee number (EMP-YYYY-###)
@@ -65,7 +115,7 @@ export async function addEmployee(formData: FormData) {
   }).select()
 
   if (insertError) {
-    console.error("❌ Failed to add employee:", insertError)
+    console.error("Failed to add employee:", insertError)
     return { error: insertError.message }
   }
 
@@ -74,6 +124,7 @@ export async function addEmployee(formData: FormData) {
 }
 
 export async function updateEmployee(formData: FormData) {
+  await requireAdmin()
   const supabase = await createSupabaseServer()
   const id = Number(formData.get("id"))
   if (!id) redirect("/employees")
@@ -112,36 +163,51 @@ export async function updateEmployee(formData: FormData) {
     notes: formData.get("notes") as string || null,
   }).eq("id", id)
 
+  const employmentStatus = (formData.get("employment_status") as string) || "Active"
+  const loginSync = await syncEmployeeLoginAccess(id, employmentStatus)
+  if (loginSync.error) {
+    console.error("Failed to sync employee login access:", loginSync.error.message)
+  }
+
   revalidatePath("/employees")
   revalidatePath(`/employees/${id}`)
   redirect("/employees?success=updated")
 }
 
 export async function updateEmployeeStatus(employeeId: number, newStatus: string) {
+  await requireAdmin()
   const supabase = await createSupabaseServer()
   const { error } = await supabase
     .from("employees")
     .update({ employment_status: newStatus })
     .eq("id", employeeId)
   if (error) return { error }
+  const loginSync = await syncEmployeeLoginAccess(employeeId, newStatus)
+  if (loginSync.error) return { error: loginSync.error }
   revalidatePath("/employees")
   revalidatePath(`/employees/${employeeId}`)
   return {}
 }
 
-export async function createEmployeeLogin(employeeId: number, password: string) {
+export async function createEmployeeLogin(employeeId: number) {
+  await requireAdmin()
   const admin = createSupabaseAdmin()
   const supabase = await createSupabaseServer()
 
   const { data: emp, error: empError } = await supabase
     .from("employees")
-    .select("id, email, auth_user_id")
+    .select("id, email, auth_user_id, date_of_birth, employee_number")
     .eq("id", employeeId)
     .single()
 
   if (empError || !emp) return { error: { message: "Employee not found" } }
   if (!emp.email?.trim()) return { error: { message: "Employee has no email" } }
   if (emp.auth_user_id) return { error: { message: "Employee already has login" } }
+
+  const password = generateEmployeePassword({
+    date_of_birth: emp.date_of_birth,
+    employee_number: emp.employee_number,
+  })
 
   const { data: authData, error: authError } = await admin.auth.admin.createUser({
     email: emp.email.trim(),
@@ -152,6 +218,29 @@ export async function createEmployeeLogin(employeeId: number, password: string) 
   if (authError || !authData.user) return { error: authError || { message: "Failed to create user" } }
 
   await supabase.from("employees").update({ auth_user_id: authData.user.id }).eq("id", employeeId)
+  revalidatePath("/employees")
+  return { email: emp.email.trim(), password }
+}
+
+export async function disableEmployeeLogin(employeeId: number) {
+  await requireAdmin()
+  const admin = createSupabaseAdmin()
+  const supabase = await createSupabaseServer()
+
+  const { data: emp, error: empError } = await supabase
+    .from("employees")
+    .select("auth_user_id")
+    .eq("id", employeeId)
+    .single()
+
+  if (empError || !emp) return { error: { message: "Employee not found" } }
+  if (!emp.auth_user_id) return { error: { message: "Employee has no login" } }
+
+  const { error } = await admin.auth.admin.updateUserById(emp.auth_user_id, {
+    ban_duration: "876000h",
+  })
+  if (error) return { error: { message: error.message } }
+
   revalidatePath("/employees")
   return {}
 }

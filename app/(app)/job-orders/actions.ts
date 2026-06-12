@@ -1,13 +1,14 @@
 "use server"
 
 import { createSupabaseServer } from "@/lib/supabase/server"
+import { createPlacement, removePlacement } from "@/lib/applicant-workflow"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
 const getStr = (formData: FormData, key: string) => (formData.get(key) as string) ?? ""
 const getStrOrNull = (formData: FormData, key: string) => {
   const v = formData.get(key) as string | null
-  return (v != null && v.trim() !== "") ? v : null
+  return v != null && v.trim() !== "" ? v : null
 }
 
 export async function addJobOrder(formData: FormData) {
@@ -50,18 +51,37 @@ export async function matchToJob(formData: FormData) {
   const supabase = await createSupabaseServer()
   const applicantId = Number(formData.get("applicant_id"))
   const jobOrderId = Number(formData.get("job_order_id"))
-  if (applicantId && jobOrderId) await supabase.from("placements").insert({ applicant_id: applicantId, job_order_id: jobOrderId })
+
+  const result = await createPlacement(supabase, applicantId, jobOrderId)
+  if (result.error) {
+    redirect(
+      `/job-orders/${jobOrderId}/match?error=match&message=${encodeURIComponent(result.error.message)}`
+    )
+  }
+
+  revalidatePath("/applicants")
+  revalidatePath("/job-orders")
   revalidatePath(`/job-orders/${jobOrderId}/match`)
-  redirect(`/job-orders/${jobOrderId}/match`)
+  redirect(`/job-orders/${jobOrderId}/match?success=matched`)
 }
 
 export async function deleteMatch(formData: FormData) {
   const supabase = await createSupabaseServer()
   const applicantId = Number(formData.get("applicant_id"))
   const jobOrderId = Number(formData.get("job_order_id"))
-  if (applicantId && jobOrderId) await supabase.from("placements").delete().eq("applicant_id", applicantId).eq("job_order_id", jobOrderId)
+
+  const result = await removePlacement(supabase, applicantId, jobOrderId)
+  if (result.error) {
+    redirect(
+      `/job-orders/${jobOrderId}/match?error=match&message=${encodeURIComponent(result.error.message)}`
+    )
+  }
+
+  revalidatePath("/applicants")
+  revalidatePath("/job-orders")
+  revalidatePath("/monitoring")
   revalidatePath(`/job-orders/${jobOrderId}/match`)
-  redirect(`/job-orders/${jobOrderId}/match`)
+  redirect(`/job-orders/${jobOrderId}/match?success=unmatched`)
 }
 
 export async function updateJobOrder(formData: FormData) {

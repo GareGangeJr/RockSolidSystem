@@ -1,5 +1,5 @@
-import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
+import { BackButton } from "@/components/BackButton"
 
 const formatValue = (x: unknown) => (x != null && x !== "" ? String(x) : "--")
 const formatDate = (x: unknown) => (x != null && String(x).length >= 10 ? String(x).slice(0, 10) : "--")
@@ -22,7 +22,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   if (Number.isNaN(id)) return (
     <div className="p-6">
       <p className="font-semibold text-red-500">Invalid applicant ID</p>
-      <Link href="/applicants" className="text-blue-600 hover:underline">Back</Link>
+      <BackButton href="/applicants" />
     </div>
   )
 
@@ -31,14 +31,14 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   if (error) return (
     <div className="p-6">
       <p className="font-semibold text-red-500">Error: {error.message}</p>
-      <Link href="/applicants" className="text-blue-600 hover:underline">Back</Link>
+      <BackButton href="/applicants" />
     </div>
   )
 
   if (!data) return (
     <div className="p-6">
       <p className="font-semibold text-red-500">Applicant not found.</p>
-      <Link href="/applicants" className="text-blue-600 hover:underline">Back</Link>
+      <BackButton href="/applicants" />
     </div>
   )
 
@@ -54,9 +54,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-900">View Applicant</h1>
-          <Link href="/applicants" className="text-sm text-blue-600 hover:text-blue-800">
-            ← Back to Applicants Page
-          </Link>
+          <BackButton href="/applicants" />
         </div>
 
         <div className="rounded-lg border border-gray-200 bg-white shadow-sm">

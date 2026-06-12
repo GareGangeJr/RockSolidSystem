@@ -1,10 +1,10 @@
 "use client"
 
-import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { createSupabaseBrowser } from "@/lib/supabase/browser"
 import UploadEmployeeFile from "@/components/UploadEmployeeFiles"
+import { BackButton } from "@/components/BackButton"
 
 type FileRow = {
   id: number
@@ -97,9 +97,7 @@ export default function EmployeeFilesPage() {
         <div className="flex items-center gap-3">
           <UploadEmployeeFile id={employeeId} />
 
-          <Link href="/employees" className="text-blue-600 hover:underline">
-            Back
-          </Link>
+          <BackButton href="/employees" />
         </div>
       </div>
 

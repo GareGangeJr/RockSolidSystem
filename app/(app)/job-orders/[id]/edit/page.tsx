@@ -1,8 +1,7 @@
-import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { updateJobOrder } from "../../actions"
-import { COUNTRY_OPTIONS } from "@/lib/status-options"
-
+import { JOB_ORDER_STATUS_OPTIONS, JOB_ORDER_GENDER_OPTIONS, DEFAULT_JOB_ORDER_STATUS, DEFAULT_JOB_ORDER_GENDER } from "@/lib/status-options"
+import { BackButton } from "@/components/BackButton"
 const formatValue = (x: unknown) => (x != null ? String(x) : "")
 
 export default async function EditJobOrderPage({
@@ -17,7 +16,7 @@ export default async function EditJobOrderPage({
   if (Number.isNaN(numericId)) return (
     <div className="p-6">
       <p className="font-semibold text-red-500">Invalid ID</p>
-      <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
+      <BackButton href="/job-orders" />
     </div>
   )
 
@@ -26,7 +25,7 @@ export default async function EditJobOrderPage({
   if (error || !data) return (
     <div className="p-6">
       <p className="font-semibold text-red-500">Job order not found</p>
-      <Link href="/job-orders" className="text-blue-600 hover:underline">Back</Link>
+      <BackButton href="/job-orders" />
     </div>
   )
 
@@ -40,9 +39,7 @@ export default async function EditJobOrderPage({
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-900">Edit Job Order</h1>
-          <Link href="/job-orders" className="text-sm text-blue-600 hover:text-blue-800">
-            ← Back to Job Orders
-          </Link>
+          <BackButton href="/job-orders" />
         </div>
 
         <form action={updateJobOrder} className="rounded-lg border border-gray-200 bg-white shadow-sm">
@@ -57,12 +54,7 @@ export default async function EditJobOrderPage({
                 </div>
                 <div className="col-span-12 md:col-span-4">
                   <label className={labelStyles}>Country</label>
-                  <select name="country" defaultValue={formatValue(data.country)} className={inputFieldStyles}>
-                    <option value="">Select country...</option>
-                    {COUNTRY_OPTIONS.map((opt) => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
+                  <input name="country" type="text" defaultValue={formatValue(data.country)} className={inputFieldStyles} />
                 </div>
                 <div className="col-span-12 md:col-span-4">
                   <label className={labelStyles}>Job Title</label>
@@ -70,10 +62,10 @@ export default async function EditJobOrderPage({
                 </div>
                 <div className="col-span-12 md:col-span-4">
                   <label className={labelStyles}>Status</label>
-                  <select name="status" defaultValue={formatValue(data.status) || "Open"} className={inputFieldStyles}>
-                    <option value="Open">Open</option>
-                    <option value="Filled">Filled</option>
-                    <option value="Closed">Closed</option>
+                  <select name="status" defaultValue={formatValue(data.status) || DEFAULT_JOB_ORDER_STATUS} className={inputFieldStyles}>
+                    {JOB_ORDER_STATUS_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -86,11 +78,10 @@ export default async function EditJobOrderPage({
               <div className={gridLayoutStyles}>
                 <div className="col-span-12 md:col-span-4">
                   <label className={labelStyles}>Sex</label>
-                  <select name="gender" defaultValue={formatValue(data.gender)} className={inputFieldStyles}>
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Any">Any</option>
+                  <select name="gender" defaultValue={formatValue(data.gender) || DEFAULT_JOB_ORDER_GENDER} className={inputFieldStyles}>
+                    {JOB_ORDER_GENDER_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="col-span-12 md:col-span-4">

@@ -13,19 +13,20 @@ export default function CreateEmployeeLoginButton({ employeeId, employeeName }: 
   const router = useRouter()
 
   async function handleClick() {
-    const password = prompt(`Create login for ${employeeName}. Enter initial password (min 6 chars):`)
-    if (!password?.trim()) return
-    if (password.length < 6) {
-      alert("Password must be at least 6 characters")
+    const ok = confirm(
+      `Create login for ${employeeName}?\n\nPassword will be auto-generated from their birthday (MMDDYYYY).`
+    )
+    if (!ok) return
+
+    const result = await createEmployeeLogin(employeeId)
+    if (result.error) {
+      alert(result.error.message || "Failed to create login")
       return
     }
 
-    const { error } = await createEmployeeLogin(employeeId, password)
-    if (error) {
-      alert(error.message || "Failed to create login")
-      return
-    }
-    alert("Login created! They can now sign in with their email and this password.")
+    alert(
+      `Login created!\n\nEmail: ${result.email}\nPassword: ${result.password}`
+    )
     router.refresh()
   }
 
