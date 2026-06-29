@@ -46,13 +46,11 @@ export default async function Home() {
     { data: applicants },
     { data: jobOrders },
     { data: monitoringRecords },
-    { count: totalEmployees },
     { count: openJobOrders },
   ] = await Promise.all([
     supabase.from("applicants").select("id, first_name, last_name, position_applied, status, applicant_type, created_at").order("created_at", { ascending: false }),
     supabase.from("job_orders").select("id, status, country"),
     supabase.from("monitoring").select("id, applicant_id, job_order_id, deployment_status, deployment_date").order("deployment_date", { ascending: false }).limit(10),
-    supabase.from("employees").select("*", { count: "exact", head: true }),
     supabase.from("job_orders").select("*", { count: "exact", head: true }).eq("status", "Open"),
   ])
 
@@ -64,19 +62,16 @@ export default async function Home() {
   ).length
   const docsOnProcess = applicantRows.filter((a) => a.status === "Docs on Process").length
   const forBooking = applicantRows.filter((a) => a.status === "For Booking").length
-  const newThisMonth = applicantRows.filter((a) => {
-    const created = new Date(a.created_at)
-    const now = new Date()
-    return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear()
-  }).length
+  const deported = applicantRows.filter((a) => a.status === "Deported").length
+  const finishContracts = applicantRows.filter((a) => a.status === "Finish Contract").length
 
   const stats: StatCard[] = [
     { title: "Total Applicants", value: applicantRows.length, icon: "applicants", color: "bg-blue-600" },
     { title: "Deployed", value: deployed, icon: "deployed", color: "bg-green-600" },
     { title: "Open Job Orders", value: openJobOrders ?? 0, icon: "jobOrders", color: "bg-orange-600" },
-    { title: "Employees", value: totalEmployees ?? 0, icon: "employees", color: "bg-purple-600" },
+    { title: "Finish Contracts", value: finishContracts, icon: "employees", color: "bg-purple-600" },
     { title: "Docs on Process", value: docsOnProcess, icon: "docs", color: "bg-cyan-600" },
-    { title: "New This Month", value: newThisMonth, icon: "booking", color: "bg-amber-600" },
+    { title: "Deported", value: deported, icon: "booking", color: "bg-amber-600" },
   ]
 
   const statusCounts = countByField(applicantRows, "status", STATUS_OPTIONS)

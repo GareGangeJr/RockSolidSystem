@@ -54,7 +54,7 @@ type Props = {
   recentDeployments: RecentDeployment[]
 }
 
-const CHART_COLORS = ["#2563eb", "#16a34a", "#ea580c", "#9333ea", "#0891b2", "#dc2626", "#ca8a04", "#64748b"]
+const CHART_COLORS = ["#2563eb", "#16a34a", "#9333ea", "#9333ea", "#0891b2", "#dc2626", "#ca8a04", "#64748b"]
 
 const iconMap = {
   applicants: Users,
@@ -100,7 +100,7 @@ export default function DashboardView({
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <ChartCard title="Applicants by Status" subtitle="Current pipeline breakdown">
+        <ChartCard title="Applicants by Status">
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={topStatuses} layout="vertical" margin={{ left: 20, right: 20 }}>
               <CartesianGrid strokeDasharray="3 3" horizontal={false} />
@@ -153,7 +153,7 @@ export default function DashboardView({
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis allowDecimals={false} />
               <Tooltip />
-              <Bar dataKey="count" fill="#ea580c" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" fill="#9333ea" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -244,13 +244,13 @@ function ChartCard({
   children,
 }: {
   title: string
-  subtitle: string
+  subtitle?: string
   children: React.ReactNode
 }) {
   return (
     <div className="rounded-lg border bg-white p-5 shadow-sm">
       <h2 className="font-semibold text-gray-900">{title}</h2>
-      <p className="text-xs text-gray-500">{subtitle}</p>
+      {subtitle ? <p className="text-xs text-gray-500">{subtitle}</p> : null}
       <div className="mt-4">{children}</div>
     </div>
   )

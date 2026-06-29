@@ -45,9 +45,11 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
       <div className="grid w-full max-w-4xl gap-6 md:grid-cols-2">
         <form onSubmit={handleLogin} className="w-full space-y-4 rounded-lg border bg-white p-6">
-          <img src="/logo123.png" alt="Rock Solid Logo" className="mx-auto mb-4 w-24" onError={() => {}} />
-          <h1 className="text-2xl font-bold">Rock Solid Manpower System</h1>
-          <p className="text-sm text-gray-500">Staff sign in</p>
+          <img src="/logo123.png" alt="Rock Solid Logo" className="mx-auto mb-4 w-24" />
+          <div className="text-center">
+            <h1 className="text-2xl font-bold">Rock Solid Manpower System</h1>
+            <p className="mt-1 text-sm text-gray-500">Admin & staff sign in</p>
+          </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Email</label>
@@ -59,7 +61,7 @@ export default function LoginPage() {
             <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="mx-auto block w-1/2" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </Button>
         </form>

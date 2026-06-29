@@ -2,29 +2,14 @@
 
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { createPlacement, removePlacement } from "@/lib/applicant-workflow"
+import { jobOrderFromFormData } from "@/lib/job-order-fields"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-
-const getStr = (formData: FormData, key: string) => (formData.get(key) as string) ?? ""
-const getStrOrNull = (formData: FormData, key: string) => {
-  const v = formData.get(key) as string | null
-  return v != null && v.trim() !== "" ? v : null
-}
 
 export async function addJobOrder(formData: FormData) {
   const supabase = await createSupabaseServer()
 
-  const { error } = await supabase.from("job_orders").insert({
-    company: getStr(formData, "company"),
-    country: getStrOrNull(formData, "country"),
-    job_title: getStr(formData, "job_title"),
-    gender: getStrOrNull(formData, "gender") ?? "Any",
-    no_workers: Math.max(1, Number(formData.get("no_workers")) || 1),
-    years_exp_required: Math.max(0, Number(formData.get("years_exp_required")) || 0),
-    skills_required: getStrOrNull(formData, "skills_required"),
-    salary: getStr(formData, "salary"),
-    status: getStr(formData, "status") || "Open",
-  })
+  const { error } = await supabase.from("job_orders").insert(jobOrderFromFormData(formData))
 
   if (error) {
     console.error("Error adding job order:", error)
@@ -92,17 +77,7 @@ export async function updateJobOrder(formData: FormData) {
 
   const { error } = await supabase
     .from("job_orders")
-    .update({
-      company: getStr(formData, "company"),
-      country: getStrOrNull(formData, "country"),
-      job_title: getStr(formData, "job_title"),
-      gender: getStrOrNull(formData, "gender") ?? "Any",
-      no_workers: Math.max(1, Number(formData.get("no_workers")) || 1),
-      years_exp_required: Math.max(0, Number(formData.get("years_exp_required")) || 0),
-      skills_required: getStrOrNull(formData, "skills_required"),
-      salary: getStr(formData, "salary"),
-      status: getStr(formData, "status") || "Open",
-    })
+    .update(jobOrderFromFormData(formData))
     .eq("id", id)
 
   if (error) {

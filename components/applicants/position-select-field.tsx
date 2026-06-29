@@ -66,7 +66,7 @@ export function PositionSelectField({
           className={inputFieldStyles}
           value={otherText}
           onChange={(e) => setOtherText(e.target.value)}
-          placeholder="Enter desired position"
+          placeholder="Ex: Waiter"
           required
         />
       )}

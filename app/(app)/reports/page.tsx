@@ -1,7 +1,9 @@
 import { fetchReportData } from "@/lib/reports/fetch-report-data"
 import ReportsView from "@/components/ReportsView"
+import { requireAdmin } from "@/lib/require-role"
 
 export default async function ReportsPage() {
+  await requireAdmin()
   const data = await fetchReportData()
 
   return (

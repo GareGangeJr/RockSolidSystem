@@ -4,30 +4,24 @@ import MatchToJobForm from "@/components/MatchToJobForm"
 import DeleteMatchForm from "@/components/DeleteMatchForm"
 import CompileDownloadButton from "@/components/CompileDownloadButton"
 import { BackButton } from "@/components/BackButton"
+import { MatchScoreBadges } from "@/components/job-orders/MatchScoreBadges"
+import {
+  type ApplicantForMatch,
+  type JobOrderForMatch,
+  isSuggestedMatch,
+  scoreApplicantMatch,
+  sortByMatchScore,
+} from "@/lib/job-order-match"
 
-type JobOrder = {
-  id: number
-  job_title: string | null
-  company: string | null
-  years_exp_required: number | null
-  skills_required: string | null
-}
+type ScoredApplicant = ApplicantForMatch & { match: ReturnType<typeof scoreApplicantMatch> }
 
-type Applicant = {
-  id: number
-  first_name: string | null
-  last_name: string | null
-  position_applied: string | null
-  years_of_exp: number | null
-  skills: string | null
-}
-
-function matches(applicant: Applicant, job: JobOrder): boolean {
-  if ((applicant.years_of_exp ?? 0) < (job.years_exp_required ?? 0)) return false
-  const jobSkills = (job.skills_required || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean)
-  const appSkills = (applicant.skills || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean)
-  if (jobSkills.length > 0 && !jobSkills.some((s) => appSkills.includes(s))) return false
-  return true
+function buildScoredList(applicants: ApplicantForMatch[], job: JobOrderForMatch): ScoredApplicant[] {
+  return sortByMatchScore(
+    applicants.map((applicant) => ({
+      ...applicant,
+      match: scoreApplicantMatch(applicant, job),
+    }))
+  )
 }
 
 export default async function Page({
@@ -42,27 +36,29 @@ export default async function Page({
   const { error, success, message } = await searchParams
   const numericId = Number(id)
 
-  if (Number.isNaN(numericId)) return (
-    <div className="p-6">
-      <p className="text-red-500">Invalid ID</p>
-      <BackButton href="/job-orders" />
-    </div>
-  )
+  if (Number.isNaN(numericId))
+    return (
+      <div className="p-6">
+        <p className="text-red-500">Invalid ID</p>
+        <BackButton href="/job-orders" />
+      </div>
+    )
 
   const { data: job, error: jobError } = await supabase
     .from("job_orders")
-    .select("id, job_title, company, years_exp_required, skills_required")
+    .select("id, job_title, company, country, gender, years_exp_required, skills_required, no_workers")
     .eq("id", numericId)
     .maybeSingle()
 
-  if (jobError || !job) return (
-    <div className="p-6">
-      <p className="text-red-500">Job order not found</p>
-      <BackButton href="/job-orders" />
-    </div>
-  )
+  if (jobError || !job)
+    return (
+      <div className="p-6">
+        <p className="text-red-500">Job order not found</p>
+        <BackButton href="/job-orders" />
+      </div>
+    )
 
-  const jobOrder = job as JobOrder
+  const jobOrder = job as JobOrderForMatch & { id: number; company: string | null; no_workers: number | null }
 
   const { data: placements } = await supabase
     .from("placements")
@@ -73,21 +69,35 @@ export default async function Page({
 
   const { data: applicants } = await supabase
     .from("applicants")
-    .select("id, first_name, last_name, position_applied, years_of_exp, skills")
+    .select(
+      "id, first_name, last_name, position_applied, country_applying_for, gender, years_of_exp, skills"
+    )
 
-  const all = (applicants || []) as Applicant[]
+  const all = (applicants || []) as ApplicantForMatch[]
+  const unmatched = all.filter((applicant) => !matchedIds.includes(applicant.id))
+  const scoredUnmatched = buildScoredList(unmatched, jobOrder)
+  const suggested = scoredUnmatched.filter((applicant) => isSuggestedMatch(applicant.match))
+  const others = scoredUnmatched.filter((applicant) => !isSuggestedMatch(applicant.match))
   const matched = all.filter((applicant) => matchedIds.includes(applicant.id))
-  const suggested = all.filter((applicant) => matches(applicant, jobOrder) && !matchedIds.includes(applicant.id))
-  const others = all.filter((applicant) => !matches(applicant, jobOrder) && !matchedIds.includes(applicant.id))
+
+  const slotsNeeded = jobOrder.no_workers ?? 0
+  const slotsFilled = matched.length
 
   return (
-    <div className="p-6 max-w-3xl">
-      <div className="flex justify-between items-center mb-4">
+    <div className="max-w-4xl p-6">
+      <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Match Applicants - JO-{jobOrder.id}</h1>
         <BackButton href="/job-orders" />
       </div>
 
-      <p className="text-gray-600 mb-6">{jobOrder.job_title} at {jobOrder.company}</p>
+      <p className="mb-2 text-gray-600">
+        {jobOrder.job_title} at {jobOrder.company}
+      </p>
+      {slotsNeeded > 0 && (
+        <p className="mb-6 text-sm font-medium text-gray-800">
+          Slots filled: {slotsFilled}/{slotsNeeded}
+        </p>
+      )}
 
       {success === "matched" && (
         <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">
@@ -95,28 +105,28 @@ export default async function Page({
         </div>
       )}
       {success === "unmatched" && (
-        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">
-          Match removed.
-        </div>
+        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">Match removed.</div>
       )}
       {error === "match" && message && (
         <div className="mb-4 rounded-md bg-red-100 px-4 py-3 text-red-800">{decodeURIComponent(message)}</div>
       )}
 
       <div className="mb-6">
-        <div className="flex items-center justify-between gap-4 mb-2">
+        <div className="mb-2 flex items-center justify-between gap-4">
           <h2 className="text-lg font-semibold">Matched Applicants</h2>
           {matched.length > 0 && <CompileDownloadButton jobOrderId={jobOrder.id} />}
         </div>
         {matched.length ? (
-          <ul className="bg-white border rounded-lg divide-y">
+          <ul className="divide-y rounded-lg border bg-white">
             {matched.map((applicant) => (
-              <li key={applicant.id} className="p-3 flex items-center justify-between">
+              <li key={applicant.id} className="flex items-center justify-between p-3">
                 <span>
                   <Link href={`/applicants/${applicant.id}`} className="text-blue-600 hover:underline">
                     {applicant.first_name} {applicant.last_name}
                   </Link>
-                  <span className="text-gray-600 ml-2">— JO-{jobOrder.id} • {jobOrder.job_title}</span>
+                  <span className="ml-2 text-gray-600">
+                    — {applicant.position_applied ?? "No position"}
+                  </span>
                 </span>
                 <DeleteMatchForm applicantId={applicant.id} jobOrderId={jobOrder.id} />
               </li>
@@ -128,19 +138,21 @@ export default async function Page({
       </div>
 
       <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-2">Suggested Applicants</h2>
+        <h2 className="mb-2 text-lg font-semibold">Suggested Applicants</h2>
         {suggested.length ? (
-          <ul className="bg-white border rounded-lg divide-y">
+          <ul className="divide-y rounded-lg border bg-white">
             {suggested.map((applicant) => (
-              <li key={applicant.id} className="p-3 flex items-center justify-between">
-                <span>
-                  <Link href={`/applicants/${applicant.id}`} className="text-blue-600 hover:underline">
+              <li key={applicant.id} className="flex items-start justify-between gap-4 p-3">
+                <div className="min-w-0 flex-1">
+                  <Link href={`/applicants/${applicant.id}`} className="font-medium text-blue-600 hover:underline">
                     {applicant.first_name} {applicant.last_name}
                   </Link>
-                  <span className="text-gray-600 ml-2">
-                    — {applicant.position_applied} ({applicant.years_of_exp ?? 0} yrs) {applicant.skills && `• ${applicant.skills}`}
-                  </span>
-                </span>
+                  <p className="text-sm text-gray-600">
+                    {applicant.position_applied ?? "No position"} • {applicant.years_of_exp ?? 0} yrs
+                    {applicant.country_applying_for ? ` • ${applicant.country_applying_for}` : ""}
+                  </p>
+                  <MatchScoreBadges match={applicant.match} />
+                </div>
                 <MatchToJobForm applicantId={applicant.id} jobOrderId={jobOrder.id} />
               </li>
             ))}
@@ -151,19 +163,21 @@ export default async function Page({
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold mb-2">All Other Applicants</h2>
+        <h2 className="mb-2 text-lg font-semibold">Other Applicants</h2>
         {others.length ? (
-          <ul className="bg-white border rounded-lg divide-y">
+          <ul className="divide-y rounded-lg border bg-white">
             {others.map((applicant) => (
-              <li key={applicant.id} className="p-3 flex items-center justify-between">
-                <span>
-                  <Link href={`/applicants/${applicant.id}`} className="text-blue-600 hover:underline">
+              <li key={applicant.id} className="flex items-start justify-between gap-4 p-3">
+                <div className="min-w-0 flex-1">
+                  <Link href={`/applicants/${applicant.id}`} className="font-medium text-blue-600 hover:underline">
                     {applicant.first_name} {applicant.last_name}
                   </Link>
-                  <span className="text-gray-600 ml-2">
-                    — {applicant.position_applied} ({applicant.years_of_exp ?? 0} yrs) {applicant.skills && `• ${applicant.skills}`}
-                  </span>
-                </span>
+                  <p className="text-sm text-gray-600">
+                    {applicant.position_applied ?? "No position"} • {applicant.years_of_exp ?? 0} yrs
+                    {applicant.country_applying_for ? ` • ${applicant.country_applying_for}` : ""}
+                  </p>
+                  <MatchScoreBadges match={applicant.match} />
+                </div>
                 <MatchToJobForm applicantId={applicant.id} jobOrderId={jobOrder.id} />
               </li>
             ))}

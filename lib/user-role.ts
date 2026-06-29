@@ -2,15 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js"
 
 export type AccessRole = "admin" | "staff"
 
-export const STAFF_NAV_PATHS = [
-  "/",
-  "/applicants",
-  "/job-orders",
-  "/monitoring",
-  "/attendance",
-] as const
-
-const ADMIN_ONLY_PREFIXES = ["/employees", "/reports", "/api/reports"]
+const ADMIN_ONLY_PREFIXES = ["/employees", "/reports", "/api/reports", "/api/job-orders"]
 
 export async function getAccessRole(
   supabase: SupabaseClient,
@@ -27,21 +19,8 @@ export async function getAccessRole(
   return employee ? "staff" : "admin"
 }
 
-export function isStaffPathAllowed(path: string): boolean {
-  if (path === "/") return true
-  return STAFF_NAV_PATHS.some(
-    (allowed) => allowed !== "/" && (path === allowed || path.startsWith(`${allowed}/`))
-  )
-}
-
 export function isAdminOnlyPath(path: string): boolean {
   return ADMIN_ONLY_PREFIXES.some(
     (prefix) => path === prefix || path.startsWith(`${prefix}/`)
   )
-}
-
-export function canAccessPath(role: AccessRole, path: string): boolean {
-  if (role === "admin") return true
-  if (isAdminOnlyPath(path)) return false
-  return isStaffPathAllowed(path)
 }

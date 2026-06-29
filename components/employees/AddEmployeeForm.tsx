@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { useRef, useState } from "react"
 import { addEmployee } from "@/app/(app)/employees/actions"
 import {
@@ -310,12 +309,6 @@ export function AddEmployeeForm() {
             )}
           </div>
           <div className="flex gap-3">
-            <Link
-              href="/employees"
-              className="rounded-md border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Cancel
-            </Link>
             {step < STEPS.length - 1 ? (
               <button
                 type="button"

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import AdmZip from "adm-zip"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { applicantToPdf } from "@/lib/generate-applicant-pdf"
+import { getAccessRole } from "@/lib/user-role"
 
 const BUCKET = "applicant files"
 
@@ -17,10 +18,22 @@ function safeName(value: string) {
 }
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const supabase = await createSupabaseServer()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  const role = await getAccessRole(supabase, user.id)
+  if (role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  }
+
   const jobOrderId = Number((await params).id)
   if (Number.isNaN(jobOrderId)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 })
-
-  const supabase = await createSupabaseServer()
 
   const { data: job } = await supabase
     .from("job_orders")

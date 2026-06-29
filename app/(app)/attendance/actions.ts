@@ -119,7 +119,7 @@ export async function logAttendance(logType: AttendanceLogType, latitude: number
   })
 
   if (insertError) {
-    return { error: insertError.message.includes("attendance_logs") ? "Attendance table not set up. Run supabase/attendance_logs.sql in Supabase first." : insertError.message }
+    return { error: insertError.message.includes("attendance_logs") ? "Attendance table not set up. Run supabase/migrations/20250627_attendance_logs.sql in Supabase first." : insertError.message }
   }
 
   revalidatePath("/attendance")

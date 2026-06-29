@@ -1,11 +1,16 @@
 import { createSupabaseServer } from "@/lib/supabase/server"
+import { getAccessRole } from "@/lib/user-role"
 import AttendanceClock from "@/components/AttendanceClock"
 import AttendanceList, { type AttendanceListRow } from "@/components/AttendanceList"
 import { getMyAttendanceToday } from "./actions"
 
 export default async function AttendancePage() {
   const supabase = await createSupabaseServer()
-  const myAttendance = await getMyAttendanceToday()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  const role = await getAccessRole(supabase, user?.id)
+  const myAttendance = role === "staff" ? await getMyAttendanceToday() : null
 
   const { data: logs, error } = await supabase
     .from("attendance_logs")
@@ -44,24 +49,29 @@ export default async function AttendancePage() {
         <h1 className="text-2xl font-bold text-gray-900">Attendance</h1>
       </div>
 
-      {myAttendance.error ? (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          {myAttendance.error}
-        </div>
-      ) : myAttendance.employee ? (
-        <AttendanceClock
-          canTimeIn={myAttendance.canTimeIn ?? false}
-          canTimeOut={myAttendance.canTimeOut ?? false}
-          timeIn={myAttendance.timeIn}
-          timeOut={myAttendance.timeOut}
-        />
-      ) : null}
+      {role === "staff" && myAttendance && (
+        <>
+          {myAttendance.error ? (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              {myAttendance.error}
+            </div>
+          ) : myAttendance.employee ? (
+            <AttendanceClock
+              canTimeIn={myAttendance.canTimeIn ?? false}
+              canTimeOut={myAttendance.canTimeOut ?? false}
+              timeIn={myAttendance.timeIn}
+              timeOut={myAttendance.timeOut}
+            />
+          ) : null}
+        </>
+      )}
 
       <div>
         <h2 className="mb-4 text-lg font-semibold text-gray-900">Attendance Logs</h2>
         {error ? (
           <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-            Could not load attendance logs. Run <code className="font-mono">supabase/attendance_logs.sql</code> in
+            Could not load attendance logs. Run{" "}
+            <code className="font-mono">supabase/migrations/20250627_attendance_logs.sql</code> in
             Supabase SQL Editor first.
           </div>
         ) : (

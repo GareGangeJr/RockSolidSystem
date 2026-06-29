@@ -13,7 +13,7 @@ export default function Topbar() {
 
   return (
     <header className="h-14 border-b border-gray-900 bg-white flex items-center justify-between px-4">
-      <div className="text-sm text-grey-600">
+      <div className="text-sm text-gray-600">
         Rock Solid Manpower Information System
       </div>
 

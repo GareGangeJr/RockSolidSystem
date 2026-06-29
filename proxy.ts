@@ -1,8 +1,27 @@
 import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 import { createServerClient } from "@supabase/ssr"
-import { canAccessPath, getAccessRole } from "@/lib/user-role"
+import { getAccessRole, isAdminOnlyPath } from "@/lib/user-role"
 
-export async function proxy(request: any) {
+export async function proxy(request: NextRequest) {
+  const path = request.nextUrl.pathname
+
+  if (/\.(.*)$/.test(path)) {
+    return NextResponse.next()
+  }
+
+  if (path.startsWith("/apply")) {
+    return NextResponse.next()
+  }
+
+  if (
+    request.headers.has("rsc") ||
+    request.headers.has("next-router-prefetch") ||
+    request.headers.has("next-action")
+  ) {
+    return NextResponse.next()
+  }
+
   const response = NextResponse.next()
 
   const supabase = createServerClient(
@@ -13,7 +32,7 @@ export async function proxy(request: any) {
         getAll() {
           return request.cookies.getAll()
         },
-        setAll(cookiesToSet: any[]) {
+        setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set(name, value, options)
           })
@@ -22,32 +41,23 @@ export async function proxy(request: any) {
     }
   )
 
-  const { data } = await supabase.auth.getUser()
-  const user = data.user
-
-  const path = request.nextUrl.pathname
-  const isServerAction = request.headers.has("next-action")
-  const isRscRequest = request.headers.has("rsc")
-
-  const isPublicFile = /\.(.*)$/.test(path)
-  if (isPublicFile) {
-    return response
-  }
-
   const isLoginPage = path.startsWith("/login")
-  const isApplyPortal = path.startsWith("/apply")
 
-  if (!user && !isLoginPage && !isApplyPortal) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user && !isLoginPage) {
     return NextResponse.redirect(new URL("/login", request.url))
   }
 
-  if (user && isLoginPage && !isServerAction && !isRscRequest) {
+  if (user && isLoginPage) {
     return NextResponse.redirect(new URL("/", request.url))
   }
 
-  if (user && !isApplyPortal && !isLoginPage) {
+  if (user && isAdminOnlyPath(path)) {
     const role = await getAccessRole(supabase, user.id)
-    if (role === "staff" && !canAccessPath(role, path)) {
+    if (role === "staff") {
       return NextResponse.redirect(new URL("/", request.url))
     }
   }
