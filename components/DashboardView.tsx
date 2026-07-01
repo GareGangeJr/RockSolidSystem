@@ -16,12 +16,13 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import { Users, Briefcase, Building2, UserCheck, FileText, Plane } from "lucide-react"
+import { Users, Briefcase, UserCheck, FileText, Plane, UserX } from "lucide-react"
+import { formatApplicantRef } from "@/lib/format-applicant-ref"
 
 export type StatCard = {
   title: string
   value: number
-  icon: "applicants" | "deployed" | "jobOrders" | "employees" | "docs" | "booking"
+  icon: "applicants" | "deployed" | "jobOrders" | "employees" | "docs" | "deported"
   color: string
 }
 
@@ -38,6 +39,7 @@ export type RecentApplicant = {
 
 export type RecentDeployment = {
   id: number
+  applicantId: number
   applicantName: string
   country: string
   status: string
@@ -62,7 +64,7 @@ const iconMap = {
   jobOrders: Briefcase,
   employees: UserCheck,
   docs: FileText,
-  booking: Building2,
+  deported: UserX,
 }
 
 export default function DashboardView({
@@ -168,6 +170,7 @@ export default function DashboardView({
             <table className="w-full text-sm">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="p-3 text-left">Applicant ID</th>
                   <th className="p-3 text-left">Name</th>
                   <th className="p-3 text-left">Position</th>
                   <th className="p-3 text-left">Status</th>
@@ -177,6 +180,7 @@ export default function DashboardView({
               <tbody>
                 {recentApplicants.map((row) => (
                   <tr key={row.id} className="border-t">
+                    <td className="p-3">{formatApplicantRef(row.id)}</td>
                     <td className="p-3">
                       <Link href={`/applicants/${row.id}`} className="text-blue-600 hover:underline">
                         {row.name}
@@ -189,7 +193,7 @@ export default function DashboardView({
                 ))}
                 {recentApplicants.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="p-6 text-center text-gray-500">
+                    <td colSpan={5} className="p-6 text-center text-gray-500">
                       No applicants yet.
                     </td>
                   </tr>
@@ -216,7 +220,12 @@ export default function DashboardView({
               <tbody>
                 {recentDeployments.map((row) => (
                   <tr key={row.id} className="border-t">
-                    <td className="p-3">{row.applicantName}</td>
+                    <td className="p-3">
+                      <div>{formatApplicantRef(row.applicantId)}</div>
+                      <Link href={`/applicants/${row.applicantId}`} className="text-sm text-blue-600 hover:underline">
+                        {row.applicantName}
+                      </Link>
+                    </td>
                     <td className="p-3">{row.country}</td>
                     <td className="p-3">{row.status}</td>
                     <td className="p-3">{row.date}</td>

@@ -67,7 +67,6 @@ export async function addApplicant(formData: FormData) {
       redirect(`/applicants/${inserted.id}/edit?error=status&message=${encodeURIComponent(statusResult.error.message)}`)
     }
     revalidatePath("/monitoring")
-    revalidatePath("/employees")
   }
 
   revalidatePath("/applicants")
@@ -90,7 +89,6 @@ export async function updateApplicantStatus(applicantId: number, newStatus: stri
   if (!result.error) {
     revalidatePath("/applicants")
     revalidatePath("/monitoring")
-    revalidatePath("/employees")
   }
   return result
 }
@@ -110,7 +108,6 @@ export async function updateApplicant(formData: FormData) {
       redirect(`/applicants/${id}/edit?error=status&message=${encodeURIComponent(statusResult.error.message)}`)
     }
     revalidatePath("/monitoring")
-    revalidatePath("/employees")
   }
 
   let positionApplied: string

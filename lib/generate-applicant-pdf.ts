@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib"
+import { formatApplicantRef } from "@/lib/format-applicant-ref"
 
 const COMPANY = "Rock Solid Manpower Network & Consultancy Inc."
 
@@ -205,7 +206,7 @@ export async function applicantToPdf(applicant: Record<string, unknown>): Promis
     .filter((part) => part != null && String(part).trim() !== "")
     .map(String)
     .join(" ")
-  const ref = `APP-${new Date().getFullYear()}-${formatValue(applicant.id)}`
+  const ref = formatApplicantRef(Number(applicant.id))
 
   let ctx: PdfContext = {
     pdfDoc,

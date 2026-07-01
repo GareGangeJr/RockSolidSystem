@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Pencil, Eye, FolderOpen } from "lucide-react"
 import StatusDropdown from "./StatusDropdown"
 import { STATUS_OPTIONS, APPLICANT_TYPE_OPTIONS } from "@/lib/status-options"
+import { formatApplicantRef } from "@/lib/format-applicant-ref"
 
 export type Applicant = {
   id: number
@@ -43,7 +44,7 @@ export default function ApplicantsListWithFilters({ applicants }: Props) {
     const searchQuery = search.trim().toLowerCase()
     if (searchQuery) {
       list = list.filter((applicant) => {
-        const idStr = `app-${new Date().getFullYear()}-${applicant.id}`.toLowerCase()
+        const idStr = formatApplicantRef(applicant.id).toLowerCase()
         const name = [applicant.first_name, applicant.middle_name, applicant.last_name].filter(Boolean).join(" ").toLowerCase()
         const pos = (applicant.position_applied ?? "").toLowerCase()
         const contact = (applicant.contact_number ?? "").toLowerCase()
@@ -121,7 +122,7 @@ export default function ApplicantsListWithFilters({ applicants }: Props) {
             {filtered.map((applicant) => (
               <tr key={applicant.id} className="border-t border-gray-100">
                 <td className="p-3">
-                  {`APP-${new Date().getFullYear()}-${applicant.id}`}
+                  {formatApplicantRef(applicant.id)}
                 </td>
                 <td className="p-3">
                   {[applicant.first_name, applicant.middle_name, applicant.last_name].filter(Boolean).join(" ")}

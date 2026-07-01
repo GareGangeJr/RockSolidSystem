@@ -12,10 +12,14 @@ import {
   scoreApplicantMatch,
   sortByMatchScore,
 } from "@/lib/job-order-match"
+import { isEligibleForJobMatching } from "@/lib/status-options"
+import { formatApplicantRef } from "@/lib/format-applicant-ref"
 
-type ScoredApplicant = ApplicantForMatch & { match: ReturnType<typeof scoreApplicantMatch> }
+type ApplicantRow = ApplicantForMatch & { status: string | null }
 
-function buildScoredList(applicants: ApplicantForMatch[], job: JobOrderForMatch): ScoredApplicant[] {
+type ScoredApplicant = ApplicantRow & { match: ReturnType<typeof scoreApplicantMatch> }
+
+function buildScoredList(applicants: ApplicantRow[], job: JobOrderForMatch): ScoredApplicant[] {
   return sortByMatchScore(
     applicants.map((applicant) => ({
       ...applicant,
@@ -70,15 +74,18 @@ export default async function Page({
   const { data: applicants } = await supabase
     .from("applicants")
     .select(
-      "id, first_name, last_name, position_applied, country_applying_for, gender, years_of_exp, skills"
+      "id, first_name, last_name, position_applied, country_applying_for, gender, years_of_exp, skills, status"
     )
 
-  const all = (applicants || []) as ApplicantForMatch[]
-  const unmatched = all.filter((applicant) => !matchedIds.includes(applicant.id))
-  const scoredUnmatched = buildScoredList(unmatched, jobOrder)
+  const all = (applicants || []) as ApplicantRow[]
+  const matched = all.filter((applicant) => matchedIds.includes(applicant.id))
+  const available = all.filter(
+    (applicant) => !matchedIds.includes(applicant.id) && isEligibleForJobMatching(applicant.status)
+  )
+
+  const scoredUnmatched = buildScoredList(available, jobOrder)
   const suggested = scoredUnmatched.filter((applicant) => isSuggestedMatch(applicant.match))
   const others = scoredUnmatched.filter((applicant) => !isSuggestedMatch(applicant.match))
-  const matched = all.filter((applicant) => matchedIds.includes(applicant.id))
 
   const slotsNeeded = jobOrder.no_workers ?? 0
   const slotsFilled = matched.length
@@ -121,6 +128,7 @@ export default async function Page({
             {matched.map((applicant) => (
               <li key={applicant.id} className="flex items-center justify-between p-3">
                 <span>
+                  <span className="text-gray-500">{formatApplicantRef(applicant.id)} · </span>
                   <Link href={`/applicants/${applicant.id}`} className="text-blue-600 hover:underline">
                     {applicant.first_name} {applicant.last_name}
                   </Link>
@@ -144,9 +152,12 @@ export default async function Page({
             {suggested.map((applicant) => (
               <li key={applicant.id} className="flex items-start justify-between gap-4 p-3">
                 <div className="min-w-0 flex-1">
-                  <Link href={`/applicants/${applicant.id}`} className="font-medium text-blue-600 hover:underline">
-                    {applicant.first_name} {applicant.last_name}
-                  </Link>
+                  <div>
+                    <span className="text-gray-500">{formatApplicantRef(applicant.id)} · </span>
+                    <Link href={`/applicants/${applicant.id}`} className="font-medium text-blue-600 hover:underline">
+                      {applicant.first_name} {applicant.last_name}
+                    </Link>
+                  </div>
                   <p className="text-sm text-gray-600">
                     {applicant.position_applied ?? "No position"} • {applicant.years_of_exp ?? 0} yrs
                     {applicant.country_applying_for ? ` • ${applicant.country_applying_for}` : ""}
@@ -169,9 +180,12 @@ export default async function Page({
             {others.map((applicant) => (
               <li key={applicant.id} className="flex items-start justify-between gap-4 p-3">
                 <div className="min-w-0 flex-1">
-                  <Link href={`/applicants/${applicant.id}`} className="font-medium text-blue-600 hover:underline">
-                    {applicant.first_name} {applicant.last_name}
-                  </Link>
+                  <div>
+                    <span className="text-gray-500">{formatApplicantRef(applicant.id)} · </span>
+                    <Link href={`/applicants/${applicant.id}`} className="font-medium text-blue-600 hover:underline">
+                      {applicant.first_name} {applicant.last_name}
+                    </Link>
+                  </div>
                   <p className="text-sm text-gray-600">
                     {applicant.position_applied ?? "No position"} • {applicant.years_of_exp ?? 0} yrs
                     {applicant.country_applying_for ? ` • ${applicant.country_applying_for}` : ""}

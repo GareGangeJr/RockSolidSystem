@@ -93,6 +93,17 @@ export type JobOrderReportRow = {
   yearsExpRequired: number | null
   skillsRequired: string | null
   salary: string | null
+  commercialRegistration: string | null
+  companyAddress: string | null
+  companyContact: string | null
+  jobOrderDate: string | null
+  visaNumber: string | null
+  visaDate: string | null
+  visaCategory: string | null
+  contractPeriod: string | null
+  workSite: string | null
+  workingHours: string | null
+  benefitsAndTerms: string | null
   createdAt: string | null
   matchedCount: number
   slotsRemaining: number | null

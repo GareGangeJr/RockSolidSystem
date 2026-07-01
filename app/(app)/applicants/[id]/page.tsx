@@ -1,5 +1,6 @@
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { BackButton } from "@/components/BackButton"
+import { formatApplicantRef } from "@/lib/format-applicant-ref"
 
 const formatValue = (x: unknown) => (x != null && x !== "" ? String(x) : "--")
 const formatDate = (x: unknown) => (x != null && String(x).length >= 10 ? String(x).slice(0, 10) : "--")
@@ -53,7 +54,10 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-900">View Applicant</h1>
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">View Applicant</h1>
+            <p className="mt-1 text-sm text-gray-500">{formatApplicantRef(id)}</p>
+          </div>
           <BackButton href="/applicants" />
         </div>
 

@@ -22,7 +22,18 @@ export const STATUS_OPTIONS = [
 
 ] as const
 
+export const MATCH_EXCLUDED_STATUSES = new Set<string>([
+  "Deployed",
+  "Deployed(With Concerns)",
+  "Finish Contract",
+  "Cancelled",
+  "Deported",
+])
 
+export function isEligibleForJobMatching(status: string | null | undefined) {
+  if (!status) return true
+  return !MATCH_EXCLUDED_STATUSES.has(status)
+}
 
 export const APPLICANT_TYPE_OPTIONS = ["Domestic Helper", "Skilled Worker", "Online Application"] as const
 

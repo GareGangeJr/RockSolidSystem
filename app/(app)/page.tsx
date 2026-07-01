@@ -71,7 +71,7 @@ export default async function Home() {
     { title: "Open Job Orders", value: openJobOrders ?? 0, icon: "jobOrders", color: "bg-orange-600" },
     { title: "Finish Contracts", value: finishContracts, icon: "employees", color: "bg-purple-600" },
     { title: "Docs on Process", value: docsOnProcess, icon: "docs", color: "bg-cyan-600" },
-    { title: "Deported", value: deported, icon: "booking", color: "bg-amber-600" },
+    { title: "Deported", value: deported, icon: "deported", color: "bg-amber-600" },
   ]
 
   const statusCounts = countByField(applicantRows, "status", STATUS_OPTIONS)
@@ -110,6 +110,7 @@ export default async function Home() {
     const jobOrder = jobOrderMap.get(m.job_order_id)
     return {
       id: m.id,
+      applicantId: m.applicant_id,
       applicantName: [applicant?.first_name, applicant?.last_name].filter(Boolean).join(" ") || "--",
       country: jobOrder?.country || "--",
       status: m.deployment_status || "--",

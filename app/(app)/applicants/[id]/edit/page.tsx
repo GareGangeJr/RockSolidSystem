@@ -1,6 +1,7 @@
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { EditApplicantForm } from "@/components/applicants/EditApplicantForm"
 import { BackButton } from "@/components/BackButton"
+import { formatApplicantRef } from "@/lib/format-applicant-ref"
 
 export default async function EditPage({
   params,
@@ -38,7 +39,10 @@ export default async function EditPage({
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-900">Edit Applicant</h1>
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">Edit Applicant</h1>
+            <p className="mt-1 text-sm text-gray-500">{formatApplicantRef(numericId)}</p>
+          </div>
           <BackButton href="/applicants" />
         </div>
 

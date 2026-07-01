@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react"
 import Link from "next/link"
 import { Eye, Pencil } from "lucide-react"
+import { formatApplicantRef } from "@/lib/format-applicant-ref"
 
 export type MonitoringRecord = {
   id: number
@@ -41,7 +42,7 @@ export default function MonitoringListWithFilters({ records }: Props) {
     if (searchQuery) {
       list = list.filter((record) => {
         const applicantName = `${record.applicant?.first_name || ""} ${record.applicant?.last_name || ""}`.toLowerCase()
-        const applicantId = record.applicant?.id != null ? `app-${new Date().getFullYear()}-${record.applicant.id}` : ""
+        const applicantId = formatApplicantRef(record.applicant?.id).toLowerCase()
         const jobOrderId = `jo-${record.jobOrder?.id || ""}`.toLowerCase()
         const country = (record.jobOrder?.country ?? "").toLowerCase()
         const jobTitle = (record.jobOrder?.job_title ?? "").toLowerCase()
@@ -74,8 +75,6 @@ export default function MonitoringListWithFilters({ records }: Props) {
 
 
   const formatDate = (date: string | null) => date ? new Date(date).toLocaleDateString() : "--"
-  const formatApplicantId = (id: number | undefined) =>
-    id != null ? `APP-${new Date().getFullYear()}-${id}` : "--"
 
   return (
     <div className="space-y-4">
@@ -135,7 +134,7 @@ export default function MonitoringListWithFilters({ records }: Props) {
               {filtered.map((record) => (
                 <tr key={record.id} className="border-t">
                   <td className="p-3">
-                    <div>{formatApplicantId(record.applicant?.id)}</div>
+                    <div>{formatApplicantRef(record.applicant?.id)}</div>
                     <div className="text-xs text-gray-500">{record.applicant?.first_name} {record.applicant?.last_name}</div>
                   </td>
                   <td className="p-3">

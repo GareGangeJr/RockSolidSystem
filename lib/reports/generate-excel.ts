@@ -203,6 +203,17 @@ const JOB_ORDER_COLUMNS: ColumnDef<JobOrderReportRow>[] = [
   { header: "Years Exp Required", key: "yearsExpRequired", width: 16 },
   { header: "Skills Required", key: "skillsRequired", width: 28 },
   { header: "Salary", key: "salary", width: 16 },
+  { header: "Commercial Registration", key: "commercialRegistration", width: 22 },
+  { header: "Company Address", key: "companyAddress", width: 28 },
+  { header: "Company Contact", key: "companyContact", width: 18 },
+  { header: "Job Order Date", key: "jobOrderDate", width: 14 },
+  { header: "Visa Number", key: "visaNumber", width: 16 },
+  { header: "Visa Date", key: "visaDate", width: 14 },
+  { header: "Visa Category", key: "visaCategory", width: 16 },
+  { header: "Contract Period", key: "contractPeriod", width: 16 },
+  { header: "Work Site", key: "workSite", width: 20 },
+  { header: "Working Hours", key: "workingHours", width: 16 },
+  { header: "Benefits and Terms", key: "benefitsAndTerms", width: 40 },
   { header: "Date Created", key: "createdAt", width: 14 },
 ]
 

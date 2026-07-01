@@ -1,8 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
+import { MATCH_EXCLUDED_STATUSES } from "@/lib/status-options"
 
 export const DEPLOYED_STATUSES = new Set(["Deployed", "Deployed(With Concerns)"])
-
-const EARLY_APPLICANT_STATUSES = new Set(["New Applicant"])
 
 export type WorkflowResult = { error: { message: string } | null }
 
@@ -43,7 +42,9 @@ export async function promoteApplicantToSelected(
     .eq("id", applicantId)
     .maybeSingle()
 
-  if (!applicant?.status || !EARLY_APPLICANT_STATUSES.has(applicant.status)) return
+  const status = applicant?.status
+  if (status === "Selected") return
+  if (status && MATCH_EXCLUDED_STATUSES.has(status)) return
 
   await supabase.from("applicants").update({ status: "Selected" }).eq("id", applicantId)
 }
@@ -160,80 +161,19 @@ export async function removePlacement(
   return { error: null }
 }
 
-async function nextEmployeeNumber(supabase: SupabaseClient): Promise<string> {
-  const year = new Date().getFullYear()
-  const { data: existingEmployees } = await supabase
-    .from("employees")
-    .select("employee_number")
-    .like("employee_number", `EMP-${year}-%`)
-    .order("employee_number", { ascending: false })
-    .limit(1)
-
-  let nextNumber = 1
-  if (existingEmployees && existingEmployees.length > 0) {
-    const lastNumber = existingEmployees[0].employee_number
-    const match = lastNumber?.match(/EMP-\d{4}-(\d+)/)
-    if (match) nextNumber = parseInt(match[1], 10) + 1
-  }
-
-  return `EMP-${year}-${String(nextNumber).padStart(3, "0")}`
-}
-
-export function applicantEmployeeMarker(applicantId: number): string {
-  return `[applicant:${applicantId}]`
-}
-
-export async function ensureEmployeeFromApplicant(
-  supabase: SupabaseClient,
-  applicantId: number,
-  jobOrderId: number
-): Promise<void> {
-  const marker = applicantEmployeeMarker(applicantId)
-
-  const { data: existing } = await supabase
-    .from("employees")
-    .select("id")
-    .ilike("notes", `%${marker}%`)
-    .maybeSingle()
-
-  if (existing) return
-
-  const { data: applicant } = await supabase.from("applicants").select("*").eq("id", applicantId).maybeSingle()
-  if (!applicant) return
-
+async function monitoringDefaultsFromJobOrder(supabase: SupabaseClient, jobOrderId: number) {
   const { data: job } = await supabase
     .from("job_orders")
-    .select("country, company, job_title")
+    .select("company, salary, contract_period")
     .eq("id", jobOrderId)
     .maybeSingle()
 
-  const employeeNumber = await nextEmployeeNumber(supabase)
-  const today = new Date().toISOString().slice(0, 10)
+  if (!job) return {}
 
-  const { error } = await supabase.from("employees").insert({
-    employee_number: employeeNumber,
-    position: applicant.position_applied || job?.job_title || "Domestic Helper",
-    department: job?.country ? `Deployment - ${job.country}` : "Overseas Deployment",
-    date_hired: today,
-    employment_status: "Active",
-    employment_type: "Contract",
-    last_name: applicant.last_name,
-    first_name: applicant.first_name,
-    middle_name: applicant.middle_name,
-    date_of_birth: applicant.date_of_birth,
-    gender: applicant.gender || "Female",
-    civil_status: applicant.civil_status || "Single",
-    contact_number: applicant.contact_number || applicant.active_cellphone,
-    email: applicant.email,
-    current_address: applicant.current_address || applicant.provincial_address,
-    emergency_contact_name: applicant.emergency_contact_name,
-    emergency_contact_relationship: applicant.emergency_contact_relationship,
-    emergency_contact_number: applicant.emergency_contact_number,
-    notes: `${marker} Auto-created when applicant was deployed.${job?.company ? ` Job: ${job.company}.` : ""}`,
-  })
-
-  if (error) {
-    console.error("Error creating employee from applicant:", error)
+  return {
+    employer_name: job.company || null,
+    salary_amount: job.salary || null,
+    contract_duration: job.contract_period || null,
   }
 }
 
@@ -287,11 +227,13 @@ export async function applyApplicantStatusChange(
       .maybeSingle()
 
     if (!existing) {
+      const jobDefaults = await monitoringDefaultsFromJobOrder(supabase, jobOrderId)
       const { error: insertError } = await supabase.from("monitoring").insert({
         applicant_id: applicantId,
         job_order_id: jobOrderId,
         deployment_status: newStatus,
         deployment_date: new Date().toISOString().split("T")[0],
+        ...jobDefaults,
       })
 
       if (insertError) {
@@ -312,8 +254,6 @@ export async function applyApplicantStatusChange(
         return { error: { message: `Error updating monitoring record: ${updateError.message}` } }
       }
     }
-
-    await ensureEmployeeFromApplicant(supabase, applicantId, jobOrderId)
   } else if (wasDeployed && !isDeploying) {
     const { error: monitoringError } = await supabase
       .from("monitoring")

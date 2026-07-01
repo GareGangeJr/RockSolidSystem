@@ -1,3 +1,4 @@
+import { formatApplicantRef } from "@/lib/format-applicant-ref"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import type {
   ApplicantReportRow,
@@ -18,10 +19,6 @@ function cell(value: unknown) {
 function dateOnly(value: string | null | undefined) {
   if (!value) return null
   return value.slice(0, 10)
-}
-
-function applicantRef(id: number) {
-  return `APP-${new Date().getFullYear()}-${id}`
 }
 
 function jobOrderRef(id: number) {
@@ -58,7 +55,7 @@ function mapApplicantRow(applicant: Record<string, unknown>): ApplicantReportRow
   const id = Number(applicant.id)
   return {
     id,
-    ref: applicantRef(id),
+    ref: formatApplicantRef(id),
     lastName: cell(applicant.last_name),
     firstName: cell(applicant.first_name),
     middleName: cell(applicant.middle_name),
@@ -136,7 +133,7 @@ export async function fetchReportData(): Promise<ReportData> {
       deploymentDate: dateOnly(record.deployment_date),
       lastStatusUpdate: dateOnly(record.last_status_update),
       applicantId: record.applicant_id,
-      applicantRef: applicantRef(record.applicant_id),
+      applicantRef: formatApplicantRef(record.applicant_id),
       applicantName: name,
       middleName: applicant?.middleName ?? null,
       positionApplied: applicant?.positionApplied ?? "--",
@@ -243,6 +240,17 @@ export async function fetchReportData(): Promise<ReportData> {
       yearsExpRequired: order.years_exp_required ?? null,
       skillsRequired: cell(order.skills_required),
       salary: cell(order.salary),
+      commercialRegistration: cell(order.commercial_registration),
+      companyAddress: cell(order.company_address),
+      companyContact: cell(order.company_contact),
+      jobOrderDate: dateOnly(order.job_order_date),
+      visaNumber: cell(order.visa_number),
+      visaDate: dateOnly(order.visa_date),
+      visaCategory: cell(order.visa_category),
+      contractPeriod: cell(order.contract_period),
+      workSite: cell(order.work_site),
+      workingHours: cell(order.working_hours),
+      benefitsAndTerms: cell(order.benefits_and_terms),
       createdAt: dateOnly(order.created_at),
       matchedCount,
       slotsRemaining,
@@ -257,7 +265,7 @@ export async function fetchReportData(): Promise<ReportData> {
 
     return {
       applicantId: placement.applicant_id,
-      applicantRef: applicantRef(placement.applicant_id),
+      applicantRef: formatApplicantRef(placement.applicant_id),
       applicantName: name,
       positionApplied: applicant?.positionApplied ?? null,
       jobOrderId: placement.job_order_id,

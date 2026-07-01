@@ -6,6 +6,7 @@ import type {
   DeploymentReportRow,
   PlacementStatusCount,
 } from "@/lib/reports/types"
+import { formatApplicantRef } from "@/lib/format-applicant-ref"
 
 export type { DeploymentReportRow, CountryCount, PlacementStatusCount }
 
@@ -129,7 +130,7 @@ export default function ReportsView({
                     <td className="p-3">
                       <div className="font-medium">{row.applicantName}</div>
                       <div className="text-xs text-gray-500">
-                        APP-{new Date().getFullYear()}-{row.applicantId}
+                        {formatApplicantRef(row.applicantId)}
                       </div>
                     </td>
                     <td className="p-3">{row.positionApplied}</td>
