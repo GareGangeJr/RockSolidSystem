@@ -10,11 +10,12 @@ export default async function AttendancePage() {
     data: { user },
   } = await supabase.auth.getUser()
   const role = await getAccessRole(supabase, user?.id)
-  const myAttendance = role === "staff" ? await getMyAttendanceToday() : null
+  const kiosk = process.env.NEXT_PUBLIC_ATTENDANCE_KIOSK === "true"
+  const myAttendance = role === "staff" && kiosk ? await getMyAttendanceToday() : null
 
   const { data: logs, error } = await supabase
     .from("attendance_logs")
-    .select("id, employee_id, log_type, logged_at, branch_name, location_status, distance_meters, latitude, longitude")
+    .select("id, employee_id, log_type, logged_at")
     .order("logged_at", { ascending: false })
     .limit(200)
 
@@ -30,16 +31,10 @@ export default async function AttendancePage() {
 
     return {
       id: log.id,
-      employeeId: log.employee_id,
       employeeName: name,
       employeeNumber: employee?.employee_number ?? null,
       logType: log.log_type,
       loggedAt: log.logged_at,
-      branchName: log.branch_name,
-      locationStatus: log.location_status,
-      distanceMeters: log.distance_meters,
-      latitude: log.latitude,
-      longitude: log.longitude,
     }
   })
 
@@ -49,7 +44,7 @@ export default async function AttendancePage() {
         <h1 className="text-2xl font-bold text-gray-900">Attendance</h1>
       </div>
 
-      {role === "staff" && myAttendance && (
+      {role === "staff" && kiosk && myAttendance && (
         <>
           {myAttendance.error ? (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
@@ -70,9 +65,7 @@ export default async function AttendancePage() {
         <h2 className="mb-4 text-lg font-semibold text-gray-900">Attendance Logs</h2>
         {error ? (
           <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-            Could not load attendance logs. Run{" "}
-            <code className="font-mono">supabase/migrations/20250627_attendance_logs.sql</code> in
-            Supabase SQL Editor first.
+            Could not load attendance logs.
           </div>
         ) : (
           <AttendanceList rows={rows} />

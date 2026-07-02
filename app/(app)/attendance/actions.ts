@@ -1,7 +1,7 @@
 "use server"
 
+import { createSupabaseAdmin } from "@/lib/supabase/admin"
 import { createSupabaseServer } from "@/lib/supabase/server"
-import { checkBranchLocation } from "@/lib/attendance-location"
 import { revalidatePath } from "next/cache"
 
 type AttendanceLogType = "time_in" | "time_out"
@@ -23,7 +23,7 @@ async function getCurrentEmployee() {
     return {
       supabase,
       employee: null,
-      error: "No employee account linked to this login. Ask HR to create your employee login.",
+      error: "No employee account linked to this login.",
     }
   }
 
@@ -48,12 +48,12 @@ function getTodayRange() {
 
 export async function getMyAttendanceToday() {
   const { supabase, employee, error } = await getCurrentEmployee()
-  if (error || !employee) return { error, logs: [], employee: null }
+  if (error || !employee) return { error, employee: null }
 
   const { start, end } = getTodayRange()
   const { data: logs } = await supabase
     .from("attendance_logs")
-    .select("id, log_type, logged_at, branch_name, location_status, distance_meters")
+    .select("id, log_type, logged_at")
     .eq("employee_id", employee.id)
     .gte("logged_at", start)
     .lte("logged_at", end)
@@ -65,7 +65,6 @@ export async function getMyAttendanceToday() {
   return {
     error: null,
     employee,
-    logs: logs ?? [],
     canTimeIn: !timeIn,
     canTimeOut: !!timeIn && !timeOut,
     timeIn,
@@ -73,22 +72,13 @@ export async function getMyAttendanceToday() {
   }
 }
 
-export async function logAttendance(logType: AttendanceLogType, latitude: number, longitude: number) {
+export async function logAttendance(logType: AttendanceLogType) {
+  if (process.env.NEXT_PUBLIC_ATTENDANCE_KIOSK !== "true") {
+    return { error: "Time in/out is only available on the office attendance PC." }
+  }
+
   const { supabase, employee, error } = await getCurrentEmployee()
   if (error || !employee) return { error }
-
-  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-    return { error: "Location is required. Please allow GPS access and try again." }
-  }
-
-  const location = checkBranchLocation(latitude, longitude)
-  if (!location.onSite) {
-    const distanceText =
-      location.distanceMeters != null ? ` (${location.distanceMeters}m away)` : ""
-    return {
-      error: `You must be at the office to log attendance${distanceText}. Nearest branch: ${location.branchName ?? "unknown"}. Your GPS: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}.`,
-    }
-  }
 
   const { start, end } = getTodayRange()
   const { data: todayLogs } = await supabase
@@ -108,26 +98,16 @@ export async function logAttendance(logType: AttendanceLogType, latitude: number
     if (hasTimeOut) return { error: "You already timed out today." }
   }
 
-  const { error: insertError } = await supabase.from("attendance_logs").insert({
+  const admin = createSupabaseAdmin()
+  const { error: insertError } = await admin.from("attendance_logs").insert({
     employee_id: employee.id,
     log_type: logType,
-    latitude,
-    longitude,
-    branch_name: location.branchName,
-    location_status: "on_site",
-    distance_meters: location.distanceMeters,
   })
 
   if (insertError) {
-    return { error: insertError.message.includes("attendance_logs") ? "Attendance table not set up. Run supabase/migrations/20250627_attendance_logs.sql in Supabase first." : insertError.message }
+    return { error: insertError.message }
   }
 
   revalidatePath("/attendance")
-  return {
-    success: true,
-    message:
-      logType === "time_in"
-        ? `Timed in at ${location.branchName}.`
-        : `Timed out from ${location.branchName}.`,
-  }
+  return { success: true }
 }

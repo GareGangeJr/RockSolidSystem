@@ -4,16 +4,10 @@ import { useMemo, useState } from "react"
 
 export type AttendanceListRow = {
   id: number
-  employeeId: number
   employeeName: string
   employeeNumber: string | null
   logType: string
   loggedAt: string
-  branchName: string | null
-  locationStatus: string
-  distanceMeters: number | null
-  latitude: number
-  longitude: number
 }
 
 type Props = {
@@ -32,8 +26,7 @@ export default function AttendanceList({ rows }: Props) {
       list = list.filter(
         (row) =>
           row.employeeName.toLowerCase().includes(query) ||
-          (row.employeeNumber ?? "").toLowerCase().includes(query) ||
-          (row.branchName ?? "").toLowerCase().includes(query)
+          (row.employeeNumber ?? "").toLowerCase().includes(query)
       )
     }
 
@@ -81,10 +74,6 @@ export default function AttendanceList({ rows }: Props) {
               <th className="p-3 text-left">Employee</th>
               <th className="p-3 text-left">Type</th>
               <th className="p-3 text-left">Date & Time</th>
-              <th className="p-3 text-left">Branch</th>
-              <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-left">Distance</th>
-              <th className="p-3 text-left">GPS</th>
             </tr>
           </thead>
           <tbody>
@@ -96,21 +85,11 @@ export default function AttendanceList({ rows }: Props) {
                 </td>
                 <td className="p-3 capitalize">{row.logType.replace("_", " ")}</td>
                 <td className="p-3">{formatDateTime(row.loggedAt)}</td>
-                <td className="p-3">{row.branchName ?? "--"}</td>
-                <td className="p-3">
-                  <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
-                    {row.locationStatus === "on_site" ? "On-site" : row.locationStatus}
-                  </span>
-                </td>
-                <td className="p-3">{row.distanceMeters != null ? `${row.distanceMeters}m` : "--"}</td>
-                <td className="p-3 text-xs text-gray-500">
-                  {row.latitude.toFixed(5)}, {row.longitude.toFixed(5)}
-                </td>
               </tr>
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={7} className="p-8 text-center text-gray-500">
+                <td colSpan={3} className="p-8 text-center text-gray-500">
                   No attendance logs found.
                 </td>
               </tr>
