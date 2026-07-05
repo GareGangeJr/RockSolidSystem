@@ -177,11 +177,6 @@ export default function ReportsView({
       <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
         <div className="border-b border-gray-100 p-6">
           <h2 className="text-lg font-semibold text-gray-900">Deployment Report</h2>
-          {period !== "all" && (
-            <p className="mt-1 text-sm text-gray-500">
-              Showing {filteredDeployments.length} deployment(s) for selected {period}
-            </p>
-          )}
         </div>
 
         {filteredDeployments.length === 0 ? (

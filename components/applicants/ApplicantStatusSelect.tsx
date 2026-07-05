@@ -24,7 +24,7 @@ export function ApplicantStatusSelect({ applicantId, currentStatus }: Props) {
     const newStatus = e.target.value
     setError("")
 
-    if (DEPLOYED_STATUSES.has(newStatus) && !confirm(`Change status to "${newStatus}"? This adds the applicant to Monitoring.`)) {
+    if (DEPLOYED_STATUSES.has(newStatus) && !confirm(`Change status to "${newStatus}"?`)) {
       e.target.value = currentStatus ?? "New Applicant"
       return
     }
@@ -33,6 +33,11 @@ export function ApplicantStatusSelect({ applicantId, currentStatus }: Props) {
     if (updateError) {
       setError(updateError.message)
       e.target.value = currentStatus ?? "New Applicant"
+      return
+    }
+
+    if (DEPLOYED_STATUSES.has(newStatus)) {
+      router.push("/applicants?success=deployed")
       return
     }
 

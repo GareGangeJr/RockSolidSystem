@@ -106,11 +106,6 @@ export default async function Page({
         </p>
       )}
 
-      {success === "matched" && (
-        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">
-          Applicant matched. Status set to Selected if applicable.
-        </div>
-      )}
       {success === "unmatched" && (
         <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">Match removed.</div>
       )}

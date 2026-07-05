@@ -14,31 +14,16 @@ type FileRow = {
   created_at: string
 }
 
-type FilePreview = {
-  url: string
-  name: string
-  type: "image" | "pdf"
-}
-
 const BUCKET = "applicant files"
-
-function getPreviewType(fileName: string): "image" | "pdf" | null {
-  const lower = fileName.toLowerCase()
-  if (lower.endsWith(".pdf")) return "pdf"
-  if (/\.(jpe?g|png|gif|webp)$/.test(lower)) return "image"
-  return null
-}
 
 export default function ApplicantFilesPage() {
   const params = useParams()
   const supabase = createSupabaseBrowser()
-
   const applicantId = Number(params.id)
 
   const [files, setFiles] = useState<FileRow[]>([])
   const [loading, setLoading] = useState(true)
-  const [preview, setPreview] = useState<FilePreview | null>(null)
-  const [viewLoading, setViewLoading] = useState(false)
+  const [preview, setPreview] = useState<{ url: string; name: string; pdf: boolean } | null>(null)
 
   async function loadFiles() {
     setLoading(true)
@@ -53,44 +38,25 @@ export default function ApplicantFilesPage() {
   }
 
   async function signedUrl(path: string) {
-    const { data, error } = await supabase.storage
-      .from(BUCKET)
-      .createSignedUrl(path, 60)
-
+    const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(path, 60)
     if (error || !data?.signedUrl) {
-      alert("Signed URL failed: " + (error?.message || "unknown error"))
+      alert(error?.message || "Could not open file.")
       return null
     }
     return data.signedUrl
   }
 
   async function viewFile(path: string, name: string) {
-    const previewType = getPreviewType(name)
-    if (!previewType) {
-      alert("Preview is only available for PDF, JPG, and PNG files. Use Download instead.")
+    const lower = name.toLowerCase()
+    const pdf = lower.endsWith(".pdf")
+    const image = /\.(jpe?g|png)$/.test(lower)
+    if (!pdf && !image) {
+      alert("Use Download for this file.")
       return
     }
-
-    setViewLoading(true)
     const url = await signedUrl(path)
-    setViewLoading(false)
-    if (url) setPreview({ url, name, type: previewType })
+    if (url) setPreview({ url, name, pdf })
   }
-
-  useEffect(() => {
-    if (!preview) return
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setPreview(null)
-    }
-
-    document.body.style.overflow = "hidden"
-    window.addEventListener("keydown", onKeyDown)
-    return () => {
-      document.body.style.overflow = ""
-      window.removeEventListener("keydown", onKeyDown)
-    }
-  }, [preview])
 
   async function downloadFile(path: string, name: string) {
     const url = await signedUrl(path)
@@ -98,23 +64,23 @@ export default function ApplicantFilesPage() {
 
     const res = await fetch(url)
     const blob = await res.blob()
-    const downloadLink = document.createElement("a")
-    downloadLink.href = URL.createObjectURL(blob)
-    downloadLink.download = name || "file"
-    document.body.appendChild(downloadLink)
-    downloadLink.click()
-    downloadLink.remove()
-    URL.revokeObjectURL(downloadLink.href)
+    const a = document.createElement("a")
+    a.href = URL.createObjectURL(blob)
+    a.download = name || "file"
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(a.href)
   }
 
   async function deleteFile(fileId: number, path: string) {
     if (!confirm("Delete this file?")) return
 
     const { error: storageError } = await supabase.storage.from(BUCKET).remove([path])
-    if (storageError) return alert("Storage delete failed: " + storageError.message)
+    if (storageError) return alert(storageError.message)
 
     const { error: dbError } = await supabase.from("applicant_files").delete().eq("id", fileId)
-    if (dbError) return alert("DB delete failed: " + dbError.message)
+    if (dbError) return alert(dbError.message)
 
     loadFiles()
   }
@@ -152,6 +118,7 @@ export default function ApplicantFilesPage() {
             storageBucket="applicant files"
             filesTable="applicant_files"
             entityIdColumn="applicant_id"
+            onUploadSuccess={loadFiles}
           />
 
           <BackButton href="/applicants" />
@@ -175,16 +142,14 @@ export default function ApplicantFilesPage() {
               {files.map((f) => (
                 <tr key={f.id} className="border-t">
                   <td className="p-3">{f.file_name}</td>
-                  <td className="p-3">
-                    {new Date(f.created_at).toLocaleString()}
-                  </td>
+                  <td className="p-3">{new Date(f.created_at).toLocaleString()}</td>
                   <td className="p-3">
                     <div className="flex gap-2">
                       <button
                         type="button"
                         className="px-3 py-1 rounded-md border hover:bg-blue-50 hover:text-blue-700"
                         onClick={() => viewFile(f.file_path || "", f.file_name || "file")}
-                        disabled={!f.file_path || viewLoading}
+                        disabled={!f.file_path}
                       >
                         View
                       </button>
@@ -192,9 +157,7 @@ export default function ApplicantFilesPage() {
                       <button
                         type="button"
                         className="px-3 py-1 rounded-md border hover:bg-gray-100"
-                        onClick={() =>
-                          downloadFile(f.file_path || "", f.file_name || "file")
-                        }
+                        onClick={() => downloadFile(f.file_path || "", f.file_name || "file")}
                         disabled={!f.file_path}
                       >
                         Download
@@ -218,35 +181,19 @@ export default function ApplicantFilesPage() {
       )}
 
       {preview && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-          onClick={() => setPreview(null)}
-        >
-          <div
-            className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg bg-white shadow-xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b px-4 py-3">
-              <h2 className="truncate pr-4 text-sm font-medium text-gray-900">{preview.name}</h2>
-              <button
-                type="button"
-                onClick={() => setPreview(null)}
-                className="rounded-md border px-3 py-1 text-sm hover:bg-gray-50"
-              >
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setPreview(null)}>
+          <div className="bg-white rounded-lg w-full max-w-4xl p-4 max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between mb-3">
+              <span className="text-sm font-medium truncate">{preview.name}</span>
+              <button type="button" className="border px-3 py-1 text-sm rounded" onClick={() => setPreview(null)}>
                 Close
               </button>
             </div>
-            <div className="overflow-auto p-4">
-              {preview.type === "image" ? (
-                <img
-                  src={preview.url}
-                  alt={preview.name}
-                  className="mx-auto max-h-[75vh] max-w-full object-contain"
-                />
-              ) : (
-                <iframe src={preview.url} title={preview.name} className="h-[75vh] w-full rounded border" />
-              )}
-            </div>
+            {preview.pdf ? (
+              <iframe src={preview.url} className="w-full h-[70vh] border" />
+            ) : (
+              <img src={preview.url} alt={preview.name} className="max-w-full max-h-[70vh] mx-auto block" />
+            )}
           </div>
         </div>
       )}

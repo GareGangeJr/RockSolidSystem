@@ -42,6 +42,11 @@ export default async function ApplicantsPage({ searchParams }: { searchParams: P
           Applicant updated successfully.
         </div>
       )}
+      {success === "deployed" && (
+        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">
+          Applicant deployed.
+        </div>
+      )}
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Applicants</h1>
         <Link

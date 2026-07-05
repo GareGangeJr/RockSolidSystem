@@ -82,7 +82,7 @@ export function ApplicantForm({
       if (
         DEPLOYED_STATUSES.has(newStatus) &&
         newStatus !== currentStatus &&
-        !confirm(`Change status to "${newStatus}"? This adds the applicant to Monitoring.`)
+        !confirm(`Change status to "${newStatus}"?`)
       ) {
         return
       }

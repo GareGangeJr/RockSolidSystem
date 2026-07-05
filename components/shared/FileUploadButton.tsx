@@ -1,6 +1,5 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { createSupabaseBrowser } from "@/lib/supabase/browser"
 
@@ -12,6 +11,7 @@ type FileUploadButtonProps = {
   storageBucket: string
   filesTable: string
   entityIdColumn: string
+  onUploadSuccess?: () => void
 }
 
 export function FileUploadButton({
@@ -19,24 +19,24 @@ export function FileUploadButton({
   storageBucket,
   filesTable,
   entityIdColumn,
+  onUploadSuccess,
 }: FileUploadButtonProps) {
-  const router = useRouter()
   const [uploading, setUploading] = useState(false)
-  const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const inputId = `upload-${filesTable}-${entityId}`
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     e.target.value = ""
-    setMessage(null)
+    setError(null)
 
     if (file.size > MAX_BYTES) {
-      setMessage({ type: "error", text: "File too large. Maximum size is 5 MB." })
+      setError("File too large. Maximum size is 5 MB.")
       return
     }
     if (!ALLOWED_TYPES.includes(file.type)) {
-      setMessage({ type: "error", text: "Only PDF, JPG, and PNG files are allowed." })
+      setError("Only PDF, JPG, and PNG files are allowed.")
       return
     }
 
@@ -47,7 +47,7 @@ export function FileUploadButton({
     const { error: uploadError } = await supabase.storage.from(storageBucket).upload(filePath, file)
     if (uploadError) {
       setUploading(false)
-      setMessage({ type: "error", text: uploadError.message })
+      setError(uploadError.message)
       return
     }
 
@@ -59,12 +59,11 @@ export function FileUploadButton({
 
     setUploading(false)
     if (dbError) {
-      setMessage({ type: "error", text: dbError.message })
+      setError(dbError.message)
       return
     }
 
-    setMessage({ type: "success", text: "File uploaded." })
-    router.refresh()
+    if (onUploadSuccess) onUploadSuccess()
   }
 
   return (
@@ -88,11 +87,7 @@ export function FileUploadButton({
       >
         {uploading ? "Uploading..." : "Upload File"}
       </button>
-      {message && (
-        <p className={`text-xs ${message.type === "error" ? "text-red-600" : "text-green-600"}`}>
-          {message.text}
-        </p>
-      )}
+      {error && <p className="text-xs text-red-600">{error}</p>}
     </div>
   )
 }

@@ -19,11 +19,11 @@ const BUCKET = "employee-files"
 export default function EmployeeFilesPage() {
   const params = useParams()
   const supabase = createSupabaseBrowser()
-
   const employeeId = Number(params.id)
 
   const [files, setFiles] = useState<FileRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [preview, setPreview] = useState<{ url: string; name: string; pdf: boolean } | null>(null)
 
   async function loadFiles() {
     setLoading(true)
@@ -38,20 +38,24 @@ export default function EmployeeFilesPage() {
   }
 
   async function signedUrl(path: string) {
-    const { data, error } = await supabase.storage
-      .from(BUCKET)
-      .createSignedUrl(path, 60)
-
+    const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(path, 60)
     if (error || !data?.signedUrl) {
-      alert("Signed URL failed: " + (error?.message || "unknown error"))
+      alert(error?.message || "Could not open file.")
       return null
     }
     return data.signedUrl
   }
 
-  async function viewFile(path: string) {
+  async function viewFile(path: string, name: string) {
+    const lower = name.toLowerCase()
+    const pdf = lower.endsWith(".pdf")
+    const image = /\.(jpe?g|png)$/.test(lower)
+    if (!pdf && !image) {
+      alert("Use Download for this file.")
+      return
+    }
     const url = await signedUrl(path)
-    if (url) window.open(url, "_blank")
+    if (url) setPreview({ url, name, pdf })
   }
 
   async function downloadFile(path: string, name: string) {
@@ -60,23 +64,23 @@ export default function EmployeeFilesPage() {
 
     const res = await fetch(url)
     const blob = await res.blob()
-    const downloadLink = document.createElement("a")
-    downloadLink.href = URL.createObjectURL(blob)
-    downloadLink.download = name || "file"
-    document.body.appendChild(downloadLink)
-    downloadLink.click()
-    downloadLink.remove()
-    URL.revokeObjectURL(downloadLink.href)
+    const a = document.createElement("a")
+    a.href = URL.createObjectURL(blob)
+    a.download = name || "file"
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(a.href)
   }
 
   async function deleteFile(fileId: number, path: string) {
     if (!confirm("Delete this file?")) return
 
     const { error: storageError } = await supabase.storage.from(BUCKET).remove([path])
-    if (storageError) return alert("Storage delete failed: " + storageError.message)
+    if (storageError) return alert(storageError.message)
 
     const { error: dbError } = await supabase.from("employee_files").delete().eq("id", fileId)
-    if (dbError) return alert("DB delete failed: " + dbError.message)
+    if (dbError) return alert(dbError.message)
 
     loadFiles()
   }
@@ -114,6 +118,7 @@ export default function EmployeeFilesPage() {
             storageBucket="employee-files"
             filesTable="employee_files"
             entityIdColumn="employee_id"
+            onUploadSuccess={loadFiles}
           />
 
           <BackButton href="/employees" />
@@ -137,15 +142,13 @@ export default function EmployeeFilesPage() {
               {files.map((f) => (
                 <tr key={f.id} className="border-t">
                   <td className="p-3">{f.file_name}</td>
-                  <td className="p-3">
-                    {new Date(f.created_at).toLocaleString()}
-                  </td>
+                  <td className="p-3">{new Date(f.created_at).toLocaleString()}</td>
                   <td className="p-3">
                     <div className="flex gap-2">
                       <button
                         type="button"
                         className="px-3 py-1 rounded-md border hover:bg-blue-50 hover:text-blue-700"
-                        onClick={() => viewFile(f.file_path || "")}
+                        onClick={() => viewFile(f.file_path || "", f.file_name || "file")}
                         disabled={!f.file_path}
                       >
                         View
@@ -154,9 +157,7 @@ export default function EmployeeFilesPage() {
                       <button
                         type="button"
                         className="px-3 py-1 rounded-md border hover:bg-gray-100"
-                        onClick={() =>
-                          downloadFile(f.file_path || "", f.file_name || "file")
-                        }
+                        onClick={() => downloadFile(f.file_path || "", f.file_name || "file")}
                         disabled={!f.file_path}
                       >
                         Download
@@ -176,6 +177,24 @@ export default function EmployeeFilesPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {preview && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setPreview(null)}>
+          <div className="bg-white rounded-lg w-full max-w-4xl p-4 max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between mb-3">
+              <span className="text-sm font-medium truncate">{preview.name}</span>
+              <button type="button" className="border px-3 py-1 text-sm rounded" onClick={() => setPreview(null)}>
+                Close
+              </button>
+            </div>
+            {preview.pdf ? (
+              <iframe src={preview.url} className="w-full h-[70vh] border" />
+            ) : (
+              <img src={preview.url} alt={preview.name} className="max-w-full max-h-[70vh] mx-auto block" />
+            )}
+          </div>
         </div>
       )}
     </div>
