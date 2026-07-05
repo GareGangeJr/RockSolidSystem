@@ -88,7 +88,8 @@ function drawFooter(ctx: PdfContext) {
 }
 
 function drawCompanyHeader(ctx: PdfContext, applicantName: string, ref: string) {
-  let { page, y } = ctx
+  const { page } = ctx
+  let y = ctx.y
 
   page.drawText(COMPANY, {
     x: MARGIN,
@@ -139,7 +140,7 @@ function drawCompanyHeader(ctx: PdfContext, applicantName: string, ref: string) 
 }
 
 function drawSection(ctx: PdfContext, title: string): PdfContext {
-  let next = ensureSpace(ctx, SECTION_GAP + LINE_HEIGHT + 6)
+  const next = ensureSpace(ctx, SECTION_GAP + LINE_HEIGHT + 6)
   next.y -= SECTION_GAP
 
   next.page.drawText(title, {
@@ -166,7 +167,7 @@ function drawField(ctx: PdfContext, label: string, value: unknown): PdfContext {
   const display = formatValue(value)
   const valueLines = wrapText(display, ctx.helvetica, FONT_SIZE, VALUE_MAX_WIDTH)
   const blockHeight = Math.max(LINE_HEIGHT, valueLines.length * LINE_HEIGHT)
-  let next = ensureSpace(ctx, blockHeight + 2)
+  const next = ensureSpace(ctx, blockHeight + 2)
 
   next.page.drawText(label, {
     x: LABEL_X,

@@ -78,7 +78,7 @@ export async function addEmployee(formData: FormData) {
   }
   const employeeNumber = `EMP-${year}-${String(nextNumber).padStart(3, '0')}`
 
-  const { data, error: insertError } = await supabase.from("employees").insert({
+  const { error: insertError } = await supabase.from("employees").insert({
     employee_number: employeeNumber,
     position: formData.get("position") as string,
     department: formData.get("department") as string,

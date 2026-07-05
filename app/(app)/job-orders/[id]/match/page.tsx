@@ -133,7 +133,7 @@ export default async function Page({
                     {applicant.first_name} {applicant.last_name}
                   </Link>
                   <span className="ml-2 text-gray-600">
-                    — {applicant.position_applied ?? "No position"}
+                    - {applicant.position_applied ?? "No position"}
                   </span>
                 </span>
                 <DeleteMatchForm applicantId={applicant.id} jobOrderId={jobOrder.id} />

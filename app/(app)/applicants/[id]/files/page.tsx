@@ -41,6 +41,7 @@ export default function ApplicantFilesPage() {
   const [viewLoading, setViewLoading] = useState(false)
 
   async function loadFiles() {
+    setLoading(true)
     const { data, error } = await supabase
       .from("applicant_files")
       .select("*")
@@ -119,11 +120,24 @@ export default function ApplicantFilesPage() {
   }
 
   useEffect(() => {
-    if (!isNaN(applicantId)) {
+    if (isNaN(applicantId)) return
+    let cancelled = false
+    void (async () => {
       setLoading(true)
-      loadFiles()
+      const { data, error } = await supabase
+        .from("applicant_files")
+        .select("*")
+        .eq("applicant_id", applicantId)
+        .order("created_at", { ascending: false })
+
+      if (cancelled) return
+      if (!error && data) setFiles(data as FileRow[])
+      setLoading(false)
+    })()
+    return () => {
+      cancelled = true
     }
-  }, [applicantId])
+  }, [applicantId, supabase])
 
   if (isNaN(applicantId)) return <div className="p-6 text-red-500">Invalid applicant ID</div>
 

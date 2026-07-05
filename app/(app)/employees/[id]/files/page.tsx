@@ -26,6 +26,7 @@ export default function EmployeeFilesPage() {
   const [loading, setLoading] = useState(true)
 
   async function loadFiles() {
+    setLoading(true)
     const { data, error } = await supabase
       .from("employee_files")
       .select("*")
@@ -81,11 +82,24 @@ export default function EmployeeFilesPage() {
   }
 
   useEffect(() => {
-    if (!isNaN(employeeId)) {
+    if (isNaN(employeeId)) return
+    let cancelled = false
+    void (async () => {
       setLoading(true)
-      loadFiles()
+      const { data, error } = await supabase
+        .from("employee_files")
+        .select("*")
+        .eq("employee_id", employeeId)
+        .order("created_at", { ascending: false })
+
+      if (cancelled) return
+      if (!error && data) setFiles(data as FileRow[])
+      setLoading(false)
+    })()
+    return () => {
+      cancelled = true
     }
-  }, [employeeId])
+  }, [employeeId, supabase])
 
   if (isNaN(employeeId)) return <div className="p-6 text-red-500">Invalid employee ID</div>
 

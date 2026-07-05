@@ -61,7 +61,6 @@ export default async function Home() {
     ["Deployed", "Deployed(With Concerns)"].includes(String(a.status ?? ""))
   ).length
   const docsOnProcess = applicantRows.filter((a) => a.status === "Docs on Process").length
-  const forBooking = applicantRows.filter((a) => a.status === "For Booking").length
   const deported = applicantRows.filter((a) => a.status === "Deported").length
   const finishContracts = applicantRows.filter((a) => a.status === "Finish Contract").length
 
