@@ -1,5 +1,5 @@
 import { createSupabaseAdmin } from "@/lib/supabase/admin"
-import PublicJobOrdersList from "@/components/PublicJobOrdersList"
+import { PublicJobOrderTable } from "@/components/apply/PublicJobOrderTable"
 
 export default async function PublicJobOrdersPage() {
   const supabase = createSupabaseAdmin()
@@ -29,7 +29,7 @@ export default async function PublicJobOrdersPage() {
         <p className="mt-1 text-sm text-gray-600">Open positions you can apply for.</p>
       </div>
 
-      <PublicJobOrdersList jobOrders={list} />
+      <PublicJobOrderTable jobOrders={list} />
     </div>
   )
 }

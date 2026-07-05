@@ -1,5 +1,6 @@
 import { createSupabaseServer } from "@/lib/supabase/server"
-import MonitoringListWithFilters from "@/components/MonitoringListWithFilters"
+import { MonitoringTable } from "@/components/monitoring/MonitoringTable"
+import type { MonitoringRecord } from "@/types/entities"
 
 export default async function MonitoringPage() {
   const supabase = await createSupabaseServer()
@@ -16,8 +17,8 @@ export default async function MonitoringPage() {
     </div>
   )
 
-  const applicantIds = monitoringRecords?.map((r: any) => r.applicant_id) || []
-  const jobOrderIds = monitoringRecords?.map((r: any) => r.job_order_id) || []
+  const applicantIds = monitoringRecords?.map((r) => r.applicant_id) ?? []
+  const jobOrderIds = monitoringRecords?.map((r) => r.job_order_id) ?? []
 
   const { data: applicants } = await supabase
     .from("applicants")
@@ -29,16 +30,17 @@ export default async function MonitoringPage() {
     .select("id, job_title, country")
     .in("id", jobOrderIds.length > 0 ? jobOrderIds : [0])
 
-  const records = monitoringRecords?.map((m: any) => {
-    const applicant = applicants?.find((a: any) => a.id === m.applicant_id)
-    const jobOrder = jobOrders?.find((j: any) => j.id === m.job_order_id)
-    return { ...m, applicant, jobOrder }
-  }) || []
+  const records: MonitoringRecord[] =
+    monitoringRecords?.map((m) => {
+      const applicant = applicants?.find((a) => a.id === m.applicant_id)
+      const jobOrder = jobOrders?.find((j) => j.id === m.job_order_id)
+      return { ...m, applicant, jobOrder }
+    }) ?? []
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Deployment Monitoring</h1>
-      <MonitoringListWithFilters records={records} />
+      <MonitoringTable records={records} />
     </div>
   )
 }

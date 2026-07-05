@@ -1,5 +1,6 @@
 import { createSupabaseServer } from "@/lib/supabase/server"
-import { EditApplicantForm } from "@/components/applicants/EditApplicantForm"
+import { ApplicantForm } from "@/components/applicants/ApplicantForm"
+import type { Applicant } from "@/types/entities"
 import { BackButton } from "@/components/BackButton"
 import { formatApplicantRef } from "@/lib/format-applicant-ref"
 
@@ -50,7 +51,7 @@ export default async function EditPage({
           <div className="mb-4 rounded-md bg-red-100 px-4 py-3 text-red-800">{decodeURIComponent(message)}</div>
         )}
 
-        <EditApplicantForm applicant={data as Record<string, unknown>} />
+        <ApplicantForm applicant={data as Applicant} />
       </div>
     </div>
   )

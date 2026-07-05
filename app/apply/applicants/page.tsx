@@ -1,5 +1,5 @@
 import { createSupabaseAdmin } from "@/lib/supabase/admin"
-import { AddApplicantForm } from "@/components/applicants/AddApplicantForm"
+import { ApplicantForm } from "@/components/applicants/ApplicantForm"
 import type { OpenJobOrderOption } from "@/components/applicants/job-order-select-field"
 
 export default async function PublicApplyPage({
@@ -34,7 +34,7 @@ export default async function PublicApplyPage({
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">Application</h1>
         <p className="mt-1 text-sm text-gray-600">
-          Fill out the form below to apply. Our HR team will review your application.
+          Fill out the form below to apply.
         </p>
       </div>
 
@@ -65,7 +65,7 @@ export default async function PublicApplyPage({
         </div>
       )}
 
-      <AddApplicantForm
+      <ApplicantForm
         mode="public"
         openJobOrders={openJobOrders}
         defaultJobOrderId={preselectedJob?.id}

@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { createSupabaseBrowser } from "@/lib/supabase/browser"
-import UploadEmployeeFile from "@/components/UploadEmployeeFiles"
+import { FileUploadButton } from "@/components/shared/FileUploadButton"
 import { BackButton } from "@/components/BackButton"
 
 type FileRow = {
@@ -95,7 +95,12 @@ export default function EmployeeFilesPage() {
         <h1 className="text-2xl font-semibold">Employee Files</h1>
 
         <div className="flex items-center gap-3">
-          <UploadEmployeeFile id={employeeId} />
+          <FileUploadButton
+            entityId={employeeId}
+            storageBucket="employee-files"
+            filesTable="employee_files"
+            entityIdColumn="employee_id"
+          />
 
           <BackButton href="/employees" />
         </div>

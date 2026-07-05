@@ -20,3 +20,7 @@ export async function requireAdmin(): Promise<void> {
   const role = await requireAuthRole()
   if (role !== "admin") redirect("/")
 }
+
+export async function requireUser() {
+  await requireAuthRole()
+}

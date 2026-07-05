@@ -1,4 +1,4 @@
-import { AddApplicantForm } from "@/components/applicants/AddApplicantForm"
+import { ApplicantForm } from "@/components/applicants/ApplicantForm"
 import { BackButton } from "@/components/BackButton"
 
 export default function AddApplicantPage() {
@@ -10,7 +10,7 @@ export default function AddApplicantPage() {
           <BackButton href="/applicants" />
         </div>
 
-        <AddApplicantForm />
+        <ApplicantForm />
       </div>
     </div>
   )

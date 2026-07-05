@@ -3,10 +3,12 @@
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { createPlacement, removePlacement } from "@/lib/applicant-workflow"
 import { jobOrderFromFormData } from "@/lib/job-order-fields"
+import { requireUser } from "@/lib/require-role"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
 export async function addJobOrder(formData: FormData) {
+  await requireUser()
   const supabase = await createSupabaseServer()
 
   const { error } = await supabase.from("job_orders").insert(jobOrderFromFormData(formData))
@@ -22,6 +24,7 @@ export async function addJobOrder(formData: FormData) {
 }
 
 export async function updateJobOrderStatus(jobOrderId: number, newStatus: string) {
+  await requireUser()
   const supabase = await createSupabaseServer()
   const { error } = await supabase.from("job_orders").update({ status: newStatus }).eq("id", jobOrderId)
   if (error) {
@@ -33,6 +36,7 @@ export async function updateJobOrderStatus(jobOrderId: number, newStatus: string
 }
 
 export async function matchToJob(formData: FormData) {
+  await requireUser()
   const supabase = await createSupabaseServer()
   const applicantId = Number(formData.get("applicant_id"))
   const jobOrderId = Number(formData.get("job_order_id"))
@@ -51,6 +55,7 @@ export async function matchToJob(formData: FormData) {
 }
 
 export async function deleteMatch(formData: FormData) {
+  await requireUser()
   const supabase = await createSupabaseServer()
   const applicantId = Number(formData.get("applicant_id"))
   const jobOrderId = Number(formData.get("job_order_id"))
@@ -70,6 +75,7 @@ export async function deleteMatch(formData: FormData) {
 }
 
 export async function updateJobOrder(formData: FormData) {
+  await requireUser()
   const supabase = await createSupabaseServer()
 
   const id = Number(formData.get("id"))

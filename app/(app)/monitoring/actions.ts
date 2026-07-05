@@ -2,9 +2,11 @@
 
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { requireUser } from "@/lib/require-role"
 import { redirect } from "next/navigation"
 
 export async function updateMonitoring(formData: FormData) {
+  await requireUser()
   const supabase = await createSupabaseServer()
   const id = Number(formData.get("id"))
   

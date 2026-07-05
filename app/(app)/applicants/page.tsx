@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
-import ApplicantsListWithFilters from "@/components/ApplicantsListWithFilters"
+import { ApplicantTable } from "@/components/applicants/ApplicantTable"
 
 export default async function ApplicantsPage({ searchParams }: { searchParams: Promise<{ success?: string }> }) {
   const { success } = await searchParams
@@ -51,7 +51,7 @@ export default async function ApplicantsPage({ searchParams }: { searchParams: P
           Add Applicant
         </Link>
       </div>
-      <ApplicantsListWithFilters applicants={list} />
+      <ApplicantTable applicants={list} />
     </div>
   )
 }

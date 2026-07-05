@@ -1,6 +1,7 @@
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { BackButton } from "@/components/BackButton"
-import { EditEmployeeForm } from "@/components/employees/EditEmployeeForm"
+import { EmployeeForm } from "@/components/employees/EmployeeForm"
+import type { Employee } from "@/types/entities"
 
 export default async function EditEmployeePage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createSupabaseServer()
@@ -35,7 +36,7 @@ export default async function EditEmployeePage({ params }: { params: Promise<{ i
           <BackButton href="/employees" />
         </div>
 
-        <EditEmployeeForm employee={data as Record<string, unknown>} />
+        <EmployeeForm mode="edit" employee={data as Employee} />
       </div>
     </div>
   )

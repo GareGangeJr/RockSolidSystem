@@ -1,5 +1,7 @@
 "use client"
 
+import { fieldClassSm, labelClassSm } from "@/lib/form-ui"
+
 export type OpenJobOrderOption = {
   id: number
   job_title: string | null
@@ -7,9 +9,8 @@ export type OpenJobOrderOption = {
   country: string | null
 }
 
-const inputFieldStyles =
-  "mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-const labelStyles = "block text-sm font-medium text-gray-700"
+const labelStyles = labelClassSm
+const inputFieldStyles = fieldClassSm
 
 type JobOrderSelectFieldProps = {
   jobOrders: OpenJobOrderOption[]
@@ -33,7 +34,7 @@ export function JobOrderSelectField({
   }
 
   return (
-    <div className="col-span-12 md:col-span-6">
+    <div className="col-span-12 md:col-span-6 md:max-w-sm">
       <label className={labelStyles}>Job Order Applying For</label>
       <select
         name="job_order_id"
@@ -44,7 +45,7 @@ export function JobOrderSelectField({
         <option value="">Select a job order</option>
         {jobOrders.map((job) => (
           <option key={job.id} value={job.id}>
-            JO-{job.id} — {job.job_title ?? "Untitled"}
+            {job.id} - {job.job_title ?? "Untitled"}
           </option>
         ))}
       </select>

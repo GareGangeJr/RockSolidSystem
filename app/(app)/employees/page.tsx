@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
-import EmployeesListWithFilters from "@/components/EmployeesListWithFilters"
+import { EmployeeTable } from "@/components/employees/EmployeeTable"
 
 export default async function EmployeesPage({ searchParams }: { searchParams: Promise<{ success?: string }> }) {
   const { success } = await searchParams
@@ -47,7 +47,7 @@ export default async function EmployeesPage({ searchParams }: { searchParams: Pr
           Add Employee
         </Link>
       </div>
-      <EmployeesListWithFilters employees={list} />
+      <EmployeeTable employees={list} />
     </div>
   )
 }   

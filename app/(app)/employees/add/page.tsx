@@ -1,4 +1,4 @@
-import { AddEmployeeForm } from "@/components/employees/AddEmployeeForm"
+import { EmployeeForm } from "@/components/employees/EmployeeForm"
 
 export default function AddEmployeePage() {
   return (
@@ -8,7 +8,7 @@ export default function AddEmployeePage() {
           <h1 className="text-2xl font-semibold text-gray-900">Add Employee</h1>
         </div>
 
-        <AddEmployeeForm />
+        <EmployeeForm mode="add" />
       </div>
     </div>
   )

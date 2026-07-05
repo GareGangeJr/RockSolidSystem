@@ -3,7 +3,6 @@ type EmployeePasswordInput = {
   employee_number?: string | null
 }
 
-/** Default login password: birthday as MMDDYYYY (Ex: May 15 1990 → 05151990). */
 export function generateEmployeePassword(employee: EmployeePasswordInput): string {
   const dob = employee.date_of_birth?.slice(0, 10) ?? ""
   const match = dob.match(/^(\d{4})-(\d{2})-(\d{2})$/)

@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
-import JobOrdersListWithFilters from "@/components/JobOrdersListWithFilters"
+import { JobOrderTable } from "@/components/job-orders/JobOrderTable"
 
 export default async function JobOrdersPage({ searchParams }: { searchParams: Promise<{ success?: string }> }) {
   const { success } = await searchParams
@@ -46,7 +46,7 @@ export default async function JobOrdersPage({ searchParams }: { searchParams: Pr
           Add Job Order
         </Link>
       </div>
-      <JobOrdersListWithFilters jobOrders={list} />
+      <JobOrderTable jobOrders={list} />
     </div>
   )
 }

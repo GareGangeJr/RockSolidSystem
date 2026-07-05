@@ -58,7 +58,6 @@ export async function addEmployee(formData: FormData) {
   await requireAdmin()
   const supabase = await createSupabaseServer()
 
-  // Auto-generate employee number (EMP-YYYY-###)
   const year = new Date().getFullYear()
   const { data: existingEmployees, error: queryError } = await supabase
     .from("employees")
