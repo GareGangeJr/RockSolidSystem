@@ -70,7 +70,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     contact: applicant.contact_number ?? null,
   }))
 
-  const buffer = await generateMatchedSummaryPdf({
+  const bytes = await generateMatchedSummaryPdf({
     jobOrderId,
     jobTitle: job.job_title ?? null,
     company: job.company ?? null,
@@ -81,7 +81,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const jobLabel = safeName(job.job_title ?? "Job Order")
   const filename = `JO ${jobOrderId} ${jobLabel} Matched Summary.pdf`
 
-  return new NextResponse(buffer, {
+  return new Response(new Uint8Array(bytes), {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="${filename}"`,

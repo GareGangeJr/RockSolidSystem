@@ -16,10 +16,17 @@ export function SummaryDownloadButton({ jobOrderId }: SummaryDownloadButtonProps
     setError("")
 
     try {
-      const response = await fetch(`/api/job-orders/${jobOrderId}/summary`)
+      const response = await fetch(`/api/job-orders/${jobOrderId}/summary`, {
+        credentials: "same-origin",
+      })
       if (!response.ok) {
         const data = (await response.json().catch(() => null)) as { error?: string } | null
         throw new Error(data?.error ?? "Download failed.")
+      }
+
+      const contentType = response.headers.get("Content-Type") ?? ""
+      if (!contentType.includes("application/pdf")) {
+        throw new Error("Download failed. Server did not return a PDF.")
       }
 
       const blob = await response.blob()

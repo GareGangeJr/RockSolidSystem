@@ -196,5 +196,5 @@ export async function generateMatchedSummaryPdf(input: SummaryInput) {
   })
 
   const bytes = await pdfDoc.save()
-  return Buffer.from(bytes)
+  return bytes
 }
