@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { createSupabaseBrowser } from "@/lib/supabase/browser"
 import { Button } from "@/components/ui/button"
 
@@ -12,14 +13,17 @@ export default function Topbar() {
   }
 
   return (
-    <header className="h-14 border-b border-gray-900 bg-white flex items-center justify-between px-4">
-      <div className="text-sm text-gray-600">
-        Rock Solid Manpower Information System
-      </div>
+    <header className="flex h-14 items-center justify-between border-b border-gray-900 bg-white px-4">
+      <div className="text-sm text-gray-600">Rock Solid Manpower Information System</div>
 
-      <Button size="sm" variant="outline" onClick={logout}>
-        Logout
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button size="sm" variant="outline" asChild>
+          <Link href="/account/password">Change Password</Link>
+        </Button>
+        <Button size="sm" variant="outline" onClick={logout}>
+          Logout
+        </Button>
+      </div>
     </header>
   )
 }

@@ -3,8 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { updateApplicantStatus } from "@/app/(app)/applicants/actions"
-import { DEPLOYED_STATUSES } from "@/lib/applicant-workflow"
-import { STATUS_OPTIONS } from "@/lib/status-options"
+import { getSelectableApplicantStatusOptions } from "@/lib/status-options"
 
 type Props = {
   applicantId: number
@@ -15,29 +14,20 @@ export function ApplicantStatusSelect({ applicantId, currentStatus }: Props) {
   const router = useRouter()
   const [error, setError] = useState("")
 
+  const selectable = getSelectableApplicantStatusOptions(currentStatus)
   const options =
-    currentStatus && !(STATUS_OPTIONS as readonly string[]).includes(currentStatus)
-      ? [currentStatus, ...STATUS_OPTIONS]
-      : [...STATUS_OPTIONS]
+    currentStatus && !selectable.includes(currentStatus)
+      ? [currentStatus, ...selectable]
+      : selectable
 
   async function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const newStatus = e.target.value
     setError("")
 
-    if (DEPLOYED_STATUSES.has(newStatus) && !confirm(`Change status to "${newStatus}"?`)) {
-      e.target.value = currentStatus ?? "New Applicant"
-      return
-    }
-
     const { error: updateError } = await updateApplicantStatus(applicantId, newStatus)
     if (updateError) {
       setError(updateError.message)
       e.target.value = currentStatus ?? "New Applicant"
-      return
-    }
-
-    if (DEPLOYED_STATUSES.has(newStatus)) {
-      router.push("/applicants?success=deployed")
       return
     }
 

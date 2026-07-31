@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { ApplicantTable } from "@/components/applicants/ApplicantTable"
+import { resolveApplicantType } from "@/lib/status-options"
 
 export default async function ApplicantsPage({ searchParams }: { searchParams: Promise<{ success?: string }> }) {
   const { success } = await searchParams
@@ -9,6 +10,7 @@ export default async function ApplicantsPage({ searchParams }: { searchParams: P
   const { data: applicants, error } = await supabase
     .from("applicants")
     .select("*")
+    .is("archived_at", null)
     .order("created_at", { ascending: false })
 
   if (error) {
@@ -22,7 +24,7 @@ export default async function ApplicantsPage({ searchParams }: { searchParams: P
     middle_name: a.middle_name ?? null,
     last_name: a.last_name ?? null,
     position_applied: a.position_applied ?? null,
-    applicant_type: a.applicant_type ?? null,
+    applicant_type: resolveApplicantType(a.applicant_type, a.position_applied),
     status: a.status ?? null,
     notes: a.notes ?? null,
     contact_number: a.contact_number ?? null,

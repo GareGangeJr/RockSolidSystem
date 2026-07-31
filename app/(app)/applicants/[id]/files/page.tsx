@@ -1,10 +1,12 @@
 "use client"
 
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { archiveFileRecord } from "@/app/(app)/archive/actions"
 import { createSupabaseBrowser } from "@/lib/supabase/browser"
-import { FileUploadButton } from "@/components/shared/FileUploadButton"
 import { BackButton } from "@/components/BackButton"
+import { FileUploadButton } from "@/components/shared/FileUploadButton"
+import { FilePreviewModal } from "@/components/shared/FilePreviewModal"
 
 type FileRow = {
   id: number
@@ -18,6 +20,7 @@ const BUCKET = "applicant files"
 
 export default function ApplicantFilesPage() {
   const params = useParams()
+  const router = useRouter()
   const supabase = createSupabaseBrowser()
   const applicantId = Number(params.id)
 
@@ -31,9 +34,18 @@ export default function ApplicantFilesPage() {
       .from("applicant_files")
       .select("*")
       .eq("applicant_id", applicantId)
+      .is("archived_at", null)
       .order("created_at", { ascending: false })
 
-    if (!error && data) setFiles(data as FileRow[])
+    if (error) {
+      alert(error.message.includes("archived_at")
+        ? `${error.message}\n\nRun supabase/add_archived_at.sql in Supabase SQL Editor.`
+        : error.message)
+      setLoading(false)
+      return
+    }
+
+    if (data) setFiles(data as FileRow[])
     setLoading(false)
   }
 
@@ -73,16 +85,17 @@ export default function ApplicantFilesPage() {
     URL.revokeObjectURL(a.href)
   }
 
-  async function deleteFile(fileId: number, path: string) {
-    if (!confirm("Delete this file?")) return
+  async function archiveFile(fileId: number, fileName: string) {
+    if (!confirm("Are you sure you want to archive this?")) return
 
-    const { error: storageError } = await supabase.storage.from(BUCKET).remove([path])
-    if (storageError) return alert(storageError.message)
+    const result = await archiveFileRecord("applicant_files", fileId, applicantId)
+    if (result.error) {
+      alert(result.error.message || "Failed to archive file")
+      return
+    }
 
-    const { error: dbError } = await supabase.from("applicant_files").delete().eq("id", fileId)
-    if (dbError) return alert(dbError.message)
-
-    loadFiles()
+    await loadFiles()
+    router.refresh()
   }
 
   useEffect(() => {
@@ -94,10 +107,18 @@ export default function ApplicantFilesPage() {
         .from("applicant_files")
         .select("*")
         .eq("applicant_id", applicantId)
+        .is("archived_at", null)
         .order("created_at", { ascending: false })
 
       if (cancelled) return
-      if (!error && data) setFiles(data as FileRow[])
+      if (error) {
+        alert(error.message.includes("archived_at")
+          ? `${error.message}\n\nRun supabase/add_archived_at.sql in Supabase SQL Editor.`
+          : error.message)
+        setLoading(false)
+        return
+      }
+      if (data) setFiles(data as FileRow[])
       setLoading(false)
     })()
     return () => {
@@ -165,11 +186,10 @@ export default function ApplicantFilesPage() {
 
                       <button
                         type="button"
-                        className="px-3 py-1 rounded-md border hover:bg-red-50 hover:text-red-700"
-                        onClick={() => deleteFile(f.id, f.file_path || "")}
-                        disabled={!f.file_path}
+                        className="px-3 py-1 rounded-md border hover:bg-orange-50 hover:text-orange-700"
+                        onClick={() => archiveFile(f.id, f.file_name || "file")}
                       >
-                        Delete
+                        Archive
                       </button>
                     </div>
                   </td>
@@ -180,23 +200,7 @@ export default function ApplicantFilesPage() {
         </div>
       )}
 
-      {preview && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setPreview(null)}>
-          <div className="bg-white rounded-lg w-full max-w-4xl p-4 max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between mb-3">
-              <span className="text-sm font-medium truncate">{preview.name}</span>
-              <button type="button" className="border px-3 py-1 text-sm rounded" onClick={() => setPreview(null)}>
-                Close
-              </button>
-            </div>
-            {preview.pdf ? (
-              <iframe src={preview.url} className="w-full h-[70vh] border" />
-            ) : (
-              <img src={preview.url} alt={preview.name} className="max-w-full max-h-[70vh] mx-auto block" />
-            )}
-          </div>
-        </div>
-      )}
+      <FilePreviewModal preview={preview} onClose={() => setPreview(null)} />
     </div>
   )
 }

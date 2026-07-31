@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { fieldClassSm, formGridClass, labelClassSm } from "@/lib/form-ui"
+import { CountrySelect } from "@/components/shared/CountrySelect"
 
 export type WorkExperienceItem = {
   country: string
@@ -9,9 +11,6 @@ export type WorkExperienceItem = {
   date_started: string
   date_ended: string
 }
-
-const inputFieldStyles = "mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-const labelStyles = "block text-sm font-medium text-gray-700"
 
 const emptyWork: WorkExperienceItem = {
   country: "",
@@ -42,25 +41,24 @@ export function WorkExperienceForm({ initial = [] }: { initial?: WorkExperienceI
               Remove
             </button>
           </div>
-          <div className="grid grid-cols-12 gap-4">
-            <div className="col-span-12 md:col-span-3">
-              <label className={labelStyles}>Country</label>
-              <input
-                className={inputFieldStyles}
+          <div className={formGridClass}>
+            <div>
+              <label className={labelClassSm}>Country</label>
+              <CountrySelect
                 value={work.country}
-                onChange={(e) =>
+                onChange={(country) =>
                   setWorks((prev) => {
                     const next = [...prev]
-                    next[index] = { ...next[index], country: e.target.value }
+                    next[index] = { ...next[index], country }
                     return next
                   })
                 }
               />
             </div>
-            <div className="col-span-12 md:col-span-5">
-              <label className={labelStyles}>Company</label>
+            <div>
+              <label className={labelClassSm}>Company</label>
               <input
-                className={inputFieldStyles}
+                className={fieldClassSm}
                 value={work.company}
                 onChange={(e) =>
                   setWorks((prev) => {
@@ -71,10 +69,10 @@ export function WorkExperienceForm({ initial = [] }: { initial?: WorkExperienceI
                 }
               />
             </div>
-            <div className="col-span-12 md:col-span-4">
-              <label className={labelStyles}>Position</label>
+            <div>
+              <label className={labelClassSm}>Position</label>
               <input
-                className={inputFieldStyles}
+                className={fieldClassSm}
                 value={work.position}
                 onChange={(e) =>
                   setWorks((prev) => {
@@ -85,11 +83,11 @@ export function WorkExperienceForm({ initial = [] }: { initial?: WorkExperienceI
                 }
               />
             </div>
-            <div className="col-span-12 md:col-span-3">
-              <label className={labelStyles}>Date Started</label>
+            <div>
+              <label className={labelClassSm}>Date Started</label>
               <input
                 type="date"
-                className={inputFieldStyles}
+                className={fieldClassSm}
                 value={work.date_started}
                 onChange={(e) =>
                   setWorks((prev) => {
@@ -100,11 +98,11 @@ export function WorkExperienceForm({ initial = [] }: { initial?: WorkExperienceI
                 }
               />
             </div>
-            <div className="col-span-12 md:col-span-3">
-              <label className={labelStyles}>Date Ended</label>
+            <div>
+              <label className={labelClassSm}>Date Ended</label>
               <input
                 type="date"
-                className={inputFieldStyles}
+                className={fieldClassSm}
                 value={work.date_ended}
                 onChange={(e) =>
                   setWorks((prev) => {

@@ -3,7 +3,7 @@
 import { createSupabaseAdmin } from "@/lib/supabase/admin"
 import { buildApplicantInsertPayload } from "@/lib/applicant-insert"
 import { createPlacement } from "@/lib/applicant-workflow"
-import { ONLINE_APPLICANT_TYPE } from "@/lib/status-options"
+import { getOnlineApplicantType } from "@/lib/status-options"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
@@ -13,7 +13,7 @@ export async function submitOnlineApplication(formData: FormData) {
     payload = buildApplicantInsertPayload(formData, {
       status: "New Applicant",
       date_applied: new Date().toISOString().slice(0, 10),
-      applicant_type: ONLINE_APPLICANT_TYPE,
+      applicant_type: getOnlineApplicantType(String(formData.get("position_applied") ?? "")),
     })
   } catch (error) {
     console.error("Invalid online application:", error)

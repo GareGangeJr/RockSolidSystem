@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { Eye, FolderOpen, Pencil } from "lucide-react"
 import { SearchTable } from "@/components/shared/SearchTable"
+import { ArchiveButton } from "@/components/shared/ArchiveButton"
 import CreateEmployeeLoginButton from "@/components/CreateEmployeeLoginButton"
 import DisableEmployeeLoginButton from "@/components/DisableEmployeeLoginButton"
 import EmployeeStatusSelect from "@/components/employees/EmployeeStatusSelect"
@@ -77,6 +78,7 @@ export function EmployeeTable({ employees }: { employees: EmployeeRow[] }) {
               <Link href={`/employees/${row.id}/edit`} className="rounded p-1 text-gray-600 hover:bg-yellow-100 hover:text-yellow-600" title="Edit">
                 <Pencil className="h-4 w-4" />
               </Link>
+              <ArchiveButton table="employees" id={row.id} name={fullName(row) || `Employee ${row.id}`} />
               {!row.auth_user_id && row.email && (
                 <CreateEmployeeLoginButton employeeId={row.id} employeeName={fullName(row) || "Employee"} />
               )}

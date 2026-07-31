@@ -1,10 +1,10 @@
+import type { ReactNode } from "react"
+import { formGridClass, sectionTitleClassSm } from "@/lib/form-ui"
 import { formatDisplayDate } from "@/lib/job-order-fields"
 
 const labelStyles = "block text-xs font-medium text-gray-500"
 const valueStyles = "mt-0.5 text-sm text-gray-900"
-const sectionHeaderStyles =
-  "mb-3 border-b border-gray-100 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-500"
-const gridLayoutStyles = "grid grid-cols-12 gap-4"
+const gridLayoutStyles = formGridClass
 
 type Props = {
   jobOrder: Record<string, unknown>
@@ -15,19 +15,20 @@ function formatValue(value: unknown) {
   return value != null && value !== "" ? String(value) : "--"
 }
 
-function DetailField({
-  label,
-  value,
-  className = "col-span-12 md:col-span-4",
-}: {
-  label: string
-  value: unknown
-  className?: string
-}) {
+function Field({ label, value }: { label: string; value: unknown }) {
   return (
-    <div className={className}>
+    <div>
       <span className={labelStyles}>{label}</span>
       <p className={valueStyles}>{formatValue(value)}</p>
+    </div>
+  )
+}
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div>
+      <h2 className={sectionTitleClassSm}>{title}</h2>
+      {children}
     </div>
   )
 }
@@ -52,99 +53,80 @@ export function JobOrderDetailsView({ jobOrder, showStatus = true }: Props) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className={sectionHeaderStyles}>Job Order Details</h2>
+      <Section title="Job Order Details">
         <div className={gridLayoutStyles}>
-          <DetailField label="ID" value={`JO-${formatValue(jobOrder.id)}`} />
-          <DetailField label="Company Name" value={jobOrder.company} />
-          <DetailField label="Country" value={jobOrder.country} />
-          <DetailField label="Job Title" value={jobOrder.job_title} className="col-span-12 md:col-span-6" />
-          {showStatus && (
-            <DetailField label="Status" value={jobOrder.status} className="col-span-12 md:col-span-6" />
-          )}
-          <DetailField
+          <Field label="Company Name" value={jobOrder.company} />
+          <Field label="Country" value={jobOrder.country} />
+          <Field label="Job Title" value={jobOrder.job_title} />
+          {showStatus && <Field label="Status" value={jobOrder.status} />}
+          <Field
             label="Job Order Date"
             value={formatDisplayDate(jobOrder.job_order_date) ?? "--"}
           />
         </div>
-      </div>
+      </Section>
 
       {showEmployer && (
-        <>
-          <hr className="border-gray-200" />
-          <div>
-            <h2 className={sectionHeaderStyles}>Employer Information</h2>
-            <div className={gridLayoutStyles}>
-              <DetailField label="Commercial Registration (C.R.) No." value={jobOrder.commercial_registration} />
-              <DetailField label="Company Contact" value={jobOrder.company_contact} />
-              <DetailField label="Company Address" value={jobOrder.company_address} />
-            </div>
+        <Section title="Employer Information">
+          <div className={gridLayoutStyles}>
+            <Field label="Commercial Registration (C.R.) No." value={jobOrder.commercial_registration} />
+            <Field label="Company Contact" value={jobOrder.company_contact} />
+            <Field label="Company Address" value={jobOrder.company_address} />
           </div>
-        </>
+        </Section>
       )}
 
       {showVisa && (
-        <>
-          <hr className="border-gray-200" />
-          <div>
-            <h2 className={sectionHeaderStyles}>Visa Information</h2>
-            <div className={gridLayoutStyles}>
-              <DetailField label="Work Visa Number" value={jobOrder.visa_number} />
-              <DetailField
-                label="Work Visa Date"
-                value={formatDisplayDate(jobOrder.visa_date) ?? "--"}
-              />
-              <DetailField label="Visa Category" value={jobOrder.visa_category} />
-            </div>
+        <Section title="Visa Information">
+          <div className={gridLayoutStyles}>
+            <Field label="Work Visa Number" value={jobOrder.visa_number} />
+            <Field
+              label="Work Visa Date"
+              value={formatDisplayDate(jobOrder.visa_date) ?? "--"}
+            />
+            <Field label="Visa Category" value={jobOrder.visa_category} />
           </div>
-        </>
+        </Section>
       )}
 
-      <hr className="border-gray-200" />
-
-      <div>
-        <h2 className={sectionHeaderStyles}>Requirements</h2>
+      <Section title="Requirements">
         <div className={gridLayoutStyles}>
-          <DetailField label="Sex" value={jobOrder.gender} />
-          <DetailField
+          <Field label="Sex" value={jobOrder.gender} />
+          <Field
             label="Number of Workers"
             value={jobOrder.no_workers != null ? String(jobOrder.no_workers) : "--"}
           />
-          <DetailField
+          <Field
             label="Years Experience Required"
             value={jobOrder.years_exp_required != null ? String(jobOrder.years_exp_required) : "--"}
           />
-          <DetailField label="Skills Required" value={jobOrder.skills_required} className="col-span-12" />
+          <div className="col-span-full">
+            <span className={labelStyles}>Skills Required</span>
+            <p className={valueStyles}>{formatValue(jobOrder.skills_required)}</p>
+          </div>
         </div>
-      </div>
+      </Section>
 
-      <hr className="border-gray-200" />
-
-      <div>
-        <h2 className={sectionHeaderStyles}>Compensation</h2>
+      <Section title="Compensation">
         <div className={gridLayoutStyles}>
-          <DetailField label="Basic Salary" value={jobOrder.salary} className="col-span-12 md:col-span-6" />
+          <Field label="Basic Salary" value={jobOrder.salary} />
         </div>
-      </div>
+      </Section>
 
       {showTerms && (
-        <>
-          <hr className="border-gray-200" />
-          <div>
-            <h2 className={sectionHeaderStyles}>Terms & Benefits</h2>
-            <div className={gridLayoutStyles}>
-              <DetailField label="Contract Period" value={jobOrder.contract_period} />
-              <DetailField label="Place of Work" value={jobOrder.work_site} />
-              <DetailField label="Working Hours" value={jobOrder.working_hours} />
-              <div className="col-span-12">
-                <span className={labelStyles}>Benefits & Other Terms</span>
-                <p className={`${valueStyles} whitespace-pre-line`}>
-                  {formatValue(jobOrder.benefits_and_terms)}
-                </p>
-              </div>
+        <Section title="Terms & Benefits">
+          <div className={gridLayoutStyles}>
+            <Field label="Contract Period" value={jobOrder.contract_period} />
+            <Field label="Place of Work" value={jobOrder.work_site} />
+            <Field label="Working Hours" value={jobOrder.working_hours} />
+            <div className="col-span-full">
+              <span className={labelStyles}>Benefits & Other Terms</span>
+              <p className={`${valueStyles} whitespace-pre-line`}>
+                {formatValue(jobOrder.benefits_and_terms)}
+              </p>
             </div>
           </div>
-        </>
+        </Section>
       )}
     </div>
   )

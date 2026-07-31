@@ -27,6 +27,16 @@ export type ApplicantMatchResult = {
   criteria: MatchCriterion[]
 }
 
+const CRITERION_WEIGHTS: Record<string, number> = {
+  Position: 35,
+  Country: 30,
+  Experience: 20,
+  Skills: 10,
+  Gender: 5,
+}
+
+const REQUIRED_FOR_SUGGESTED = new Set(["Position", "Country"])
+
 function parseSkills(value: string | null) {
   return (value || "")
     .split(",")
@@ -50,9 +60,16 @@ function checkExperience(applicant: ApplicantForMatch, job: JobOrderForMatch): M
 function checkSkills(applicant: ApplicantForMatch, job: JobOrderForMatch): MatchCriterion {
   const jobSkills = parseSkills(job.skills_required)
   const appSkills = parseSkills(applicant.skills)
+  if (jobSkills.length === 0) {
+    return { label: "Skills", pass: true }
+  }
+
+  const matched = jobSkills.filter((skill) => appSkills.includes(skill)).length
+  const needed = Math.ceil(jobSkills.length / 2)
+
   return {
     label: "Skills",
-    pass: jobSkills.length === 0 || jobSkills.some((skill) => appSkills.includes(skill)),
+    pass: matched >= needed,
   }
 }
 
@@ -92,16 +109,20 @@ export function scoreApplicantMatch(applicant: ApplicantForMatch, job: JobOrderF
     checkPosition(applicant, job),
   ]
 
-  const passed = criteria.filter((item) => item.pass).length
-  const score = Math.round((passed / criteria.length) * 100)
+  const score = criteria.reduce(
+    (sum, item) => sum + (item.pass ? (CRITERION_WEIGHTS[item.label] ?? 0) : 0),
+    0
+  )
 
   return { score, criteria }
 }
 
-export const SUGGESTED_MATCH_MIN_SCORE = 60
-
 export function isSuggestedMatch(result: ApplicantMatchResult) {
-  return result.score >= SUGGESTED_MATCH_MIN_SCORE
+  const passes = new Map(result.criteria.map((item) => [item.label, item.pass]))
+  for (const label of REQUIRED_FOR_SUGGESTED) {
+    if (!passes.get(label)) return false
+  }
+  return true
 }
 
 export function sortByMatchScore<T extends { match: ApplicantMatchResult }>(items: T[]) {

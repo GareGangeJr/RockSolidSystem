@@ -9,10 +9,25 @@ export default async function JobOrdersPage({ searchParams }: { searchParams: Pr
   const { data: orders, error } = await supabase
     .from("job_orders")
     .select("*")
+    .is("archived_at", null)
     .order("created_at", { ascending: false })
 
   if (error) {
     return <div className="p-6 text-red-500">Error loading job orders</div>
+  }
+
+  const jobOrderIds = (orders ?? []).map((order) => order.id)
+  const { data: placements } = await supabase
+    .from("placements")
+    .select("job_order_id")
+    .in("job_order_id", jobOrderIds.length > 0 ? jobOrderIds : [0])
+
+  const assignedByJobOrder = new Map<number, number>()
+  for (const placement of placements ?? []) {
+    assignedByJobOrder.set(
+      placement.job_order_id,
+      (assignedByJobOrder.get(placement.job_order_id) ?? 0) + 1
+    )
   }
 
   const list = (orders ?? []).map((o) => ({
@@ -22,6 +37,7 @@ export default async function JobOrdersPage({ searchParams }: { searchParams: Pr
     country: o.country ?? null,
     job_title: o.job_title ?? null,
     no_workers: o.no_workers ?? null,
+    assigned_workers: assignedByJobOrder.get(o.id) ?? 0,
     status: o.status ?? null,
   }))
 

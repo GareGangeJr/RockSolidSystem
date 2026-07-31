@@ -30,14 +30,60 @@ export const MATCH_EXCLUDED_STATUSES = new Set<string>([
   "Deported",
 ])
 
+export const DEPLOY_VIA_MATCH_STATUSES = new Set<string>(["Deployed", "Deployed(With Concerns)"])
+
+export function getSelectableApplicantStatusOptions(currentStatus?: string | null): string[] {
+  const current = currentStatus?.trim() || null
+  return STATUS_OPTIONS.filter((opt) => {
+    if (!DEPLOY_VIA_MATCH_STATUSES.has(opt)) return true
+    return opt === current
+  }).map(String)
+}
+
 export function isEligibleForJobMatching(status: string | null | undefined) {
   if (!status) return true
   return !MATCH_EXCLUDED_STATUSES.has(status)
 }
 
-export const APPLICANT_TYPE_OPTIONS = ["Domestic Helper", "Skilled Worker", "Online Application"] as const
+export const APPLICANT_TYPE_OPTIONS = [
+  "Domestic Helper",
+  "Skilled Worker",
+  "Online Application - Domestic Helper",
+  "Online Application - Skilled",
+  "Online Application",
+] as const
 
 export const ONLINE_APPLICANT_TYPE = "Online Application" as const
+export const ONLINE_APPLICANT_TYPE_DH = "Online Application - Domestic Helper" as const
+export const ONLINE_APPLICANT_TYPE_SKILLED = "Online Application - Skilled" as const
+
+export const ONLINE_APPLICANT_TYPES = new Set<string>([
+  ONLINE_APPLICANT_TYPE,
+  ONLINE_APPLICANT_TYPE_DH,
+  ONLINE_APPLICANT_TYPE_SKILLED,
+])
+
+export function getOnlineApplicantType(positionApplied: string | null | undefined): string {
+  if ((positionApplied ?? "").trim() === "Domestic Helper") {
+    return ONLINE_APPLICANT_TYPE_DH
+  }
+  return ONLINE_APPLICANT_TYPE_SKILLED
+}
+
+export function resolveApplicantType(
+  applicantType: string | null | undefined,
+  positionApplied?: string | null
+): string | null {
+  const type = applicantType?.trim() || null
+  if (type === ONLINE_APPLICANT_TYPE) {
+    return getOnlineApplicantType(positionApplied)
+  }
+  return type
+}
+
+export const APPLICANT_TYPE_FILTER_OPTIONS = APPLICANT_TYPE_OPTIONS.filter(
+  (option) => option !== ONLINE_APPLICANT_TYPE
+)
 
 
 

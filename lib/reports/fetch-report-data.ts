@@ -108,9 +108,9 @@ export async function fetchReportData(): Promise<ReportData> {
     { data: placements },
     { count: matchedCount },
   ] = await Promise.all([
-    supabase.from("monitoring").select("*").order("deployment_date", { ascending: false }),
-    supabase.from("applicants").select("*").order("created_at", { ascending: false }),
-    supabase.from("job_orders").select("*").order("created_at", { ascending: false }),
+    supabase.from("monitoring").select("*").is("archived_at", null).order("deployment_date", { ascending: false }),
+    supabase.from("applicants").select("*").is("archived_at", null).order("created_at", { ascending: false }),
+    supabase.from("job_orders").select("*").is("archived_at", null).order("created_at", { ascending: false }),
     supabase.from("placements").select("*"),
     supabase.from("placements").select("*", { count: "exact", head: true }),
   ])

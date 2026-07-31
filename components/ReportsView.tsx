@@ -7,11 +7,7 @@ import type {
   DeploymentReportRow,
   PlacementStatusCount,
 } from "@/lib/reports/types"
-import {
-  defaultDateInput,
-  filterDeploymentsByPeriod,
-  type ReportPeriod,
-} from "@/lib/reports/date-range"
+import { filterDeploymentsByDateRange } from "@/lib/reports/date-range"
 import { formatApplicantRef } from "@/lib/format-applicant-ref"
 
 export type { DeploymentReportRow, CountryCount, PlacementStatusCount }
@@ -29,31 +25,30 @@ type Props = {
   deployments: DeploymentReportRow[]
 }
 
+const dateFieldClass =
+  "rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+
 export default function ReportsView({
   summary,
   statusCounts,
   countryCounts,
   deployments,
 }: Props) {
-  const [period, setPeriod] = useState<ReportPeriod>("all")
-  const [dateInput, setDateInput] = useState(() => defaultDateInput("day"))
+  const [fromDate, setFromDate] = useState("")
+  const [toDate, setToDate] = useState("")
 
   const filteredDeployments = useMemo(
-    () => filterDeploymentsByPeriod(deployments, period, dateInput),
-    [deployments, period, dateInput]
+    () => filterDeploymentsByDateRange(deployments, fromDate || null, toDate || null),
+    [deployments, fromDate, toDate]
   )
 
-  const exportHref =
-    period === "all"
-      ? "/api/reports/export"
-      : `/api/reports/export?period=${period}&date=${encodeURIComponent(dateInput)}`
-
-  function handlePeriodChange(next: ReportPeriod) {
-    setPeriod(next)
-    if (next !== "all") {
-      setDateInput(defaultDateInput(next))
-    }
-  }
+  const exportHref = useMemo(() => {
+    const params = new URLSearchParams()
+    if (fromDate) params.set("from", fromDate)
+    if (toDate) params.set("to", toDate)
+    const query = params.toString()
+    return query ? `/api/reports/export?${query}` : "/api/reports/export"
+  }, [fromDate, toDate])
 
   const formatDate = (date: string | null) =>
     date ? new Date(date).toLocaleDateString() : "--"
@@ -68,51 +63,44 @@ export default function ReportsView({
           <SummaryCard label="Deployed This Month" value={summary.deployedThisMonth} />
           <SummaryCard label="Matched to Jobs" value={summary.matchedApplicants} />
         </div>
-        <div className="flex flex-wrap items-end gap-2">
+        <div className="flex flex-wrap items-end gap-3">
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">Report period</label>
-            <select
-              value={period}
-              onChange={(e) => handlePeriodChange(e.target.value as ReportPeriod)}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm"
-            >
-              <option value="all">All time</option>
-              <option value="day">Day</option>
-              <option value="week">Week</option>
-              <option value="month">Month</option>
-              <option value="year">Year</option>
-            </select>
+            <label htmlFor="report-from-date" className="mb-1 block text-xs font-medium text-gray-600">
+              From
+            </label>
+            <input
+              id="report-from-date"
+              type="date"
+              value={fromDate}
+              max={toDate || undefined}
+              onChange={(e) => setFromDate(e.target.value)}
+              className={dateFieldClass}
+            />
           </div>
-          {period !== "all" && (
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-600">
-                {period === "year" ? "Year" : period === "month" ? "Month" : period === "week" ? "Any day in week" : "Date"}
-              </label>
-              {period === "year" ? (
-                <input
-                  type="number"
-                  min={2020}
-                  max={2035}
-                  value={dateInput}
-                  onChange={(e) => setDateInput(e.target.value)}
-                  className="rounded-md border border-gray-300 px-3 py-2 text-sm"
-                />
-              ) : period === "month" ? (
-                <input
-                  type="month"
-                  value={dateInput}
-                  onChange={(e) => setDateInput(e.target.value)}
-                  className="rounded-md border border-gray-300 px-3 py-2 text-sm"
-                />
-              ) : (
-                <input
-                  type="date"
-                  value={dateInput}
-                  onChange={(e) => setDateInput(e.target.value)}
-                  className="rounded-md border border-gray-300 px-3 py-2 text-sm"
-                />
-              )}
-            </div>
+          <div>
+            <label htmlFor="report-to-date" className="mb-1 block text-xs font-medium text-gray-600">
+              To
+            </label>
+            <input
+              id="report-to-date"
+              type="date"
+              value={toDate}
+              min={fromDate || undefined}
+              onChange={(e) => setToDate(e.target.value)}
+              className={dateFieldClass}
+            />
+          </div>
+          {(fromDate || toDate) && (
+            <button
+              type="button"
+              onClick={() => {
+                setFromDate("")
+                setToDate("")
+              }}
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            >
+              Clear
+            </button>
           )}
           <a
             href={exportHref}
@@ -123,6 +111,12 @@ export default function ReportsView({
           </a>
         </div>
       </div>
+
+      <p className="text-sm text-gray-500">
+        {fromDate || toDate
+          ? `Showing deployments${fromDate ? ` from ${formatDate(fromDate)}` : ""}${toDate ? ` to ${formatDate(toDate)}` : ""}.`
+          : "Showing all deployments. Pick a from and to date to filter the report."}
+      </p>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">

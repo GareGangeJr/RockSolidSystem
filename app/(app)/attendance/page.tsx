@@ -1,17 +1,10 @@
 import { createSupabaseServer } from "@/lib/supabase/server"
-import { getAccessRole } from "@/lib/user-role"
 import AttendanceClock from "@/components/AttendanceClock"
 import AttendanceList, { type AttendanceListRow } from "@/components/AttendanceList"
-import { getMyAttendanceToday } from "./actions"
 
 export default async function AttendancePage() {
   const supabase = await createSupabaseServer()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  const role = await getAccessRole(supabase, user?.id)
   const kiosk = process.env.NEXT_PUBLIC_ATTENDANCE_KIOSK === "true"
-  const myAttendance = role === "staff" && kiosk ? await getMyAttendanceToday() : null
 
   const { data: logs, error } = await supabase
     .from("attendance_logs")
@@ -44,22 +37,7 @@ export default async function AttendancePage() {
         <h1 className="text-2xl font-bold text-gray-900">Attendance</h1>
       </div>
 
-      {role === "staff" && kiosk && myAttendance && (
-        <>
-          {myAttendance.error ? (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-              {myAttendance.error}
-            </div>
-          ) : myAttendance.employee ? (
-            <AttendanceClock
-              canTimeIn={myAttendance.canTimeIn ?? false}
-              canTimeOut={myAttendance.canTimeOut ?? false}
-              timeIn={myAttendance.timeIn}
-              timeOut={myAttendance.timeOut}
-            />
-          ) : null}
-        </>
-      )}
+      {kiosk && <AttendanceClock />}
 
       <div>
         <h2 className="mb-4 text-lg font-semibold text-gray-900">Attendance Logs</h2>

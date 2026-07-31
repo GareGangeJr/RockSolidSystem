@@ -53,6 +53,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     .from("applicant_files")
     .select("applicant_id, file_name, file_path")
     .in("applicant_id", matchedIds)
+    .is("archived_at", null)
 
   const filesByApplicant = new Map<number, { file_name: string; file_path: string }[]>()
   for (const file of filesList ?? []) {

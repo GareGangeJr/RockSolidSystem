@@ -2,7 +2,7 @@ import { createSupabaseServer } from "@/lib/supabase/server"
 import { ApplicantForm } from "@/components/applicants/ApplicantForm"
 import type { Applicant } from "@/types/entities"
 import { BackButton } from "@/components/BackButton"
-import { formatApplicantRef } from "@/lib/format-applicant-ref"
+import { fetchOpenJobOrdersForApplicantForm } from "@/lib/fetch-open-job-orders"
 
 export default async function EditPage({
   params,
@@ -36,22 +36,28 @@ export default async function EditPage({
     )
   }
 
+  const { openJobOrders, defaultJobOrderId } = await fetchOpenJobOrdersForApplicantForm(supabase, numericId)
+
   return (
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">Edit Applicant</h1>
-            <p className="mt-1 text-sm text-gray-500">{formatApplicantRef(numericId)}</p>
-          </div>
+          <h1 className="text-xl font-semibold text-gray-900">Edit Applicant</h1>
           <BackButton href="/applicants" />
         </div>
 
         {queryError === "status" && message && (
           <div className="mb-4 rounded-md bg-red-100 px-4 py-3 text-red-800">{decodeURIComponent(message)}</div>
         )}
+        {queryError === "placement" && message && (
+          <div className="mb-4 rounded-md bg-red-100 px-4 py-3 text-red-800">{decodeURIComponent(message)}</div>
+        )}
 
-        <ApplicantForm applicant={data as Applicant} />
+        <ApplicantForm
+          applicant={data as Applicant}
+          openJobOrders={openJobOrders}
+          defaultJobOrderId={defaultJobOrderId}
+        />
       </div>
     </div>
   )

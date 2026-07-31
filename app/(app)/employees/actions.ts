@@ -3,6 +3,7 @@
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { createSupabaseAdmin } from "@/lib/supabase/admin"
 import { generateEmployeePassword } from "@/lib/generate-employee-password"
+import { logActivity } from "@/lib/activity-log"
 import { requireAdmin } from "@/lib/require-role"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
@@ -78,7 +79,7 @@ export async function addEmployee(formData: FormData) {
   }
   const employeeNumber = `EMP-${year}-${String(nextNumber).padStart(3, '0')}`
 
-  const { error: insertError } = await supabase.from("employees").insert({
+  const { data: inserted, error: insertError } = await supabase.from("employees").insert({
     employee_number: employeeNumber,
     position: formData.get("position") as string,
     department: formData.get("department") as string,
@@ -111,12 +112,20 @@ export async function addEmployee(formData: FormData) {
     contract_start_date: formData.get("contract_start_date") || null,
     contract_end_date: formData.get("contract_end_date") || null,
     notes: formData.get("notes") as string || null,
-  }).select()
+  }).select("id, employee_number").single()
 
-  if (insertError) {
+  if (insertError || !inserted) {
     console.error("Failed to add employee:", insertError)
-    return { error: insertError.message }
+    redirect(
+      `/employees/add?error=save&message=${encodeURIComponent(insertError?.message ?? "Failed to add employee.")}`
+    )
   }
+
+  await logActivity({
+    action: "create",
+    module: "employees",
+    recordId: inserted.employee_number ?? inserted.id,
+  })
 
   revalidatePath("/employees")
   redirect("/employees?success=added")
@@ -168,6 +177,18 @@ export async function updateEmployee(formData: FormData) {
     console.error("Failed to sync employee login access:", loginSync.error.message)
   }
 
+  const { data: emp } = await supabase
+    .from("employees")
+    .select("employee_number")
+    .eq("id", id)
+    .maybeSingle()
+
+  await logActivity({
+    action: "update",
+    module: "employees",
+    recordId: emp?.employee_number ?? id,
+  })
+
   revalidatePath("/employees")
   revalidatePath(`/employees/${id}`)
   redirect("/employees?success=updated")
@@ -183,6 +204,20 @@ export async function updateEmployeeStatus(employeeId: number, newStatus: string
   if (error) return { error }
   const loginSync = await syncEmployeeLoginAccess(employeeId, newStatus)
   if (loginSync.error) return { error: loginSync.error }
+
+  const { data: emp } = await supabase
+    .from("employees")
+    .select("employee_number")
+    .eq("id", employeeId)
+    .maybeSingle()
+
+  await logActivity({
+    action: "status_change",
+    module: "employees",
+    recordId: emp?.employee_number ?? employeeId,
+    details: { status: newStatus },
+  })
+
   revalidatePath("/employees")
   revalidatePath(`/employees/${employeeId}`)
   return {}
@@ -217,6 +252,11 @@ export async function createEmployeeLogin(employeeId: number) {
   if (authError || !authData.user) return { error: authError || { message: "Failed to create user" } }
 
   await supabase.from("employees").update({ auth_user_id: authData.user.id }).eq("id", employeeId)
+  await logActivity({
+    action: "login_create",
+    module: "employees",
+    recordId: emp.employee_number ?? employeeId,
+  })
   revalidatePath("/employees")
   return { email: emp.email.trim(), password }
 }
@@ -239,6 +279,18 @@ export async function disableEmployeeLogin(employeeId: number) {
     ban_duration: "876000h",
   })
   if (error) return { error: { message: error.message } }
+
+  const { data: empRecord } = await supabase
+    .from("employees")
+    .select("employee_number")
+    .eq("id", employeeId)
+    .maybeSingle()
+
+  await logActivity({
+    action: "login_disable",
+    module: "employees",
+    recordId: empRecord?.employee_number ?? employeeId,
+  })
 
   revalidatePath("/employees")
   return {}

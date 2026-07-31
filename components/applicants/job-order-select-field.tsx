@@ -34,7 +34,7 @@ export function JobOrderSelectField({
   }
 
   return (
-    <div className="col-span-12 md:col-span-6 md:max-w-sm">
+    <div>
       <label className={labelStyles}>Job Order Applying For</label>
       <select
         name="job_order_id"
@@ -43,11 +43,16 @@ export function JobOrderSelectField({
         onChange={handleChange}
       >
         <option value="">Select a job order</option>
-        {jobOrders.map((job) => (
-          <option key={job.id} value={job.id}>
-            {job.id} - {job.job_title ?? "Untitled"}
-          </option>
-        ))}
+        {jobOrders.map((job) => {
+          const title = job.job_title ?? "Untitled"
+          const label = job.country ? `${job.id} - ${title} - ${job.country}` : `${job.id} - ${title}`
+
+          return (
+            <option key={job.id} value={job.id}>
+              {label}
+            </option>
+          )
+        })}
       </select>
     </div>
   )

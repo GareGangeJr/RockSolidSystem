@@ -3,6 +3,10 @@ import { MATCH_EXCLUDED_STATUSES } from "@/lib/status-options"
 
 export const DEPLOYED_STATUSES = new Set(["Deployed", "Deployed(With Concerns)"])
 
+export function isManualDeployAttempt(newStatus: string, previousStatus?: string | null): boolean {
+  return DEPLOYED_STATUSES.has(newStatus) && !(previousStatus && DEPLOYED_STATUSES.has(previousStatus))
+}
+
 export type WorkflowResult = { error: { message: string } | null }
 
 export async function syncJobOrderFilledStatus(
@@ -181,7 +185,8 @@ export async function applyApplicantStatusChange(
   supabase: SupabaseClient,
   applicantId: number,
   newStatus: string,
-  previousStatus?: string | null
+  previousStatus?: string | null,
+  preferredJobOrderId?: number | null
 ): Promise<WorkflowResult> {
   const isDeploying = DEPLOYED_STATUSES.has(newStatus)
   const wasDeployed = Boolean(previousStatus && DEPLOYED_STATUSES.has(previousStatus))
@@ -189,23 +194,57 @@ export async function applyApplicantStatusChange(
   let jobOrderId: number | null = null
 
   if (isDeploying) {
-    const { data: placement } = await supabase
-      .from("placements")
-      .select("job_order_id")
-      .eq("applicant_id", applicantId)
-      .order("id", { ascending: false })
-      .limit(1)
-      .maybeSingle()
+    if (preferredJobOrderId) {
+      const { data: placement } = await supabase
+        .from("placements")
+        .select("job_order_id")
+        .eq("applicant_id", applicantId)
+        .eq("job_order_id", preferredJobOrderId)
+        .maybeSingle()
 
-    if (!placement) {
-      return {
-        error: {
-          message:
-            "Cannot deploy: Applicant is not matched to any job order. Please match them to a job order first.",
-        },
+      if (!placement) {
+        return {
+          error: {
+            message: "Cannot deploy: Applicant is not matched to this job order.",
+          },
+        }
       }
+
+      const { data: deployedElsewhere } = await supabase
+        .from("monitoring")
+        .select("id")
+        .eq("applicant_id", applicantId)
+        .neq("job_order_id", preferredJobOrderId)
+        .limit(1)
+
+      if (deployedElsewhere && deployedElsewhere.length > 0) {
+        return {
+          error: {
+            message: "Applicant is already deployed to another job order.",
+          },
+        }
+      }
+
+      jobOrderId = preferredJobOrderId
+    } else {
+      const { data: placement } = await supabase
+        .from("placements")
+        .select("job_order_id")
+        .eq("applicant_id", applicantId)
+        .order("id", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (!placement) {
+        return {
+          error: {
+            message:
+              "Cannot deploy: Applicant is not matched to any job order. Please match them to a job order first.",
+          },
+        }
+      }
+      jobOrderId = placement.job_order_id
     }
-    jobOrderId = placement.job_order_id
   }
 
   const { error: statusError } = await supabase

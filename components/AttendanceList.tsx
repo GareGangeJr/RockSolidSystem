@@ -44,7 +44,7 @@ export default function AttendanceList({ rows }: Props) {
       <div className="flex flex-wrap gap-3">
         <input
           type="text"
-          placeholder="Search employee..."
+          placeholder="Search by Employee ID..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="min-w-[240px] rounded-md border border-gray-300 px-3 py-2 text-sm"
@@ -71,7 +71,8 @@ export default function AttendanceList({ rows }: Props) {
         <table className="w-full text-sm">
           <thead className="bg-gray-50">
             <tr>
-              <th className="p-3 text-left">Employee</th>
+              <th className="p-3 text-left">Employee ID</th>
+              <th className="p-3 text-left">Name</th>
               <th className="p-3 text-left">Type</th>
               <th className="p-3 text-left">Date & Time</th>
             </tr>
@@ -79,17 +80,15 @@ export default function AttendanceList({ rows }: Props) {
           <tbody>
             {filtered.map((row) => (
               <tr key={row.id} className="border-t border-gray-100">
-                <td className="p-3">
-                  <div className="font-medium">{row.employeeName}</div>
-                  <div className="text-xs text-gray-500">{row.employeeNumber ?? "--"}</div>
-                </td>
+                <td className="p-3 font-medium">{row.employeeNumber ?? "--"}</td>
+                <td className="p-3">{row.employeeName}</td>
                 <td className="p-3 capitalize">{row.logType.replace("_", " ")}</td>
                 <td className="p-3">{formatDateTime(row.loggedAt)}</td>
               </tr>
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={3} className="p-8 text-center text-gray-500">
+                <td colSpan={4} className="p-8 text-center text-gray-500">
                   No attendance logs found.
                 </td>
               </tr>

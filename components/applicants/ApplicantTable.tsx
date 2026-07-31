@@ -3,9 +3,10 @@
 import Link from "next/link"
 import { Eye, FolderOpen, Pencil } from "lucide-react"
 import { SearchTable } from "@/components/shared/SearchTable"
+import { ArchiveButton } from "@/components/shared/ArchiveButton"
 import { ApplicantStatusSelect } from "./ApplicantStatusSelect"
 import { formatApplicantRef } from "@/lib/format-applicant-ref"
-import { APPLICANT_TYPE_OPTIONS, STATUS_OPTIONS } from "@/lib/status-options"
+import { APPLICANT_TYPE_FILTER_OPTIONS, resolveApplicantType, STATUS_OPTIONS } from "@/lib/status-options"
 import type { Applicant } from "@/types/entities"
 
 type ApplicantRow = Pick<
@@ -57,8 +58,8 @@ export function ApplicantTable({ applicants }: { applicants: ApplicantRow[] }) {
         {
           id: "type",
           label: "Type",
-          options: APPLICANT_TYPE_OPTIONS,
-          match: (row, value) => row.applicant_type?.trim() === value,
+          options: APPLICANT_TYPE_FILTER_OPTIONS,
+          match: (row, value) => resolveApplicantType(row.applicant_type, row.position_applied) === value,
         },
         {
           id: "status",
@@ -71,18 +72,10 @@ export function ApplicantTable({ applicants }: { applicants: ApplicantRow[] }) {
         { header: "Applicant ID", cell: (row) => formatApplicantRef(row.id) },
         { header: "Name", cell: (row) => fullName(row) },
         { header: "Position", cell: (row) => row.position_applied ?? "--" },
-        { header: "Type", cell: (row) => row.applicant_type ?? "--" },
+        { header: "Type", cell: (row) => resolveApplicantType(row.applicant_type, row.position_applied) ?? "--" },
         {
           header: "Status",
           cell: (row) => <ApplicantStatusSelect applicantId={row.id} currentStatus={row.status} />,
-        },
-        {
-          header: "Notes",
-          cell: (row) => (
-            <span className="block max-w-[200px] truncate" title={row.notes ?? undefined}>
-              {row.notes ?? "--"}
-            </span>
-          ),
         },
         { header: "Contact", cell: (row) => row.contact_number ?? "--" },
         {
@@ -102,6 +95,7 @@ export function ApplicantTable({ applicants }: { applicants: ApplicantRow[] }) {
               <Link href={`/applicants/${row.id}/edit`} className="rounded p-1 text-gray-600 hover:bg-yellow-100 hover:text-yellow-600" title="Edit">
                 <Pencil className="h-4 w-4" />
               </Link>
+              <ArchiveButton table="applicants" id={row.id} name={fullName(row) || `Applicant ${row.id}`} />
             </div>
           ),
         },

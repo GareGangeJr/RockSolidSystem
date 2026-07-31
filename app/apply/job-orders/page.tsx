@@ -8,6 +8,7 @@ export default async function PublicJobOrdersPage() {
     .from("job_orders")
     .select("id, company, country, job_title, no_workers")
     .eq("status", "Open")
+    .is("archived_at", null)
     .order("created_at", { ascending: false })
 
   if (error) {

@@ -3,11 +3,14 @@
 import Link from "next/link"
 import { Eye, Pencil, UserPlus } from "lucide-react"
 import { SearchTable } from "@/components/shared/SearchTable"
+import { ArchiveButton } from "@/components/shared/ArchiveButton"
 import JobOrderStatusSelect from "@/components/job-orders/JobOrderStatusSelect"
 import { JOB_ORDER_STATUS_OPTIONS } from "@/lib/status-options"
 import type { JobOrder } from "@/types/entities"
 
-export function JobOrderTable({ jobOrders }: { jobOrders: JobOrder[] }) {
+type JobOrderRow = JobOrder & { assigned_workers: number }
+
+export function JobOrderTable({ jobOrders }: { jobOrders: JobOrderRow[] }) {
   return (
     <SearchTable
       rows={jobOrders}
@@ -33,7 +36,12 @@ export function JobOrderTable({ jobOrders }: { jobOrders: JobOrder[] }) {
         { header: "Company", cell: (row) => row.company ?? "--" },
         { header: "Country", cell: (row) => row.country ?? "--" },
         { header: "Job Title", cell: (row) => row.job_title ?? "--" },
-        { header: "Workers", cell: (row) => row.no_workers ?? "--" },
+        { header: "Workers", cell: (row) => {
+          const assigned = row.assigned_workers
+          const needed = row.no_workers
+          if (needed == null) return assigned
+          return `${assigned}/${needed}`
+        }},
         {
           header: "Status",
           cell: (row) => <JobOrderStatusSelect jobOrderId={row.id} currentStatus={row.status} />,
@@ -51,6 +59,7 @@ export function JobOrderTable({ jobOrders }: { jobOrders: JobOrder[] }) {
               <Link href={`/job-orders/${row.id}/edit`} className="rounded p-1 hover:bg-yellow-100 hover:text-yellow-600" title="Edit">
                 <Pencil className="h-4 w-4" />
               </Link>
+              <ArchiveButton table="job_orders" id={row.id} name={`JO-${row.id}`} />
             </div>
           ),
         },

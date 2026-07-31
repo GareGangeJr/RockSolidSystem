@@ -27,7 +27,8 @@ function getLastSixMonths(): MonthlyItem[] {
   for (let i = 5; i >= 0; i--) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
     items.push({
-      month: date.toLocaleString("default", { month: "short", year: "2-digit" }),
+      monthKey: `${date.getFullYear()}-${date.getMonth()}`,
+      month: date.toLocaleString("default", { month: "short" }),
       count: 0,
     })
   }
@@ -48,10 +49,10 @@ export default async function Home() {
     { data: monitoringRecords },
     { count: openJobOrders },
   ] = await Promise.all([
-    supabase.from("applicants").select("id, first_name, last_name, position_applied, status, applicant_type, created_at").order("created_at", { ascending: false }),
-    supabase.from("job_orders").select("id, status, country"),
-    supabase.from("monitoring").select("id, applicant_id, job_order_id, deployment_status, deployment_date").order("deployment_date", { ascending: false }).limit(10),
-    supabase.from("job_orders").select("*", { count: "exact", head: true }).eq("status", "Open"),
+    supabase.from("applicants").select("id, first_name, last_name, position_applied, status, applicant_type, created_at").is("archived_at", null).order("created_at", { ascending: false }),
+    supabase.from("job_orders").select("id, status, country").is("archived_at", null),
+    supabase.from("monitoring").select("id, applicant_id, job_order_id, deployment_status, deployment_date").is("archived_at", null).order("deployment_date", { ascending: false }).limit(10),
+    supabase.from("job_orders").select("*", { count: "exact", head: true }).eq("status", "Open").is("archived_at", null),
   ])
 
   const applicantRows = applicants ?? []
@@ -91,8 +92,8 @@ export default async function Home() {
   const monthlyApplicants = getLastSixMonths()
   for (const applicant of applicantRows) {
     const created = new Date(applicant.created_at)
-    const label = created.toLocaleString("default", { month: "short", year: "2-digit" })
-    const bucket = monthlyApplicants.find((item) => item.month === label)
+    const bucketKey = `${created.getFullYear()}-${created.getMonth()}`
+    const bucket = monthlyApplicants.find((item) => item.monthKey === bucketKey)
     if (bucket) bucket.count += 1
   }
 

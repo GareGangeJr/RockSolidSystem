@@ -1,5 +1,6 @@
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { BackButton } from "@/components/BackButton"
+import { ViewPageActions } from "@/components/shared/ViewPageActions"
 import { JobOrderDetailsView } from "@/components/job-orders/JobOrderDetailsView"
 
 export default async function Page({
@@ -29,16 +30,22 @@ export default async function Page({
       </div>
     )
 
+  const isArchived = Boolean(data.archived_at)
+
   return (
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-900">View Job Order</h1>
-          <BackButton href="/job-orders" />
+          {isArchived ? (
+            <BackButton href="/archive" />
+          ) : (
+            <ViewPageActions editHref={`/job-orders/${numericId}/edit`} backHref="/job-orders" />
+          )}
         </div>
 
         <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
-          <div className="p-6">
+          <div className="space-y-6 p-6">
             <JobOrderDetailsView jobOrder={data as Record<string, unknown>} />
           </div>
         </div>

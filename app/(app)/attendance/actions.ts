@@ -1,41 +1,52 @@
 "use server"
 
 import { createSupabaseAdmin } from "@/lib/supabase/admin"
-import { createSupabaseServer } from "@/lib/supabase/server"
+import { logActivity } from "@/lib/activity-log"
 import { revalidatePath } from "next/cache"
 
 type AttendanceLogType = "time_in" | "time_out"
 
-async function getCurrentEmployee() {
-  const supabase = await createSupabaseServer()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { supabase, employee: null, error: "You must be logged in." }
+type EmployeeRow = {
+  id: number
+  first_name: string | null
+  last_name: string | null
+  employee_number: string | null
+  employment_status: string | null
+}
 
-  const { data: employee } = await supabase
+function normalizeEmployeeId(value: string) {
+  return value.trim().toUpperCase()
+}
+
+async function getEmployeeByNumber(employeeNumber: string) {
+  const normalized = normalizeEmployeeId(employeeNumber)
+  if (!normalized) {
+    return { employee: null, error: "Enter your Employee ID." }
+  }
+
+  const admin = createSupabaseAdmin()
+  const { data: employee, error } = await admin
     .from("employees")
-    .select("id, first_name, last_name, employment_status")
-    .eq("auth_user_id", user.id)
+    .select("id, first_name, last_name, employee_number, employment_status")
+    .eq("employee_number", normalized)
     .maybeSingle()
 
+  if (error) {
+    return { employee: null, error: error.message }
+  }
+
   if (!employee) {
-    return {
-      supabase,
-      employee: null,
-      error: "No employee account linked to this login.",
-    }
+    return { employee: null, error: "Employee ID not found." }
   }
 
   if (employee.employment_status === "Resigned" || employee.employment_status === "Terminated") {
     return {
-      supabase,
       employee: null,
-      error: "Your employee account is no longer active. Contact HR if you need access.",
+      error: "This employee account is no longer active.",
     }
   }
 
-  return { supabase, employee, error: null }
+  return { employee: employee as EmployeeRow, error: null }
 }
 
 function getTodayRange() {
@@ -46,21 +57,32 @@ function getTodayRange() {
   return { start: start.toISOString(), end: end.toISOString() }
 }
 
-export async function getMyAttendanceToday() {
-  const { supabase, employee, error } = await getCurrentEmployee()
-  if (error || !employee) return { error, employee: null }
-
+async function getTodayLogsForEmployee(employeeId: number) {
+  const admin = createSupabaseAdmin()
   const { start, end } = getTodayRange()
-  const { data: logs } = await supabase
+  const { data: logs } = await admin
     .from("attendance_logs")
     .select("id, log_type, logged_at")
-    .eq("employee_id", employee.id)
+    .eq("employee_id", employeeId)
     .gte("logged_at", start)
     .lte("logged_at", end)
     .order("logged_at", { ascending: true })
 
   const timeIn = logs?.find((log) => log.log_type === "time_in") ?? null
   const timeOut = logs?.find((log) => log.log_type === "time_out") ?? null
+
+  return { timeIn, timeOut }
+}
+
+export async function getAttendanceToday(employeeNumber: string) {
+  if (process.env.NEXT_PUBLIC_ATTENDANCE_KIOSK !== "true") {
+    return { error: "Time in/out is only available on the office attendance PC." }
+  }
+
+  const { employee, error } = await getEmployeeByNumber(employeeNumber)
+  if (error || !employee) return { error, employee: null }
+
+  const { timeIn, timeOut } = await getTodayLogsForEmployee(employee.id)
 
   return {
     error: null,
@@ -72,30 +94,21 @@ export async function getMyAttendanceToday() {
   }
 }
 
-export async function logAttendance(logType: AttendanceLogType) {
+export async function logAttendance(logType: AttendanceLogType, employeeNumber: string) {
   if (process.env.NEXT_PUBLIC_ATTENDANCE_KIOSK !== "true") {
     return { error: "Time in/out is only available on the office attendance PC." }
   }
 
-  const { supabase, employee, error } = await getCurrentEmployee()
+  const { employee, error } = await getEmployeeByNumber(employeeNumber)
   if (error || !employee) return { error }
 
-  const { start, end } = getTodayRange()
-  const { data: todayLogs } = await supabase
-    .from("attendance_logs")
-    .select("log_type")
-    .eq("employee_id", employee.id)
-    .gte("logged_at", start)
-    .lte("logged_at", end)
-
-  const hasTimeIn = todayLogs?.some((log) => log.log_type === "time_in")
-  const hasTimeOut = todayLogs?.some((log) => log.log_type === "time_out")
+  const { timeIn, timeOut } = await getTodayLogsForEmployee(employee.id)
 
   if (logType === "time_in") {
-    if (hasTimeIn) return { error: "You already timed in today." }
+    if (timeIn) return { error: "You already timed in today." }
   } else {
-    if (!hasTimeIn) return { error: "You need to time in first." }
-    if (hasTimeOut) return { error: "You already timed out today." }
+    if (!timeIn) return { error: "You need to time in first." }
+    if (timeOut) return { error: "You already timed out today." }
   }
 
   const admin = createSupabaseAdmin()
@@ -107,6 +120,18 @@ export async function logAttendance(logType: AttendanceLogType) {
   if (insertError) {
     return { error: insertError.message }
   }
+
+  const name = [employee.first_name, employee.last_name].filter(Boolean).join(" ")
+  const actorLabel = employee.employee_number
+    ? `${name || employee.employee_number} (${employee.employee_number})`
+    : name || "Employee"
+
+  await logActivity({
+    action: logType,
+    module: "attendance",
+    recordId: employee.employee_number ?? employee.id,
+    actorLabel,
+  })
 
   revalidatePath("/attendance")
   return { success: true }

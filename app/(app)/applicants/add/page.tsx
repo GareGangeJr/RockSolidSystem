@@ -1,7 +1,12 @@
+import { createSupabaseServer } from "@/lib/supabase/server"
 import { ApplicantForm } from "@/components/applicants/ApplicantForm"
 import { BackButton } from "@/components/BackButton"
+import { fetchOpenJobOrdersForApplicantForm } from "@/lib/fetch-open-job-orders"
 
-export default function AddApplicantPage() {
+export default async function AddApplicantPage() {
+  const supabase = await createSupabaseServer()
+  const { openJobOrders } = await fetchOpenJobOrdersForApplicantForm(supabase)
+
   return (
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="mx-auto max-w-6xl">
@@ -10,7 +15,7 @@ export default function AddApplicantPage() {
           <BackButton href="/applicants" />
         </div>
 
-        <ApplicantForm />
+        <ApplicantForm openJobOrders={openJobOrders} />
       </div>
     </div>
   )

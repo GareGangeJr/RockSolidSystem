@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js"
 
 export type AccessRole = "admin" | "staff"
 
-const ADMIN_ONLY_PREFIXES = ["/employees", "/reports", "/api/reports", "/api/job-orders"]
+const ADMIN_ONLY_PREFIXES = ["/employees", "/reports", "/activity-logs", "/api/reports", "/api/job-orders"]
 
 export async function getAccessRole(
   supabase: SupabaseClient,

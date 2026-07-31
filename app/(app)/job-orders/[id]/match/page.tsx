@@ -2,7 +2,9 @@ import Link from "next/link"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import MatchToJobForm from "@/components/MatchToJobForm"
 import DeleteMatchForm from "@/components/DeleteMatchForm"
+import DeployMatchForm from "@/components/DeployMatchForm"
 import CompileDownloadButton from "@/components/CompileDownloadButton"
+import { SummaryDownloadButton } from "@/components/job-orders/SummaryDownloadButton"
 import { BackButton } from "@/components/BackButton"
 import { MatchScoreBadges } from "@/components/job-orders/MatchScoreBadges"
 import {
@@ -50,7 +52,7 @@ export default async function Page({
 
   const { data: job, error: jobError } = await supabase
     .from("job_orders")
-    .select("id, job_title, company, country, gender, years_exp_required, skills_required, no_workers")
+    .select("id, job_title, company, country, gender, years_exp_required, skills_required")
     .eq("id", numericId)
     .maybeSingle()
 
@@ -62,7 +64,7 @@ export default async function Page({
       </div>
     )
 
-  const jobOrder = job as JobOrderForMatch & { id: number; company: string | null; no_workers: number | null }
+  const jobOrder = job as JobOrderForMatch & { id: number; company: string | null }
 
   const { data: placements } = await supabase
     .from("placements")
@@ -70,6 +72,18 @@ export default async function Page({
     .eq("job_order_id", numericId)
 
   const matchedIds = (placements || []).map((p) => p.applicant_id)
+
+  const { data: monitoringRecords } = matchedIds.length
+    ? await supabase
+        .from("monitoring")
+        .select("id, applicant_id")
+        .eq("job_order_id", numericId)
+        .in("applicant_id", matchedIds)
+    : { data: [] as { id: number; applicant_id: number }[] }
+
+  const monitoringByApplicant = new Map(
+    (monitoringRecords ?? []).map((record) => [record.applicant_id, record.id])
+  )
 
   const { data: applicants } = await supabase
     .from("applicants")
@@ -87,9 +101,6 @@ export default async function Page({
   const suggested = scoredUnmatched.filter((applicant) => isSuggestedMatch(applicant.match))
   const others = scoredUnmatched.filter((applicant) => !isSuggestedMatch(applicant.match))
 
-  const slotsNeeded = jobOrder.no_workers ?? 0
-  const slotsFilled = matched.length
-
   return (
     <div className="max-w-4xl p-6">
       <div className="mb-4 flex items-center justify-between">
@@ -97,43 +108,66 @@ export default async function Page({
         <BackButton href="/job-orders" />
       </div>
 
-      <p className="mb-2 text-gray-600">
+      <p className="mb-6 text-gray-600">
         {jobOrder.job_title} at {jobOrder.company}
       </p>
-      {slotsNeeded > 0 && (
-        <p className="mb-6 text-sm font-medium text-gray-800">
-          Slots filled: {slotsFilled}/{slotsNeeded}
-        </p>
-      )}
 
       {success === "unmatched" && (
         <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">Match removed.</div>
       )}
+      {success === "deployed" && (
+        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">
+          Applicant deployed. View the record in Monitoring.
+        </div>
+      )}
       {error === "match" && message && (
+        <div className="mb-4 rounded-md bg-red-100 px-4 py-3 text-red-800">{decodeURIComponent(message)}</div>
+      )}
+      {error === "deploy" && message && (
         <div className="mb-4 rounded-md bg-red-100 px-4 py-3 text-red-800">{decodeURIComponent(message)}</div>
       )}
 
       <div className="mb-6">
         <div className="mb-2 flex items-center justify-between gap-4">
           <h2 className="text-lg font-semibold">Matched Applicants</h2>
-          {matched.length > 0 && <CompileDownloadButton jobOrderId={jobOrder.id} />}
+          {matched.length > 0 && (
+            <div className="flex items-start gap-2">
+              <SummaryDownloadButton jobOrderId={jobOrder.id} />
+              <CompileDownloadButton jobOrderId={jobOrder.id} />
+            </div>
+          )}
         </div>
         {matched.length ? (
           <ul className="divide-y rounded-lg border bg-white">
-            {matched.map((applicant) => (
-              <li key={applicant.id} className="flex items-center justify-between p-3">
-                <span>
-                  <span className="text-gray-500">{formatApplicantRef(applicant.id)} · </span>
-                  <Link href={`/applicants/${applicant.id}`} className="text-blue-600 hover:underline">
-                    {applicant.first_name} {applicant.last_name}
-                  </Link>
-                  <span className="ml-2 text-gray-600">
-                    - {applicant.position_applied ?? "No position"}
+            {matched.map((applicant) => {
+              const monitoringId = monitoringByApplicant.get(applicant.id)
+              return (
+                <li key={applicant.id} className="flex items-center justify-between gap-4 p-3">
+                  <span>
+                    <span className="text-gray-500">{formatApplicantRef(applicant.id)} · </span>
+                    <Link href={`/applicants/${applicant.id}`} className="text-blue-600 hover:underline">
+                      {applicant.first_name} {applicant.last_name}
+                    </Link>
+                    <span className="ml-2 text-gray-600">
+                      - {applicant.position_applied ?? "No position"}
+                    </span>
                   </span>
-                </span>
-                <DeleteMatchForm applicantId={applicant.id} jobOrderId={jobOrder.id} />
-              </li>
-            ))}
+                  <div className="flex shrink-0 items-center gap-2">
+                    {monitoringId ? (
+                      <Link
+                        href={`/monitoring/${monitoringId}`}
+                        className="rounded border bg-green-100 px-3 py-1 text-sm text-green-800 hover:bg-green-200"
+                      >
+                        Deployed
+                      </Link>
+                    ) : (
+                      <DeployMatchForm applicantId={applicant.id} jobOrderId={jobOrder.id} />
+                    )}
+                    <DeleteMatchForm applicantId={applicant.id} jobOrderId={jobOrder.id} />
+                  </div>
+                </li>
+              )
+            })}
           </ul>
         ) : (
           <p className="text-gray-500">No matched applicants yet</p>

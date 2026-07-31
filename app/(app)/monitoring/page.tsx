@@ -2,12 +2,18 @@ import { createSupabaseServer } from "@/lib/supabase/server"
 import { MonitoringTable } from "@/components/monitoring/MonitoringTable"
 import type { MonitoringRecord } from "@/types/entities"
 
-export default async function MonitoringPage() {
+export default async function MonitoringPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ success?: string }>
+}) {
+  const { success } = await searchParams
   const supabase = await createSupabaseServer()
 
   const { data: monitoringRecords, error: monitoringError } = await supabase
     .from("monitoring")
     .select("*")
+    .is("archived_at", null)
     .order("deployment_date", { ascending: false })
 
   if (monitoringError) return (
@@ -39,7 +45,10 @@ export default async function MonitoringPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Deployment Monitoring</h1>
+      <h1 className="mb-6 text-2xl font-bold">Deployment Monitoring</h1>
+      {success === "updated" && (
+        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">Record updated.</div>
+      )}
       <MonitoringTable records={records} />
     </div>
   )

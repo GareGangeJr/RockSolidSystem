@@ -2,6 +2,20 @@ import { resolvePositionFromForm } from "@/lib/position-utils"
 
 const getOptionalString = (formData: FormData, key: string) => (formData.get(key) as string) || ""
 
+function optionalDate(value: FormDataEntryValue | null | undefined): string | null {
+  if (value == null) return null
+  const trimmed = String(value).trim()
+  return trimmed || null
+}
+
+function sanitizeWorkExperiences(items: WorkExperienceItem[]): WorkExperienceItem[] {
+  return items.map((item) => ({
+    ...item,
+    date_started: item.date_started?.trim() || undefined,
+    date_ended: item.date_ended?.trim() || undefined,
+  }))
+}
+
 type WorkExperienceItem = {
   country?: string
   company?: string
@@ -37,13 +51,15 @@ export function buildApplicantInsertPayload(
   formData: FormData,
   overrides?: { status?: string; date_applied?: string | null; applicant_type?: string }
 ): ApplicantInsertPayload {
-  const works = parseWorkExperiences(formData).filter(
-    (w) => w.country || w.company || w.position || w.date_started || w.date_ended
+  const works = sanitizeWorkExperiences(
+    parseWorkExperiences(formData).filter(
+      (w) => w.country || w.company || w.position || w.date_started || w.date_ended
+    )
   )
 
   const positionApplied = resolvePositionFromForm(formData, "position_applied", { required: true })
   const secondChoicePosition = resolvePositionFromForm(formData, "second_choice_position")
-  const dob = (formData.get("date_of_birth") as string) || null
+  const dob = optionalDate(formData.get("date_of_birth"))
 
   return {
     first_name: formData.get("first_name") as string,
@@ -63,7 +79,7 @@ export function buildApplicantInsertPayload(
     current_address: getOptionalString(formData, "current_address"),
     provincial_address: getOptionalString(formData, "provincial_address"),
     active_cellphone: getOptionalString(formData, "active_cellphone"),
-    date_of_birth: formData.get("date_of_birth") || null,
+    date_of_birth: dob,
     age: getAgeFromDob(dob),
     place_of_birth: getOptionalString(formData, "place_of_birth"),
     religion: getOptionalString(formData, "religion"),
@@ -87,12 +103,12 @@ export function buildApplicantInsertPayload(
     emergency_contact_number: getOptionalString(formData, "emergency_contact_number"),
     emergency_contact_address: getOptionalString(formData, "emergency_contact_address"),
     beneficiary1_name: getOptionalString(formData, "beneficiary1_name"),
-    beneficiary1_dob: formData.get("beneficiary1_dob") || null,
+    beneficiary1_dob: optionalDate(formData.get("beneficiary1_dob")),
     beneficiary1_age: Number(formData.get("beneficiary1_age")) || null,
     beneficiary1_relationship: getOptionalString(formData, "beneficiary1_relationship"),
     beneficiary1_contact: getOptionalString(formData, "beneficiary1_contact"),
     beneficiary2_name: getOptionalString(formData, "beneficiary2_name"),
-    beneficiary2_dob: formData.get("beneficiary2_dob") || null,
+    beneficiary2_dob: optionalDate(formData.get("beneficiary2_dob")),
     beneficiary2_age: Number(formData.get("beneficiary2_age")) || null,
     beneficiary2_relationship: getOptionalString(formData, "beneficiary2_relationship"),
     beneficiary2_contact: getOptionalString(formData, "beneficiary2_contact"),
@@ -111,13 +127,13 @@ export function buildApplicantInsertPayload(
     english_level: getOptionalString(formData, "english_level"),
     arabic_level: getOptionalString(formData, "arabic_level"),
     passport_number: getOptionalString(formData, "passport_number"),
-    passport_date_issued: formData.get("passport_date_issued") || null,
-    passport_date_expired: formData.get("passport_date_expired") || null,
+    passport_date_issued: optionalDate(formData.get("passport_date_issued")),
+    passport_date_expired: optionalDate(formData.get("passport_date_expired")),
     passport_place_issued: getOptionalString(formData, "passport_place_issued"),
     interview_remarks: getOptionalString(formData, "interview_remarks"),
     interviewer_name: getOptionalString(formData, "interviewer_name"),
-    date_interviewed: formData.get("date_interviewed") || null,
-    date_applied: overrides?.date_applied ?? formData.get("date_applied") ?? null,
+    date_interviewed: optionalDate(formData.get("date_interviewed")),
+    date_applied: optionalDate(overrides?.date_applied ?? formData.get("date_applied")),
     work_experiences: works,
   }
 }

@@ -9,6 +9,7 @@ export default async function EmployeesPage({ searchParams }: { searchParams: Pr
   const { data: employees, error } = await supabase
     .from("employees")
     .select("*")
+    .is("archived_at", null)
     .order("created_at", { ascending: false })
 
   if (error) {

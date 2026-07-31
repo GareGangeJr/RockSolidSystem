@@ -10,6 +10,8 @@ import {
   CalendarCheck,
   BarChart3,
   Building2,
+  Archive,
+  ScrollText,
   type LucideIcon,
 } from "lucide-react"
 import type { AccessRole } from "@/lib/user-role"
@@ -29,6 +31,8 @@ const NAV: NavItem[] = [
   { name: "Employees", href: "/employees", icon: FolderKanban, roles: ["admin"] },
   { name: "Attendance", href: "/attendance", icon: CalendarCheck, roles: ["admin", "staff"] },
   { name: "Reports", href: "/reports", icon: BarChart3, roles: ["admin"] },
+  { name: "Activity Logs", href: "/activity-logs", icon: ScrollText, roles: ["admin"] },
+  { name: "Archive", href: "/archive", icon: Archive, roles: ["admin", "staff"] },
 ]
 
 export default function Sidebar({ role }: { role: AccessRole }) {

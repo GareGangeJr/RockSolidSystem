@@ -53,7 +53,7 @@ export default async function PublicJobOrderDetailPage({
       </div>
 
       <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
-        <div className="p-6">
+        <div className="space-y-6 p-6">
           <JobOrderDetailsView jobOrder={data as Record<string, unknown>} showStatus={false} />
         </div>
       </div>

@@ -1,8 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { Eye, Pencil } from "lucide-react"
+import { ClipboardList, Eye, Pencil } from "lucide-react"
 import { SearchTable } from "@/components/shared/SearchTable"
+import { ArchiveButton } from "@/components/shared/ArchiveButton"
 import { formatApplicantRef } from "@/lib/format-applicant-ref"
 import type { MonitoringRecord } from "@/types/entities"
 
@@ -76,13 +77,25 @@ export function MonitoringTable({ records }: { records: MonitoringRecord[] }) {
         {
           header: "Actions",
           cell: (row) => (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Link href={`/monitoring/${row.id}`} className="rounded p-1 hover:bg-blue-100 hover:text-blue-600" title="View">
                 <Eye className="h-4 w-4" />
+              </Link>
+              <Link
+                href={`/monitoring/${row.id}/concerns`}
+                className="rounded p-1 hover:bg-orange-100 hover:text-orange-600"
+                title="Concerns & History"
+              >
+                <ClipboardList className="h-4 w-4" />
               </Link>
               <Link href={`/monitoring/${row.id}/edit`} className="rounded p-1 hover:bg-yellow-100 hover:text-yellow-600" title="Edit">
                 <Pencil className="h-4 w-4" />
               </Link>
+              <ArchiveButton
+                table="monitoring"
+                id={row.id}
+                name={`${row.applicant?.first_name ?? ""} ${row.applicant?.last_name ?? ""}`.trim() || formatApplicantRef(row.applicant?.id ?? 0)}
+              />
             </div>
           ),
         },
