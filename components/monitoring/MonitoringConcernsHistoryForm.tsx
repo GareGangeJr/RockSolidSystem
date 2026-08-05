@@ -38,6 +38,9 @@ export function MonitoringConcernsHistoryForm({
     <div className="space-y-6">
       <div>
         <h2 className={sectionTitleClassSm}>Concerns</h2>
+        <p className="mb-3 text-xs text-gray-500">
+          Each concern must include type, date reported, and status. Action taken is optional.
+        </p>
         <div className="space-y-4">
           {concerns.map((concern, index) => (
             <div key={index} className="rounded-md border border-gray-200 p-4">
@@ -66,7 +69,7 @@ export function MonitoringConcernsHistoryForm({
                       })
                     }
                   >
-                    <option value="">None</option>
+                    <option value="">Select type</option>
                     <option value="Salary Issue">Salary Issue</option>
                     <option value="Abuse">Abuse</option>
                     <option value="Health">Health</option>
@@ -103,7 +106,7 @@ export function MonitoringConcernsHistoryForm({
                       })
                     }
                   >
-                    <option value="">None</option>
+                    <option value="">Select status</option>
                     <option value="Pending">Pending</option>
                     <option value="Resolved">Resolved</option>
                     <option value="Escalated">Escalated</option>
@@ -141,10 +144,11 @@ export function MonitoringConcernsHistoryForm({
         <h2 className={sectionTitleClassSm}>History</h2>
         <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <label className={labelClassSm}>Deployed Date</label>
+            <label className={labelClassSm}>Departure Date</label>
             <div className={`${fieldClassSm} cursor-not-allowed bg-gray-50 text-gray-600`}>
               {formatDisplayDate(deploymentDate)}
             </div>
+            <p className="mt-1 text-xs text-gray-500">Edit on Deployment page.</p>
           </div>
           <div>
             <label className={labelClassSm}>Last Status Update</label>
@@ -179,21 +183,6 @@ export function MonitoringConcernsHistoryForm({
                       setHistory((prev) => {
                         const next = [...prev]
                         next[index] = { ...next[index], entry_date: e.target.value }
-                        return next
-                      })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className={labelClassSm}>Date of Departure</label>
-                  <input
-                    type="date"
-                    className={fieldClassSm}
-                    value={entry.date_of_departure}
-                    onChange={(e) =>
-                      setHistory((prev) => {
-                        const next = [...prev]
-                        next[index] = { ...next[index], date_of_departure: e.target.value }
                         return next
                       })
                     }
@@ -315,6 +304,11 @@ export function MonitoringConcernsHistoryForm({
 
       <input type="hidden" name="concern_entries" value={JSON.stringify(concerns)} />
       <input type="hidden" name="history_entries" value={JSON.stringify(history)} />
+      <input
+        type="hidden"
+        name="deployment_date"
+        value={deploymentDate ? String(deploymentDate).slice(0, 10) : ""}
+      />
     </div>
   )
 }

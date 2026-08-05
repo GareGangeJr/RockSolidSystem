@@ -2,9 +2,8 @@ import ExcelJS from "exceljs"
 import type {
   ApplicantReportRow,
   CountryCount,
-  DeploymentReportRow,
   JobOrderReportRow,
-  PlacementReportRow,
+  MonitoringReportRow,
   PlacementStatusCount,
   ReportSummary,
 } from "@/lib/reports/types"
@@ -129,62 +128,31 @@ function addDataSheet<T>(
   return sheet
 }
 
-const DEPLOYMENT_COLUMNS: ColumnDef<DeploymentReportRow>[] = [
+const MONITORING_COLUMNS: ColumnDef<MonitoringReportRow>[] = [
   { header: "Monitoring ID", key: "monitoringId", width: 14 },
-  { header: "Deployment Status", key: "deploymentStatus", width: 18 },
-  { header: "Deployment Date", key: "deploymentDate", width: 16 },
-  { header: "Last Status Update", key: "lastStatusUpdate", width: 18 },
   { header: "Applicant Ref", key: "applicantRef", width: 16 },
   { header: "Applicant Name", key: "applicantName", width: 22 },
-  { header: "Middle Name", key: "middleName", width: 16 },
-  { header: "Position Applied", key: "positionApplied", width: 18 },
-  { header: "Second Choice", key: "secondChoicePosition", width: 16 },
-  { header: "Preferred Branch", key: "preferredBranch", width: 16 },
-  { header: "Applicant Type", key: "applicantType", width: 16 },
-  { header: "Applicant Status", key: "applicantStatus", width: 18 },
   { header: "Contact Number", key: "contactNumber", width: 16 },
-  { header: "Active Cellphone", key: "activeCellphone", width: 16 },
-  { header: "Email", key: "email", width: 24 },
-  { header: "Country Applying", key: "countryApplyingFor", width: 16 },
-  { header: "Current Address", key: "currentAddress", width: 28 },
-  { header: "Provincial Address", key: "provincialAddress", width: 24 },
-  { header: "Date of Birth", key: "dateOfBirth", width: 14 },
-  { header: "Age", key: "age", width: 10 },
-  { header: "Gender", key: "gender", width: 12 },
-  { header: "Civil Status", key: "civilStatus", width: 14 },
-  { header: "Years of Experience", key: "yearsOfExp", width: 16 },
-  { header: "Skills", key: "skills", width: 24 },
-  { header: "English Level", key: "englishLevel", width: 14 },
-  { header: "Arabic Level", key: "arabicLevel", width: 14 },
   { header: "Passport Number", key: "passportNumber", width: 16 },
-  { header: "Passport Issued", key: "passportDateIssued", width: 14 },
-  { header: "Passport Expiry", key: "passportDateExpired", width: 14 },
-  { header: "Date Applied", key: "dateApplied", width: 14 },
-  { header: "Date Interviewed", key: "dateInterviewed", width: 16 },
-  { header: "Interview Remarks", key: "interviewRemarks", width: 24 },
   { header: "Job Order Ref", key: "jobOrderRef", width: 14 },
   { header: "Job Title", key: "jobTitle", width: 20 },
   { header: "Company", key: "company", width: 22 },
-  { header: "Destination Country", key: "destinationCountry", width: 18 },
-  { header: "Job Order Status", key: "jobOrderStatus", width: 16 },
-  { header: "Gender Required", key: "genderRequired", width: 14 },
-  { header: "Workers Needed", key: "workersNeeded", width: 14 },
-  { header: "Years Exp Required", key: "yearsExpRequired", width: 16 },
-  { header: "Skills Required", key: "skillsRequired", width: 24 },
-  { header: "Job Salary", key: "jobSalary", width: 16 },
-  { header: "Job Created", key: "jobCreatedAt", width: 14 },
+  { header: "Country", key: "country", width: 16 },
+  { header: "Deployment Status", key: "deploymentStatus", width: 18 },
+  { header: "Departure Date", key: "departureDate", width: 16 },
   { header: "Employer Name", key: "employerName", width: 20 },
   { header: "Contract Duration", key: "contractDuration", width: 16 },
-  { header: "Deployment Salary", key: "deploymentSalary", width: 16 },
-  { header: "Date of Departure", key: "dateOfDeparture", width: 16 },
-  { header: "Date of Arrival", key: "dateOfArrival", width: 16 },
+  { header: "Salary Amount", key: "salaryAmount", width: 16 },
   { header: "Welfare Officer", key: "welfareOfficer", width: 18 },
+  { header: "Last Status Update", key: "lastStatusUpdate", width: 18 },
+  { header: "Concern Status", key: "concernStatus", width: 16 },
   { header: "Concern Type", key: "concernType", width: 16 },
   { header: "Concern Date", key: "concernDateReported", width: 14 },
-  { header: "Concern Status", key: "concernStatus", width: 16 },
   { header: "Action Taken", key: "actionTaken", width: 28 },
-  { header: "Expected Return", key: "expectedReturnDate", width: 16 },
-  { header: "Actual Return", key: "actualReturnDate", width: 14 },
+  { header: "All Concerns", key: "allConcernsSummary", width: 40 },
+  { header: "Date of Arrival", key: "dateOfArrival", width: 16 },
+  { header: "ETA Return Date", key: "expectedReturnDate", width: 16 },
+  { header: "Actual Return Date", key: "actualReturnDate", width: 14 },
   { header: "Reason for Return", key: "reasonForReturn", width: 20 },
   { header: "Will Extend Contract", key: "willExtendContract", width: 18 },
 ]
@@ -258,17 +226,6 @@ const APPLICANT_COLUMNS: ColumnDef<ApplicantReportRow>[] = [
   { header: "Work Experience", key: "workExperienceSummary", width: 36 },
   { header: "Education", key: "educationSummary", width: 36 },
   { header: "Notes", key: "notes", width: 28 },
-]
-
-const PLACEMENT_COLUMNS: ColumnDef<PlacementReportRow>[] = [
-  { header: "Applicant Ref", key: "applicantRef", width: 16 },
-  { header: "Applicant Name", key: "applicantName", width: 22 },
-  { header: "Position Applied", key: "positionApplied", width: 18 },
-  { header: "Job Order Ref", key: "jobOrderRef", width: 14 },
-  { header: "Job Title", key: "jobTitle", width: 22 },
-  { header: "Company", key: "company", width: 22 },
-  { header: "Country", key: "country", width: 16 },
-  { header: "Job Order Status", key: "jobOrderStatus", width: 16 },
 ]
 
 function addPlainTable(
@@ -354,10 +311,9 @@ export async function generateReportsExcel(options: {
   summary: ReportSummary
   countryCounts: CountryCount[]
   statusCounts: PlacementStatusCount[]
-  deployments: DeploymentReportRow[]
+  monitoring: MonitoringReportRow[]
   jobOrders: JobOrderReportRow[]
   applicants: ApplicantReportRow[]
-  placements: PlacementReportRow[]
 }) {
   const workbook = new ExcelJS.Workbook()
   workbook.creator = COMPANY
@@ -368,10 +324,10 @@ export async function generateReportsExcel(options: {
 
   addDataSheet(
     workbook,
-    "Deployments",
-    "Deployment Report",
-    DEPLOYMENT_COLUMNS,
-    options.deployments,
+    "Monitoring",
+    "Monitoring",
+    MONITORING_COLUMNS,
+    options.monitoring,
     true
   )
 
@@ -390,15 +346,6 @@ export async function generateReportsExcel(options: {
     "Applicants",
     APPLICANT_COLUMNS,
     options.applicants,
-    true
-  )
-
-  addDataSheet(
-    workbook,
-    "Placements",
-    "Placements",
-    PLACEMENT_COLUMNS,
-    options.placements,
     true
   )
 

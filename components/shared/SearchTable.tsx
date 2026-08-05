@@ -1,12 +1,19 @@
 "use client"
 
 import { useMemo, useState, type ReactNode } from "react"
+import { isDeploymentInDateRange } from "@/lib/reports/date-range"
 
 export type TableFilter<T> = {
   id: string
   label: string
   options: readonly string[]
   match: (row: T, value: string) => boolean
+}
+
+export type DateRangeFilterConfig<T> = {
+  fields: readonly { value: string; label: string }[]
+  defaultField: string
+  getDates: (row: T, field: string) => string[]
 }
 
 export type TableColumn<T> = {
@@ -20,9 +27,13 @@ type SearchTableProps<T> = {
   searchPlaceholder: string
   searchMatch: (row: T, query: string) => boolean
   filters?: TableFilter<T>[]
+  dateRangeFilter?: DateRangeFilterConfig<T>
   columns: TableColumn<T>[]
   emptyMessage?: string
 }
+
+const dateInputClass =
+  "rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
 
 export function SearchTable<T>({
   rows,
@@ -30,6 +41,7 @@ export function SearchTable<T>({
   searchPlaceholder,
   searchMatch,
   filters = [],
+  dateRangeFilter,
   columns,
   emptyMessage = "No records found.",
 }: SearchTableProps<T>) {
@@ -37,6 +49,9 @@ export function SearchTable<T>({
   const [filterValues, setFilterValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(filters.map((f) => [f.id, "All"]))
   )
+  const [dateField, setDateField] = useState(dateRangeFilter?.defaultField ?? "")
+  const [dateFrom, setDateFrom] = useState("")
+  const [dateTo, setDateTo] = useState("")
 
   const filtered = useMemo(() => {
     let list = rows
@@ -48,12 +63,24 @@ export function SearchTable<T>({
         list = list.filter((row) => filter.match(row, value))
       }
     }
+    if (dateRangeFilter && (dateFrom || dateTo)) {
+      list = list.filter((row) => {
+        const dates = dateRangeFilter.getDates(row, dateField)
+        if (dates.length === 0) return false
+        return dates.some((day) => isDeploymentInDateRange(day, dateFrom || null, dateTo || null))
+      })
+    }
     return list
-  }, [rows, search, filterValues, filters, searchMatch])
+  }, [rows, search, filterValues, filters, dateRangeFilter, dateField, dateFrom, dateTo, searchMatch])
 
   function clearFilters() {
     setSearch("")
     setFilterValues(Object.fromEntries(filters.map((f) => [f.id, "All"])))
+    if (dateRangeFilter) {
+      setDateField(dateRangeFilter.defaultField)
+      setDateFrom("")
+      setDateTo("")
+    }
   }
 
   return (
@@ -81,6 +108,40 @@ export function SearchTable<T>({
             ))}
           </select>
         ))}
+        {dateRangeFilter && (
+          <>
+            <select
+              value={dateField}
+              onChange={(e) => setDateField(e.target.value)}
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+              aria-label="Date field"
+            >
+              {dateRangeFilter.fields.map((field) => (
+                <option key={field.value} value={field.value}>
+                  {field.label}
+                </option>
+              ))}
+            </select>
+            <input
+              type="date"
+              value={dateFrom}
+              max={dateTo || undefined}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className={dateInputClass}
+              aria-label="From date"
+              title="From date"
+            />
+            <input
+              type="date"
+              value={dateTo}
+              min={dateFrom || undefined}
+              onChange={(e) => setDateTo(e.target.value)}
+              className={dateInputClass}
+              aria-label="To date"
+              title="To date"
+            />
+          </>
+        )}
         <button
           type="button"
           onClick={clearFilters}

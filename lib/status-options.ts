@@ -181,6 +181,36 @@ export const CIVIL_STATUS_OPTIONS = [
 
 export const SPEAKING_LEVEL_OPTIONS = ["Poor", "Fair", "Fluent"] as const
 
+export const APPLICANT_SKILL_OPTIONS = [
+  "Cooking",
+  "Child Care",
+  "Elderly Care",
+  "Baby Sitting",
+  "Housekeeping",
+  "Cleaning",
+  "Laundry",
+  "Ironing",
+  "Food Preparation",
+  "Driving",
+  "Pet Care",
+  "First Aid",
+  "Basic Nursing",
+  "Sewing",
+  "Gardening",
+  "Waitering",
+  "Barista",
+  "Baking",
+  "Hair Dressing",
+  "Massage Therapy",
+  "Welding",
+  "Plumbing",
+  "Carpentry",
+  "Electrical Work",
+  "Auto Mechanic",
+  "Painting",
+  "Masonry",
+] as const
+
 
 
 export const EMPLOYMENT_STATUS_OPTIONS = ["Active", "On Leave", "Resigned", "Terminated"] as const

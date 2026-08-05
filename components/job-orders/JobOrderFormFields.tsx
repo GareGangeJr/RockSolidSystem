@@ -10,6 +10,7 @@ import {
   type JobOrderFormValues,
 } from "@/lib/job-order-fields"
 import { CountrySelect } from "@/components/shared/CountrySelect"
+import { SkillsChecklistField } from "@/components/applicants/skills-checklist-field"
 import { fieldClassSm, formGridClass, labelClassSm, sectionTitleClassSm } from "@/lib/form-ui"
 
 type Props = {
@@ -32,11 +33,11 @@ export function JobOrderFormFields({ data }: Props) {
           </div>
           <div>
             <label className={labelClassSm}>Country</label>
-            <CountrySelect name="country" defaultValue={fieldValue(data?.country)} />
+            <CountrySelect name="country" defaultValue={fieldValue(data?.country)} required />
           </div>
           <div>
             <label className={labelClassSm}>Job Title</label>
-            <input name="job_title" defaultValue={fieldValue(data?.job_title)} className={fieldClassSm} />
+            <input name="job_title" defaultValue={fieldValue(data?.job_title)} className={fieldClassSm} required />
           </div>
           <div>
             <label className={labelClassSm}>Status</label>
@@ -44,6 +45,7 @@ export function JobOrderFormFields({ data }: Props) {
               name="status"
               defaultValue={fieldValue(data?.status) || DEFAULT_JOB_ORDER_STATUS}
               className={fieldClassSm}
+              required
             >
               {JOB_ORDER_STATUS_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
@@ -59,6 +61,7 @@ export function JobOrderFormFields({ data }: Props) {
               type="date"
               defaultValue={formatDateForInput(data?.job_order_date)}
               className={fieldClassSm}
+              required
             />
           </div>
         </div>
@@ -74,6 +77,7 @@ export function JobOrderFormFields({ data }: Props) {
               defaultValue={fieldValue(data?.commercial_registration)}
               className={fieldClassSm}
               placeholder="Ex: 7034264627"
+              required
             />
           </div>
           <div>
@@ -83,6 +87,7 @@ export function JobOrderFormFields({ data }: Props) {
               defaultValue={fieldValue(data?.company_contact)}
               className={fieldClassSm}
               placeholder="Ex: 0563313305"
+              required
             />
           </div>
           <div>
@@ -92,6 +97,7 @@ export function JobOrderFormFields({ data }: Props) {
               defaultValue={fieldValue(data?.company_address)}
               className={fieldClassSm}
               placeholder="Ex: Al-Dammam, Saudi Arabia"
+              required
             />
           </div>
         </div>
@@ -102,7 +108,7 @@ export function JobOrderFormFields({ data }: Props) {
         <div className={formGridClass}>
           <div>
             <label className={labelClassSm}>Work Visa Number</label>
-            <input name="visa_number" defaultValue={fieldValue(data?.visa_number)} className={fieldClassSm} />
+            <input name="visa_number" defaultValue={fieldValue(data?.visa_number)} className={fieldClassSm} required />
           </div>
           <div>
             <label className={labelClassSm}>Work Visa Date</label>
@@ -111,6 +117,7 @@ export function JobOrderFormFields({ data }: Props) {
               type="date"
               defaultValue={formatDateForInput(data?.visa_date)}
               className={fieldClassSm}
+              required
             />
           </div>
           <div>
@@ -120,6 +127,7 @@ export function JobOrderFormFields({ data }: Props) {
               defaultValue={fieldValue(data?.visa_category)}
               className={fieldClassSm}
               placeholder="Ex: Waiter"
+              required
             />
           </div>
         </div>
@@ -134,6 +142,7 @@ export function JobOrderFormFields({ data }: Props) {
               name="gender"
               defaultValue={fieldValue(data?.gender) || DEFAULT_JOB_ORDER_GENDER}
               className={fieldClassSm}
+              required
             >
               {JOB_ORDER_GENDER_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
@@ -150,6 +159,7 @@ export function JobOrderFormFields({ data }: Props) {
               defaultValue={data?.no_workers ?? 1}
               min={1}
               className={fieldClassSm}
+              required
             />
           </div>
           <div>
@@ -160,17 +170,15 @@ export function JobOrderFormFields({ data }: Props) {
               defaultValue={data?.years_exp_required ?? 0}
               min={0}
               className={fieldClassSm}
+              required
             />
           </div>
-          <div className="col-span-full">
-            <label className={labelClassSm}>Skills Required</label>
-            <input
-              name="skills_required"
-              defaultValue={fieldValue(data?.skills_required)}
-              className={fieldClassSm}
-              placeholder="Ex: Cooking, Cleaning"
-            />
-          </div>
+          <SkillsChecklistField
+            name="skills_required"
+            label="Skills Required"
+            defaultValue={fieldValue(data?.skills_required)}
+            required
+          />
         </div>
       </div>
 
@@ -184,6 +192,7 @@ export function JobOrderFormFields({ data }: Props) {
               defaultValue={fieldValue(data?.salary)}
               className={fieldClassSm}
               placeholder="Ex: 1700 SAR"
+              required
             />
           </div>
         </div>
@@ -199,6 +208,7 @@ export function JobOrderFormFields({ data }: Props) {
               defaultValue={fieldValue(data?.contract_period)}
               className={fieldClassSm}
               placeholder="Ex: 2 years"
+              required
             />
           </div>
           <div>
@@ -208,6 +218,7 @@ export function JobOrderFormFields({ data }: Props) {
               defaultValue={fieldValue(data?.work_site)}
               className={fieldClassSm}
               placeholder="Ex: Dammam, Saudi Arabia"
+              required
             />
           </div>
           <div>
@@ -217,6 +228,7 @@ export function JobOrderFormFields({ data }: Props) {
               defaultValue={fieldValue(data?.working_hours)}
               className={fieldClassSm}
               placeholder="Ex: 8 hours/day, 6 days/week"
+              required
             />
           </div>
           <div className="col-span-full">

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { fetchReportData, filterDeployments } from "@/lib/reports/fetch-report-data"
-import { filterDeploymentsByDateRange, formatReportRangeLabel, parseDateParam } from "@/lib/reports/date-range"
+import { fetchReportData, filterMonitoring, filterMonitoringByDateRange } from "@/lib/reports/fetch-report-data"
+import { formatReportRangeLabel, parseDateParam } from "@/lib/reports/date-range"
 import { generateReportsExcel } from "@/lib/reports/generate-excel"
 import { logActivity } from "@/lib/activity-log"
 import { createSupabaseServer } from "@/lib/supabase/server"
@@ -39,18 +39,17 @@ export async function GET(request: Request) {
 
   try {
     const data = await fetchReportData()
-    let deployments = filterDeployments(data.deployments, country, status)
-    deployments = filterDeploymentsByDateRange(deployments, fromDate, toDate)
+    let monitoring = filterMonitoring(data.monitoring, country, status)
+    monitoring = filterMonitoringByDateRange(monitoring, fromDate, toDate)
 
     const buffer = await generateReportsExcel({
       generatedAt: data.generatedAt,
       summary: data.summary,
       countryCounts: data.countryCounts,
       statusCounts: data.statusCounts,
-      deployments,
+      monitoring,
       jobOrders: data.jobOrders,
       applicants: data.applicants,
-      placements: data.placements,
     })
 
     const dateStamp = new Date(data.generatedAt).toISOString().slice(0, 10)

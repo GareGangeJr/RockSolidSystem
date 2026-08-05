@@ -15,12 +15,14 @@ const inputFieldStyles = fieldClassSm
 type JobOrderSelectFieldProps = {
   jobOrders: OpenJobOrderOption[]
   defaultJobOrderId?: number
+  required?: boolean
   onJobOrderChange?: (jobOrder: OpenJobOrderOption | null) => void
 }
 
 export function JobOrderSelectField({
   jobOrders,
   defaultJobOrderId,
+  required = false,
   onJobOrderChange,
 }: JobOrderSelectFieldProps) {
   function handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
@@ -41,6 +43,7 @@ export function JobOrderSelectField({
         className={inputFieldStyles}
         defaultValue={defaultJobOrderId ? String(defaultJobOrderId) : ""}
         onChange={handleChange}
+        required={required}
       >
         <option value="">Select a job order</option>
         {jobOrders.map((job) => {

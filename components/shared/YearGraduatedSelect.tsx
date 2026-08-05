@@ -5,6 +5,7 @@ type YearGraduatedSelectProps = {
   name: string
   defaultValue?: string
   className?: string
+  required?: boolean
 }
 
 function getOptions(savedValue?: string) {
@@ -18,11 +19,12 @@ export function YearGraduatedSelect({
   name,
   defaultValue,
   className = fieldClassSm,
+  required = false,
 }: YearGraduatedSelectProps) {
   const options = getOptions(defaultValue)
 
   return (
-    <select name={name} className={className} defaultValue={defaultValue ?? ""}>
+    <select name={name} className={className} defaultValue={defaultValue ?? ""} required={required}>
       <option value="">Select year</option>
       {options.map((year) => (
         <option key={year} value={year}>

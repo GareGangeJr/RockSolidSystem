@@ -1,30 +1,49 @@
 import { fieldClassSm, formGridClass, labelClassSm, sectionTitleClassSm } from "@/lib/form-ui"
+import { formatMonitoringDateForInput } from "@/lib/monitoring-sync"
 
 type MonitoringData = Record<string, unknown>
 
 type Props = {
   data: MonitoringData
+  hasOpenConcern?: boolean
 }
 
 function formatValue(value: unknown): string {
   return value != null && value !== "" ? String(value) : ""
 }
 
-export function MonitoringDeploymentFormFields({ data }: Props) {
+export function MonitoringDeploymentFormFields({ data, hasOpenConcern = false }: Props) {
+  const currentStatus = formatValue(data.deployment_status) || "Deployed"
+
   return (
     <div>
       <h2 className={sectionTitleClassSm}>Deployment Details</h2>
       <div className={formGridClass}>
         <div>
+          <label className={labelClassSm}>Departure Date</label>
+          <input
+            name="deployment_date"
+            type="date"
+            defaultValue={formatMonitoringDateForInput(data.deployment_date)}
+            className={fieldClassSm}
+          />
+          <p className="mt-1 text-xs text-gray-500">Single departure date used across monitoring and history.</p>
+        </div>
+        <div>
           <label className={labelClassSm}>Deployment Status</label>
           <select
             name="deployment_status"
-            defaultValue={formatValue(data.deployment_status) || "Deployed"}
+            defaultValue={hasOpenConcern ? "Deployed(With Concerns)" : currentStatus}
             className={fieldClassSm}
           >
-            <option value="Deployed">Deployed</option>
+            <option value="Deployed" disabled={hasOpenConcern}>
+              Deployed{hasOpenConcern ? " (resolve open concerns first)" : ""}
+            </option>
             <option value="Deployed(With Concerns)">Deployed(With Concerns)</option>
           </select>
+          {hasOpenConcern && (
+            <p className="mt-1 text-xs text-amber-700">Open concerns require Deployed(With Concerns) status.</p>
+          )}
         </div>
         <div>
           <label className={labelClassSm}>Employer Name</label>

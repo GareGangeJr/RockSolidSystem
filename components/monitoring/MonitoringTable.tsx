@@ -5,6 +5,11 @@ import { ClipboardList, Eye, Pencil } from "lucide-react"
 import { SearchTable } from "@/components/shared/SearchTable"
 import { ArchiveButton } from "@/components/shared/ArchiveButton"
 import { formatApplicantRef } from "@/lib/format-applicant-ref"
+import {
+  getMonitoringDatesForField,
+  MONITORING_DATE_FILTER_FIELDS,
+  type MonitoringDateFilterField,
+} from "@/lib/monitoring-date-filter"
 import type { MonitoringRecord } from "@/types/entities"
 
 function formatDate(date: string | null) {
@@ -48,6 +53,12 @@ export function MonitoringTable({ records }: { records: MonitoringRecord[] }) {
           },
         },
       ]}
+      dateRangeFilter={{
+        fields: MONITORING_DATE_FILTER_FIELDS,
+        defaultField: "deployment_date",
+        getDates: (row, field) =>
+          getMonitoringDatesForField(row as Record<string, unknown>, field as MonitoringDateFilterField),
+      }}
       columns={[
         {
           header: "Applicant ID & Name",
@@ -71,7 +82,7 @@ export function MonitoringTable({ records }: { records: MonitoringRecord[] }) {
         },
         { header: "Country", cell: (row) => row.jobOrder?.country ?? "--" },
         { header: "Deployment Status", cell: (row) => row.deployment_status ?? "--" },
-        { header: "Deployed Date", cell: (row) => formatDate(row.deployment_date) },
+        { header: "Departure Date", cell: (row) => formatDate(row.deployment_date) },
         { header: "Concern Status", cell: (row) => row.concern_status ?? "--" },
         { header: "ETA Return Date", cell: (row) => formatDate(row.expected_return_date) },
         {

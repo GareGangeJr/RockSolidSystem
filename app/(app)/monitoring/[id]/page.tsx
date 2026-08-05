@@ -1,7 +1,7 @@
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { BackButton } from "@/components/BackButton"
-import { ViewPageActions } from "@/components/shared/ViewPageActions"
 import { MonitoringDetailsView } from "@/components/monitoring/MonitoringDetailsView"
+import { MonitoringPageNav } from "@/components/monitoring/MonitoringPageNav"
 
 export default async function MonitoringDetailPage({
   params,
@@ -50,13 +50,12 @@ export default async function MonitoringDetailPage({
   return (
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-xl font-semibold text-gray-900">View Monitoring</h1>
-          {isArchived ? (
-            <BackButton href="/archive" />
-          ) : (
-            <ViewPageActions editHref={`/monitoring/${monitoringId}/edit`} backHref="/monitoring" />
-          )}
+          <div className="flex flex-wrap items-center gap-3">
+            {!isArchived && <MonitoringPageNav id={monitoringId} current="view" />}
+            <BackButton href={isArchived ? "/archive" : "/monitoring"} />
+          </div>
         </div>
 
         <div className="rounded-lg border border-gray-200 bg-white shadow-sm">

@@ -84,7 +84,6 @@ function HistoryCard({ entry, index }: { entry: MonitoringHistoryEntry; index: n
       <div className="mb-2 text-xs font-bold text-gray-600">HISTORY {index + 1}</div>
       <div className={gridLayoutStyles}>
         <Field label="Entry Date" value={formatDate(entry.entry_date)} />
-        <Field label="Date of Departure" value={formatDate(entry.date_of_departure)} />
         <Field label="Date of Arrival" value={formatDate(entry.date_of_arrival)} />
         <Field label="Expected Return Date" value={formatDate(entry.expected_return_date)} />
         <Field label="Actual Return Date" value={formatDate(entry.actual_return_date)} />
@@ -129,7 +128,7 @@ export function MonitoringDetailsView({ monitoring, applicant, jobOrder }: Props
           <Field label="Employer Name" value={monitoring.employer_name} />
           <Field label="Contract Duration" value={monitoring.contract_duration} />
           <Field label="Salary Amount" value={monitoring.salary_amount} />
-          <Field label="Deployed Date" value={formatDate(monitoring.deployment_date)} />
+          <Field label="Departure Date" value={formatDate(monitoring.deployment_date)} />
           <Field label="Welfare Officer Assigned" value={monitoring.welfare_officer} />
           <Field label="Last Status Update" value={formatDate(monitoring.last_status_update)} />
         </div>

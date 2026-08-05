@@ -79,6 +79,38 @@ export type DeploymentReportRow = {
   actualReturnDate: string | null
   reasonForReturn: string | null
   willExtendContract: string | null
+  allConcernsSummary: string | null
+  allHistorySummary: string | null
+}
+
+export type MonitoringReportRow = {
+  monitoringId: number
+  applicantRef: string
+  applicantName: string
+  contactNumber: string | null
+  passportNumber: string | null
+  jobOrderRef: string
+  jobTitle: string
+  company: string
+  country: string
+  deploymentStatus: string
+  departureDate: string | null
+  employerName: string | null
+  contractDuration: string | null
+  salaryAmount: string | null
+  welfareOfficer: string | null
+  lastStatusUpdate: string | null
+  concernStatus: string | null
+  concernType: string | null
+  concernDateReported: string | null
+  actionTaken: string | null
+  allConcernsSummary: string | null
+  expectedReturnDate: string | null
+  actualReturnDate: string | null
+  dateOfArrival: string | null
+  reasonForReturn: string | null
+  willExtendContract: string | null
+  allHistorySummary: string | null
 }
 
 export type JobOrderReportRow = {
@@ -154,26 +186,13 @@ export type ApplicantReportRow = {
   notes: string | null
 }
 
-export type PlacementReportRow = {
-  applicantId: number
-  applicantRef: string
-  applicantName: string
-  positionApplied: string | null
-  jobOrderId: number
-  jobOrderRef: string
-  jobTitle: string | null
-  company: string | null
-  country: string | null
-  jobOrderStatus: string | null
-}
-
 export type ReportData = {
   generatedAt: string
   summary: ReportSummary
   countryCounts: CountryCount[]
   statusCounts: PlacementStatusCount[]
   deployments: DeploymentReportRow[]
+  monitoring: MonitoringReportRow[]
   jobOrders: JobOrderReportRow[]
   applicants: ApplicantReportRow[]
-  placements: PlacementReportRow[]
 }

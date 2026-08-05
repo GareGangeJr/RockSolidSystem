@@ -27,6 +27,7 @@ import {
   DEFAULT_STATUS,
   getSelectableApplicantStatusOptions,
 } from "@/lib/status-options"
+import { SkillsChecklistField } from "@/components/applicants/skills-checklist-field"
 import { WorkExperienceForm } from "@/components/applicants/work-experience-form"
 import { PositionSelectField } from "@/components/applicants/position-select-field"
 import { YearGraduatedSelect } from "@/components/shared/YearGraduatedSelect"
@@ -81,18 +82,37 @@ export function ApplicantForm({
     return addApplicant(formData)
   }
 
+  const defaultJobOrder = defaultJobOrderId
+    ? openJobOrders.find((job) => job.id === defaultJobOrderId)
+    : null
+
   const [countryApplyingFor, setCountryApplyingFor] = useState(() => {
-    if (defaultJobOrderId) {
-      const fromJob = openJobOrders.find((job) => job.id === defaultJobOrderId)?.country
-      if (fromJob) return fromJob
-    }
+    if (defaultJobOrder?.country) return defaultJobOrder.country
     if (defaultCountryApplyingFor) return defaultCountryApplyingFor
     if (isEdit) return val(applicant?.country_applying_for) ?? ""
+    return ""
+  })
+
+  const autoPositionFromJobOrder = !isEdit && openJobOrders.length > 0
+  const applicationReq = autoPositionFromJobOrder ? ({ required: true as const }) : {}
+
+  const [positionApplied, setPositionApplied] = useState(() => {
+    if (autoPositionFromJobOrder && defaultJobOrder?.job_title) {
+      return defaultJobOrder.job_title
+    }
+    if (isEdit) return val(applicant?.position_applied) ?? ""
     return ""
   })
   const applicantTypes = isEdit
     ? APPLICANT_TYPE_OPTIONS
     : APPLICANT_TYPE_OPTIONS.filter((opt) => !ONLINE_APPLICANT_TYPES.has(opt))
+
+  const requiredIfPublic = isPublic ? ({ required: true as const }) : {}
+  const personalReq = requiredIfPublic
+  const familyCoreReq = requiredIfPublic
+  const emergencyReq = requiredIfPublic
+  const beneficiary1Req = requiredIfPublic
+  const skillsReq = requiredIfPublic
 
   return (
     <MultiStepForm
@@ -109,18 +129,37 @@ export function ApplicantForm({
             <JobOrderSelectField
               jobOrders={openJobOrders}
               defaultJobOrderId={defaultJobOrderId}
+              required={autoPositionFromJobOrder}
               onJobOrderChange={(job) => {
                 setCountryApplyingFor(job?.country ?? "")
+                if (autoPositionFromJobOrder) {
+                  setPositionApplied(job?.job_title ?? "")
+                }
               }}
             />
           )}
           <div>
-            <PositionSelectField
-              name="position_applied"
-              label="Position Applied For"
-              required
-              defaultValue={val(applicant?.position_applied)}
-            />
+            {autoPositionFromJobOrder ? (
+              <>
+                <label className={labelClassSm}>Position Applied For</label>
+                <input
+                  name="position_applied"
+                  type="text"
+                  className={`${fieldClassSm} cursor-not-allowed bg-gray-50 text-gray-600`}
+                  value={positionApplied}
+                  readOnly
+                  required
+                  placeholder="Select a job order"
+                />
+              </>
+            ) : (
+              <PositionSelectField
+                name="position_applied"
+                label="Position Applied For"
+                required
+                defaultValue={val(applicant?.position_applied)}
+              />
+            )}
           </div>
           <div>
             <PositionSelectField
@@ -152,6 +191,7 @@ export function ApplicantForm({
               value={countryApplyingFor}
               readOnly
               placeholder="Select a job order"
+              {...applicationReq}
             />
           </div>
         </div>
@@ -174,7 +214,7 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Current Complete Address</label>
-            <input name="current_address" className={fieldClassSm} defaultValue={val(applicant?.current_address)} />
+            <input name="current_address" className={fieldClassSm} defaultValue={val(applicant?.current_address)} {...personalReq} />
           </div>
           <div>
             <label className={labelClassSm}>Provincial Address</label>
@@ -182,11 +222,11 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Contact Number</label>
-            <input name="contact_number" className={fieldClassSm} defaultValue={val(applicant?.contact_number)} />
+            <input name="contact_number" className={fieldClassSm} defaultValue={val(applicant?.contact_number)} {...personalReq} />
           </div>
           <div>
             <label className={labelClassSm}>Active Cellphone</label>
-            <input name="active_cellphone" className={fieldClassSm} defaultValue={val(applicant?.active_cellphone)} />
+            <input name="active_cellphone" className={fieldClassSm} defaultValue={val(applicant?.active_cellphone)} {...personalReq} />
           </div>
           <div>
             <label className={labelClassSm}>Email</label>
@@ -194,7 +234,7 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Date of Birth</label>
-            <input name="date_of_birth" type="date" className={fieldClassSm} defaultValue={dat(applicant?.date_of_birth)} />
+            <input name="date_of_birth" type="date" className={fieldClassSm} defaultValue={dat(applicant?.date_of_birth)} {...personalReq} />
           </div>
           <div>
             <label className={labelClassSm}>Place of Birth</label>
@@ -238,7 +278,7 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Facebook Account</label>
-            <input name="facebook_account" className={fieldClassSm} defaultValue={val(applicant?.facebook_account)} />
+            <input name="facebook_account" className={fieldClassSm} defaultValue={val(applicant?.facebook_account)} {...personalReq} />
           </div>
         </div>
       </section>
@@ -248,19 +288,19 @@ export function ApplicantForm({
         <div className={formGridClass}>
           <div>
             <label className={labelClassSm}>Mother Full Name</label>
-            <input name="mother_full_name" className={fieldClassSm} defaultValue={val(applicant?.mother_full_name)} />
+            <input name="mother_full_name" className={fieldClassSm} defaultValue={val(applicant?.mother_full_name)} {...familyCoreReq} />
           </div>
           <div>
             <label className={labelClassSm}>Mother Contact</label>
-            <input name="mother_contact" className={fieldClassSm} defaultValue={val(applicant?.mother_contact)} />
+            <input name="mother_contact" className={fieldClassSm} defaultValue={val(applicant?.mother_contact)} {...familyCoreReq} />
           </div>
           <div>
             <label className={labelClassSm}>Father Full Name</label>
-            <input name="father_full_name" className={fieldClassSm} defaultValue={val(applicant?.father_full_name)} />
+            <input name="father_full_name" className={fieldClassSm} defaultValue={val(applicant?.father_full_name)} {...familyCoreReq} />
           </div>
           <div>
             <label className={labelClassSm}>Father Contact</label>
-            <input name="father_contact" className={fieldClassSm} defaultValue={val(applicant?.father_contact)} />
+            <input name="father_contact" className={fieldClassSm} defaultValue={val(applicant?.father_contact)} {...familyCoreReq} />
           </div>
           <div>
             <label className={labelClassSm}>Spouse Name</label>
@@ -276,7 +316,14 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Number of Children</label>
-            <input name="number_of_children" type="number" className={fieldClassSm} defaultValue={val(applicant?.number_of_children)} />
+            <input
+              name="number_of_children"
+              type="number"
+              min={0}
+              className={fieldClassSm}
+              defaultValue={val(applicant?.number_of_children)}
+              {...familyCoreReq}
+            />
           </div>
           <div>
             <label className={labelClassSm}>Children Ages</label>
@@ -294,33 +341,35 @@ export function ApplicantForm({
         <div className={formGridClass}>
           <div>
             <label className={labelClassSm}>Name</label>
-            <input name="emergency_contact_name" className={fieldClassSm} defaultValue={val(applicant?.emergency_contact_name)} />
+            <input name="emergency_contact_name" className={fieldClassSm} defaultValue={val(applicant?.emergency_contact_name)} {...emergencyReq} />
           </div>
           <div>
             <label className={labelClassSm}>Relationship</label>
-            <input name="emergency_contact_relationship" className={fieldClassSm} defaultValue={val(applicant?.emergency_contact_relationship)} />
+            <input name="emergency_contact_relationship" className={fieldClassSm} defaultValue={val(applicant?.emergency_contact_relationship)} {...emergencyReq} />
           </div>
           <div>
             <label className={labelClassSm}>Contact Number</label>
-            <input name="emergency_contact_number" className={fieldClassSm} defaultValue={val(applicant?.emergency_contact_number)} />
+            <input name="emergency_contact_number" className={fieldClassSm} defaultValue={val(applicant?.emergency_contact_number)} {...emergencyReq} />
           </div>
           <div>
             <label className={labelClassSm}>Address</label>
-            <input name="emergency_contact_address" className={fieldClassSm} defaultValue={val(applicant?.emergency_contact_address)} />
+            <input name="emergency_contact_address" className={fieldClassSm} defaultValue={val(applicant?.emergency_contact_address)} {...emergencyReq} />
           </div>
         </div>
 
         <hr className="my-6 border-gray-200" />
 
         <h2 className={sectionTitleClassSm}>Beneficiaries</h2>
+
+        <p className="mb-3 text-xs font-bold text-gray-600">BENEFICIARY 1</p>
         <div className={formGridClass}>
           <div>
-            <label className={labelClassSm}>Beneficiary 1 Name</label>
-            <input name="beneficiary1_name" className={fieldClassSm} defaultValue={val(applicant?.beneficiary1_name)} />
+            <label className={labelClassSm}>Name</label>
+            <input name="beneficiary1_name" className={fieldClassSm} defaultValue={val(applicant?.beneficiary1_name)} {...beneficiary1Req} />
           </div>
           <div>
             <label className={labelClassSm}>DOB</label>
-            <input name="beneficiary1_dob" type="date" className={fieldClassSm} defaultValue={dat(applicant?.beneficiary1_dob)} />
+            <input name="beneficiary1_dob" type="date" className={fieldClassSm} defaultValue={dat(applicant?.beneficiary1_dob)} {...beneficiary1Req} />
           </div>
           <div>
             <label className={labelClassSm}>Age</label>
@@ -328,14 +377,18 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Relationship</label>
-            <input name="beneficiary1_relationship" className={fieldClassSm} defaultValue={val(applicant?.beneficiary1_relationship)} />
+            <input name="beneficiary1_relationship" className={fieldClassSm} defaultValue={val(applicant?.beneficiary1_relationship)} {...beneficiary1Req} />
           </div>
           <div>
             <label className={labelClassSm}>Contact</label>
-            <input name="beneficiary1_contact" className={fieldClassSm} defaultValue={val(applicant?.beneficiary1_contact)} />
+            <input name="beneficiary1_contact" className={fieldClassSm} defaultValue={val(applicant?.beneficiary1_contact)} {...beneficiary1Req} />
           </div>
+        </div>
+
+        <p className="mb-3 mt-6 text-xs font-bold text-gray-600">BENEFICIARY 2</p>
+        <div className={formGridClass}>
           <div>
-            <label className={labelClassSm}>Beneficiary 2 Name</label>
+            <label className={labelClassSm}>Name</label>
             <input name="beneficiary2_name" className={fieldClassSm} defaultValue={val(applicant?.beneficiary2_name)} />
           </div>
           <div>
@@ -427,16 +480,17 @@ export function ApplicantForm({
               min={0}
               defaultValue={isEdit && applicant?.years_of_exp != null ? Number(applicant.years_of_exp) : 0}
               className={fieldClassSm}
+              {...skillsReq}
             />
-          </div>
-          <div>
-            <label className={labelClassSm}>Skills (comma-separated)</label>
-            <input name="skills" className={fieldClassSm} placeholder="Ex: Cooking, Child Care, Driving" defaultValue={val(applicant?.skills)} />
           </div>
           <div>
             <label className={labelClassSm}>Notes</label>
             <input name="notes" className={fieldClassSm} defaultValue={val(applicant?.notes)} />
           </div>
+          <SkillsChecklistField
+            defaultValue={val(applicant?.skills)}
+            required={isPublic}
+          />
         </div>
 
         <hr className="my-6 border-gray-200" />
@@ -445,7 +499,7 @@ export function ApplicantForm({
         <div className={formGridClass}>
           <div>
             <label className={labelClassSm}>English Level</label>
-            <select name="english_level" className={fieldClassSm} defaultValue={val(applicant?.english_level) || DEFAULT_SPEAKING_LEVEL}>
+            <select name="english_level" className={fieldClassSm} defaultValue={val(applicant?.english_level) || DEFAULT_SPEAKING_LEVEL} {...skillsReq}>
               {SPEAKING_LEVEL_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
                   {opt}
@@ -455,7 +509,7 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Arabic Level</label>
-            <select name="arabic_level" className={fieldClassSm} defaultValue={val(applicant?.arabic_level) || DEFAULT_SPEAKING_LEVEL}>
+            <select name="arabic_level" className={fieldClassSm} defaultValue={val(applicant?.arabic_level) || DEFAULT_SPEAKING_LEVEL} {...skillsReq}>
               {SPEAKING_LEVEL_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
                   {opt}
@@ -471,19 +525,19 @@ export function ApplicantForm({
         <div className={formGridClass}>
           <div>
             <label className={labelClassSm}>Passport Number</label>
-            <input name="passport_number" className={fieldClassSm} defaultValue={val(applicant?.passport_number)} />
+            <input name="passport_number" className={fieldClassSm} defaultValue={val(applicant?.passport_number)} {...skillsReq} />
           </div>
           <div>
             <label className={labelClassSm}>Date Issued</label>
-            <input name="passport_date_issued" type="date" className={fieldClassSm} defaultValue={dat(applicant?.passport_date_issued)} />
+            <input name="passport_date_issued" type="date" className={fieldClassSm} defaultValue={dat(applicant?.passport_date_issued)} {...skillsReq} />
           </div>
           <div>
             <label className={labelClassSm}>Date Expired</label>
-            <input name="passport_date_expired" type="date" className={fieldClassSm} defaultValue={dat(applicant?.passport_date_expired)} />
+            <input name="passport_date_expired" type="date" className={fieldClassSm} defaultValue={dat(applicant?.passport_date_expired)} {...skillsReq} />
           </div>
           <div>
             <label className={labelClassSm}>Place Issued</label>
-            <input name="passport_place_issued" className={fieldClassSm} defaultValue={val(applicant?.passport_place_issued)} />
+            <input name="passport_place_issued" className={fieldClassSm} defaultValue={val(applicant?.passport_place_issued)} {...skillsReq} />
           </div>
         </div>
 

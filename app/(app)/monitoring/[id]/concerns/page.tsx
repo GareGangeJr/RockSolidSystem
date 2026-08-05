@@ -1,7 +1,7 @@
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { BackButton } from "@/components/BackButton"
-import { updateMonitoringConcerns } from "../../actions"
-import { MonitoringConcernsHistoryForm } from "@/components/monitoring/MonitoringConcernsHistoryForm"
+import { MonitoringConcernsPageForm } from "@/components/monitoring/MonitoringConcernsPageForm"
+import { MonitoringPageNav } from "@/components/monitoring/MonitoringPageNav"
 import {
   normalizeConcernEntriesFromRecord,
   normalizeHistoryEntriesFromRecord,
@@ -48,33 +48,25 @@ export default async function MonitoringConcernsPage({
   return (
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-xl font-semibold text-gray-900">Concerns & History</h1>
-          <BackButton href="/monitoring" />
+          <div className="flex flex-wrap items-center gap-3">
+            <MonitoringPageNav id={monitoringId} current="concerns" />
+            <BackButton href="/monitoring" />
+          </div>
         </div>
 
         {error === "save" && message && (
           <div className="mb-4 rounded-md bg-red-100 px-4 py-3 text-red-800">{decodeURIComponent(message)}</div>
         )}
 
-        <form action={updateMonitoringConcerns} className="rounded-lg border border-gray-200 bg-white shadow-sm">
-          <input type="hidden" name="id" value={monitoringId} />
-          <div className="space-y-6 p-6">
-            <MonitoringConcernsHistoryForm
-              deploymentDate={record.deployment_date as string | null}
-              lastStatusUpdate={record.last_status_update as string | null}
-              initialConcerns={initialConcerns}
-              initialHistory={initialHistory}
-            />
-
-            <button
-              type="submit"
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              Save
-            </button>
-          </div>
-        </form>
+        <MonitoringConcernsPageForm
+          monitoringId={monitoringId}
+          deploymentDate={record.deployment_date as string | null}
+          lastStatusUpdate={record.last_status_update as string | null}
+          initialConcerns={initialConcerns}
+          initialHistory={initialHistory}
+        />
       </div>
     </div>
   )

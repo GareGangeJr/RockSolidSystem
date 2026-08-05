@@ -1,15 +1,22 @@
 import { formatApplicantRef } from "@/lib/format-applicant-ref"
+import {
+  concernEntryHasData,
+  historyEntryHasData,
+  normalizeConcernEntriesFromRecord,
+  normalizeHistoryEntriesFromRecord,
+} from "@/lib/monitoring-entries"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import type {
   ApplicantReportRow,
   CountryCount,
   DeploymentReportRow,
   JobOrderReportRow,
-  PlacementReportRow,
+  MonitoringReportRow,
   PlacementStatusCount,
   ReportData,
   ReportSummary,
 } from "@/lib/reports/types"
+import { isDeploymentInDateRange } from "@/lib/reports/date-range"
 
 function cell(value: unknown) {
   if (value == null || value === "") return null
@@ -49,6 +56,41 @@ function formatEducation(applicant: Record<string, unknown>) {
     applicant.college_course ? `College: ${applicant.college_course}` : null,
   ].filter(Boolean)
   return parts.length ? parts.join("; ") : null
+}
+
+function formatAllConcerns(record: Record<string, unknown>) {
+  const entries = normalizeConcernEntriesFromRecord(record).filter(concernEntryHasData)
+  if (entries.length === 0) return null
+  return entries
+    .map((entry, index) => {
+      const parts = [
+        entry.concern_type,
+        entry.concern_date_reported,
+        entry.concern_status,
+        entry.action_taken || null,
+      ].filter(Boolean)
+      return `#${index + 1} ${parts.join(" | ")}`
+    })
+    .join("; ")
+}
+
+function formatAllHistory(record: Record<string, unknown>) {
+  const entries = normalizeHistoryEntriesFromRecord(record).filter(historyEntryHasData)
+  if (entries.length === 0) return null
+  return entries
+    .map((entry, index) => {
+      const parts = [
+        entry.entry_date ? `Entry: ${entry.entry_date}` : null,
+        entry.date_of_arrival ? `Arrival: ${entry.date_of_arrival}` : null,
+        entry.expected_return_date ? `ETA: ${entry.expected_return_date}` : null,
+        entry.actual_return_date ? `Return: ${entry.actual_return_date}` : null,
+        entry.reason_for_return || null,
+        entry.will_extend_contract ? `Extend: ${entry.will_extend_contract}` : null,
+        entry.notes || null,
+      ].filter(Boolean)
+      return `#${index + 1} ${parts.join(" | ")}`
+    })
+    .join("; ")
 }
 
 function mapApplicantRow(applicant: Record<string, unknown>): ApplicantReportRow {
@@ -123,14 +165,16 @@ export async function fetchReportData(): Promise<ReportData> {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
 
   const deployments: DeploymentReportRow[] = (monitoringRecords ?? []).map((record) => {
+    const row = record as Record<string, unknown>
     const applicant = applicantById.get(record.applicant_id)
     const jobOrder = jobOrderById.get(record.job_order_id)
     const name = [applicant?.firstName, applicant?.lastName].filter(Boolean).join(" ") || "--"
+    const departureDate = dateOnly(record.deployment_date) ?? dateOnly(record.date_of_departure)
 
     return {
       monitoringId: record.id,
       deploymentStatus: cell(record.deployment_status) ?? "--",
-      deploymentDate: dateOnly(record.deployment_date),
+      deploymentDate: departureDate,
       lastStatusUpdate: dateOnly(record.last_status_update),
       applicantId: record.applicant_id,
       applicantRef: formatApplicantRef(record.applicant_id),
@@ -176,7 +220,7 @@ export async function fetchReportData(): Promise<ReportData> {
       employerName: cell(record.employer_name),
       contractDuration: cell(record.contract_duration),
       deploymentSalary: cell(record.salary_amount),
-      dateOfDeparture: dateOnly(record.date_of_departure),
+      dateOfDeparture: departureDate,
       dateOfArrival: dateOnly(record.date_of_arrival),
       welfareOfficer: cell(record.welfare_officer),
       concernType: cell(record.concern_type),
@@ -187,6 +231,46 @@ export async function fetchReportData(): Promise<ReportData> {
       actualReturnDate: dateOnly(record.actual_return_date),
       reasonForReturn: cell(record.reason_for_return),
       willExtendContract: cell(record.will_extend_contract),
+      allConcernsSummary: formatAllConcerns(row),
+      allHistorySummary: formatAllHistory(row),
+    }
+  })
+
+  const monitoring: MonitoringReportRow[] = (monitoringRecords ?? []).map((record) => {
+    const row = record as Record<string, unknown>
+    const applicant = applicantById.get(record.applicant_id)
+    const jobOrder = jobOrderById.get(record.job_order_id)
+    const name = [applicant?.firstName, applicant?.lastName].filter(Boolean).join(" ") || "--"
+    const departureDate = dateOnly(record.deployment_date) ?? dateOnly(record.date_of_departure)
+
+    return {
+      monitoringId: record.id,
+      applicantRef: formatApplicantRef(record.applicant_id),
+      applicantName: name,
+      contactNumber: applicant?.contactNumber ?? null,
+      passportNumber: applicant?.passportNumber ?? null,
+      jobOrderRef: jobOrderRef(record.job_order_id),
+      jobTitle: cell(jobOrder?.job_title) ?? "--",
+      company: cell(jobOrder?.company) ?? "--",
+      country: cell(jobOrder?.country) ?? "--",
+      deploymentStatus: cell(record.deployment_status) ?? "--",
+      departureDate,
+      employerName: cell(record.employer_name),
+      contractDuration: cell(record.contract_duration),
+      salaryAmount: cell(record.salary_amount),
+      welfareOfficer: cell(record.welfare_officer),
+      lastStatusUpdate: dateOnly(record.last_status_update),
+      concernStatus: cell(record.concern_status),
+      concernType: cell(record.concern_type),
+      concernDateReported: dateOnly(record.concern_date_reported),
+      actionTaken: cell(record.action_taken),
+      allConcernsSummary: formatAllConcerns(row),
+      expectedReturnDate: dateOnly(record.expected_return_date),
+      actualReturnDate: dateOnly(record.actual_return_date),
+      dateOfArrival: dateOnly(record.date_of_arrival),
+      reasonForReturn: cell(record.reason_for_return),
+      willExtendContract: cell(record.will_extend_contract),
+      allHistorySummary: formatAllHistory(row),
     }
   })
 
@@ -258,25 +342,6 @@ export async function fetchReportData(): Promise<ReportData> {
     }
   })
 
-  const placementRows: PlacementReportRow[] = (placements ?? []).map((placement) => {
-    const applicant = applicantById.get(placement.applicant_id)
-    const jobOrder = jobOrderById.get(placement.job_order_id)
-    const name = [applicant?.firstName, applicant?.lastName].filter(Boolean).join(" ") || "--"
-
-    return {
-      applicantId: placement.applicant_id,
-      applicantRef: formatApplicantRef(placement.applicant_id),
-      applicantName: name,
-      positionApplied: applicant?.positionApplied ?? null,
-      jobOrderId: placement.job_order_id,
-      jobOrderRef: jobOrderRef(placement.job_order_id),
-      jobTitle: cell(jobOrder?.job_title),
-      company: cell(jobOrder?.company),
-      country: cell(jobOrder?.country),
-      jobOrderStatus: cell(jobOrder?.status),
-    }
-  })
-
   const summary: ReportSummary = {
     totalPlacements: deployments.length,
     totalDeployed: deployments.filter((r) => r.deploymentStatus === "Deployed").length,
@@ -294,10 +359,34 @@ export async function fetchReportData(): Promise<ReportData> {
     countryCounts,
     statusCounts,
     deployments,
+    monitoring,
     jobOrders: jobOrderRows,
     applicants: applicantRows,
-    placements: placementRows,
   }
+}
+
+export function filterMonitoring(
+  monitoring: MonitoringReportRow[],
+  countryFilter?: string | null,
+  statusFilter?: string | null
+) {
+  let list = monitoring
+  if (countryFilter && countryFilter !== "All") {
+    list = list.filter((row) => row.country === countryFilter)
+  }
+  if (statusFilter && statusFilter !== "All") {
+    list = list.filter((row) => row.deploymentStatus === statusFilter)
+  }
+  return list
+}
+
+export function filterMonitoringByDateRange(
+  monitoring: MonitoringReportRow[],
+  fromDate: string | null,
+  toDate: string | null
+) {
+  if (!fromDate && !toDate) return monitoring
+  return monitoring.filter((row) => isDeploymentInDateRange(row.departureDate, fromDate, toDate))
 }
 
 export function filterDeployments(

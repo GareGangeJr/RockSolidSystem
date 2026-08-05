@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { Eye } from "lucide-react"
 import { SearchTable } from "@/components/shared/SearchTable"
 import type { JobOrder } from "@/types/entities"
 
@@ -27,10 +26,13 @@ export function PublicJobOrderTable({ jobOrders }: { jobOrders: PublicJobOrder[]
         { header: "Job Title", cell: (row) => row.job_title ?? "--" },
         { header: "Workers Needed", cell: (row) => row.no_workers ?? "--" },
         {
-          header: "View",
+          header: "",
           cell: (row) => (
-            <Link href={`/apply/job-orders/${row.id}`} className="inline-flex rounded p-1 hover:bg-blue-100 hover:text-blue-600" title="View details">
-              <Eye className="h-4 w-4" />
+            <Link
+              href={`/apply/job-orders/${row.id}`}
+              className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+            >
+              View Details
             </Link>
           ),
         },

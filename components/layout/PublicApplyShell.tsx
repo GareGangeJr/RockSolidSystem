@@ -43,15 +43,6 @@ export default function PublicApplyShell({ children }: { children: React.ReactNo
             )
           })}
         </nav>
-
-        <div className="mt-auto border-t p-4">
-          <Link
-            href="/login"
-            className="block rounded-md border border-blue-600 px-4 py-2 text-center text-sm font-medium text-blue-600 hover:bg-blue-600 hover:text-white"
-          >
-            Staff Login
-          </Link>
-        </div>
       </aside>
 
       <div className="flex flex-1 flex-col">

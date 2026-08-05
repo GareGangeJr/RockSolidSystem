@@ -20,7 +20,13 @@ const emptyWork: WorkExperienceItem = {
   date_ended: "",
 }
 
-export function WorkExperienceForm({ initial = [] }: { initial?: WorkExperienceItem[] }) {
+export function WorkExperienceForm({
+  initial = [],
+  allRequired = false,
+}: {
+  initial?: WorkExperienceItem[]
+  allRequired?: boolean
+}) {
   const [works, setWorks] = useState<WorkExperienceItem[]>(initial.length > 0 ? initial : [emptyWork])
 
   const addWork = () => setWorks((prev) => [...prev, { ...emptyWork }])
@@ -46,6 +52,7 @@ export function WorkExperienceForm({ initial = [] }: { initial?: WorkExperienceI
               <label className={labelClassSm}>Country</label>
               <CountrySelect
                 value={work.country}
+                required={allRequired}
                 onChange={(country) =>
                   setWorks((prev) => {
                     const next = [...prev]
@@ -60,6 +67,7 @@ export function WorkExperienceForm({ initial = [] }: { initial?: WorkExperienceI
               <input
                 className={fieldClassSm}
                 value={work.company}
+                required={allRequired}
                 onChange={(e) =>
                   setWorks((prev) => {
                     const next = [...prev]
@@ -74,6 +82,7 @@ export function WorkExperienceForm({ initial = [] }: { initial?: WorkExperienceI
               <input
                 className={fieldClassSm}
                 value={work.position}
+                required={allRequired}
                 onChange={(e) =>
                   setWorks((prev) => {
                     const next = [...prev]
@@ -89,6 +98,7 @@ export function WorkExperienceForm({ initial = [] }: { initial?: WorkExperienceI
                 type="date"
                 className={fieldClassSm}
                 value={work.date_started}
+                required={allRequired}
                 onChange={(e) =>
                   setWorks((prev) => {
                     const next = [...prev]
@@ -104,6 +114,7 @@ export function WorkExperienceForm({ initial = [] }: { initial?: WorkExperienceI
                 type="date"
                 className={fieldClassSm}
                 value={work.date_ended}
+                required={allRequired}
                 onChange={(e) =>
                   setWorks((prev) => {
                     const next = [...prev]
