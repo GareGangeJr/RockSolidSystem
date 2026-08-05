@@ -365,21 +365,6 @@ export async function fetchReportData(): Promise<ReportData> {
   }
 }
 
-export function filterMonitoring(
-  monitoring: MonitoringReportRow[],
-  countryFilter?: string | null,
-  statusFilter?: string | null
-) {
-  let list = monitoring
-  if (countryFilter && countryFilter !== "All") {
-    list = list.filter((row) => row.country === countryFilter)
-  }
-  if (statusFilter && statusFilter !== "All") {
-    list = list.filter((row) => row.deploymentStatus === statusFilter)
-  }
-  return list
-}
-
 export function filterMonitoringByDateRange(
   monitoring: MonitoringReportRow[],
   fromDate: string | null,
@@ -387,19 +372,4 @@ export function filterMonitoringByDateRange(
 ) {
   if (!fromDate && !toDate) return monitoring
   return monitoring.filter((row) => isDeploymentInDateRange(row.departureDate, fromDate, toDate))
-}
-
-export function filterDeployments(
-  deployments: DeploymentReportRow[],
-  countryFilter?: string | null,
-  statusFilter?: string | null
-) {
-  let list = deployments
-  if (countryFilter && countryFilter !== "All") {
-    list = list.filter((row) => row.destinationCountry === countryFilter)
-  }
-  if (statusFilter && statusFilter !== "All") {
-    list = list.filter((row) => row.deploymentStatus === statusFilter)
-  }
-  return list
 }

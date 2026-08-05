@@ -10,8 +10,6 @@ import type {
 import { filterDeploymentsByDateRange } from "@/lib/reports/date-range"
 import { formatApplicantRef } from "@/lib/format-applicant-ref"
 
-export type { DeploymentReportRow, CountryCount, PlacementStatusCount }
-
 type Props = {
   summary: {
     totalPlacements: number
@@ -55,61 +53,60 @@ export default function ReportsView({
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          <SummaryCard label="Total Deployments" value={summary.totalPlacements} />
-          <SummaryCard label="Currently Deployed" value={summary.totalDeployed} />
-          <SummaryCard label="With Concerns" value={summary.withConcerns} />
-          <SummaryCard label="Deployed This Month" value={summary.deployedThisMonth} />
-          <SummaryCard label="Matched to Jobs" value={summary.matchedApplicants} />
+      <div className="flex flex-wrap items-end gap-3">
+        <div>
+          <label htmlFor="report-from-date" className="mb-1 block text-xs font-medium text-gray-600">
+            From
+          </label>
+          <input
+            id="report-from-date"
+            type="date"
+            value={fromDate}
+            max={toDate || undefined}
+            onChange={(e) => setFromDate(e.target.value)}
+            className={dateFieldClass}
+          />
         </div>
-        <div className="flex flex-wrap items-end gap-3">
-          <div>
-            <label htmlFor="report-from-date" className="mb-1 block text-xs font-medium text-gray-600">
-              From
-            </label>
-            <input
-              id="report-from-date"
-              type="date"
-              value={fromDate}
-              max={toDate || undefined}
-              onChange={(e) => setFromDate(e.target.value)}
-              className={dateFieldClass}
-            />
-          </div>
-          <div>
-            <label htmlFor="report-to-date" className="mb-1 block text-xs font-medium text-gray-600">
-              To
-            </label>
-            <input
-              id="report-to-date"
-              type="date"
-              value={toDate}
-              min={fromDate || undefined}
-              onChange={(e) => setToDate(e.target.value)}
-              className={dateFieldClass}
-            />
-          </div>
-          {(fromDate || toDate) && (
-            <button
-              type="button"
-              onClick={() => {
-                setFromDate("")
-                setToDate("")
-              }}
-              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-            >
-              Clear
-            </button>
-          )}
-          <a
-            href={exportHref}
-            className="inline-flex items-center gap-2 rounded-md bg-green-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-700"
+        <div>
+          <label htmlFor="report-to-date" className="mb-1 block text-xs font-medium text-gray-600">
+            To
+          </label>
+          <input
+            id="report-to-date"
+            type="date"
+            value={toDate}
+            min={fromDate || undefined}
+            onChange={(e) => setToDate(e.target.value)}
+            className={dateFieldClass}
+          />
+        </div>
+        {(fromDate || toDate) && (
+          <button
+            type="button"
+            onClick={() => {
+              setFromDate("")
+              setToDate("")
+            }}
+            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
           >
-            <Download className="h-4 w-4" />
-            Download Reports
-          </a>
-        </div>
+            Clear
+          </button>
+        )}
+        <a
+          href={exportHref}
+          className="inline-flex items-center gap-2 rounded-md bg-green-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-700"
+        >
+          <Download className="h-4 w-4" />
+          Download Reports
+        </a>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <SummaryCard label="Total Deployments" value={summary.totalPlacements} />
+        <SummaryCard label="Currently Deployed" value={summary.totalDeployed} />
+        <SummaryCard label="With Concerns" value={summary.withConcerns} />
+        <SummaryCard label="Deployed This Month" value={summary.deployedThisMonth} />
+        <SummaryCard label="Matched to Jobs" value={summary.matchedApplicants} />
       </div>
 
       <p className="text-sm text-gray-500">
@@ -224,9 +221,9 @@ export default function ReportsView({
 
 function SummaryCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-gray-900">{value}</p>
+    <div className="min-w-0 rounded-lg border border-gray-200 bg-white px-4 py-4 shadow-sm">
+      <p className="text-sm leading-snug text-gray-500">{label}</p>
+      <p className="mt-2 text-2xl font-bold tabular-nums text-gray-900">{value}</p>
     </div>
   )
 }

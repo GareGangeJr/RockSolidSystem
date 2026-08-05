@@ -57,7 +57,7 @@ export async function updateMonitoring(formData: FormData) {
   const deploymentDateRaw = (formData.get("deployment_date") as string)?.trim()
   const deployment_date = deploymentDateRaw ? deploymentDateRaw.slice(0, 10) : null
 
-  await supabase
+  const { error: updateError } = await supabase
     .from("monitoring")
     .update({
       deployment_status: deploymentStatus,
@@ -71,6 +71,12 @@ export async function updateMonitoring(formData: FormData) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
+
+  if (updateError) {
+    redirect(
+      `/monitoring/${id}/edit?error=save&message=${encodeURIComponent(updateError.message || "Could not update record.")}`
+    )
+  }
 
   await syncApplicantDeploymentStatus(supabase, current.applicant_id, deploymentStatus)
   await logActivity({ action: "update", module: "monitoring", recordId: id })
@@ -117,7 +123,7 @@ export async function updateMonitoringConcerns(formData: FormData) {
     redirect(
       `/monitoring/${id}/concerns?error=save&message=${encodeURIComponent(
         error.message.includes("concern_entries") || error.message.includes("history_entries")
-          ? "Database columns missing. Run supabase/monitoring_entries.sql in Supabase SQL Editor."
+          ? "Could not save monitoring concerns. Please try again."
           : error.message
       )}`
     )

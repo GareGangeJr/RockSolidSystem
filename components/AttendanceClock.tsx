@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { getAttendanceToday, logAttendance } from "@/app/(app)/attendance/actions"
 import { useRouter } from "next/navigation"
 
@@ -25,7 +25,7 @@ function employeeName(employee: EmployeeInfo | null) {
   return [employee.first_name, employee.last_name].filter(Boolean).join(" ")
 }
 
-export default function AttendanceClock() {
+export default function AttendanceClock({ resetAfterSave = false }: { resetAfterSave?: boolean }) {
   const router = useRouter()
   const [employeeId, setEmployeeId] = useState("")
   const [employee, setEmployee] = useState<EmployeeInfo | null>(null)
@@ -35,18 +35,26 @@ export default function AttendanceClock() {
   const [timeOut, setTimeOut] = useState<TodayLog | null>(null)
   const [loading, setLoading] = useState<"lookup" | "time_in" | "time_out" | null>(null)
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
+  const employeeIdRef = useRef(employeeId)
+
+  useEffect(() => {
+    employeeIdRef.current = employeeId
+  }, [employeeId])
+
+  function resetLookup() {
+    setEmployee(null)
+    setCanTimeIn(false)
+    setCanTimeOut(false)
+    setTimeIn(null)
+    setTimeOut(null)
+    setError("")
+    setSuccess("")
+  }
 
   useEffect(() => {
     const trimmed = employeeId.trim()
-    if (!trimmed) {
-      setEmployee(null)
-      setCanTimeIn(false)
-      setCanTimeOut(false)
-      setTimeIn(null)
-      setTimeOut(null)
-      setError("")
-      return
-    }
+    if (!trimmed) return
 
     const timer = window.setTimeout(async () => {
       setLoading("lookup")
@@ -79,6 +87,7 @@ export default function AttendanceClock() {
   async function handleLog(logType: "time_in" | "time_out") {
     setLoading(logType)
     setError("")
+    setSuccess("")
 
     const result = await logAttendance(logType, employeeId)
 
@@ -97,8 +106,18 @@ export default function AttendanceClock() {
       setTimeOut(refreshed.timeOut ?? null)
     }
 
+    setSuccess(logType === "time_in" ? "Time in recorded." : "Time out recorded.")
     router.refresh()
     setLoading(null)
+
+    if (resetAfterSave) {
+      const punchedId = employeeId.trim()
+      window.setTimeout(() => {
+        if (employeeIdRef.current.trim() !== punchedId) return
+        setEmployeeId("")
+        resetLookup()
+      }, 2500)
+    }
   }
 
   const isBusy = loading !== null
@@ -115,7 +134,11 @@ export default function AttendanceClock() {
           id="attendance-employee-id"
           type="text"
           value={employeeId}
-          onChange={(e) => setEmployeeId(e.target.value.toUpperCase())}
+          onChange={(e) => {
+            const next = e.target.value.toUpperCase()
+            setEmployeeId(next)
+            if (!next.trim()) resetLookup()
+          }}
           placeholder="EMP-2026-001"
           autoComplete="off"
           className="w-full rounded-md border border-gray-300 px-4 py-3 text-base uppercase focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -161,6 +184,7 @@ export default function AttendanceClock() {
         </p>
       </div>
 
+      {success && <p className="mt-3 text-sm text-green-700">{success}</p>}
       {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
     </div>
   )

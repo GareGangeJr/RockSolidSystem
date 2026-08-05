@@ -10,7 +10,7 @@ export default async function ViewEmployeePage({ params }: { params: Promise<{ i
 
   if (Number.isNaN(id))
     return (
-      <div className="p-6">
+      <div>
         <p className="font-semibold text-red-500">Invalid employee ID</p>
         <BackButton href="/employees" />
       </div>
@@ -20,7 +20,7 @@ export default async function ViewEmployeePage({ params }: { params: Promise<{ i
 
   if (error || !data)
     return (
-      <div className="p-6">
+      <div>
         <p className="font-semibold text-red-500">Employee not found</p>
         <BackButton href="/employees" />
       </div>
@@ -30,7 +30,7 @@ export default async function ViewEmployeePage({ params }: { params: Promise<{ i
   const isArchived = Boolean(employee.archived_at)
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div>
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-900">View Employee</h1>

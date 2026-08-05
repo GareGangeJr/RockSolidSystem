@@ -6,7 +6,6 @@ type CountrySelectProps = {
   value?: string
   defaultValue?: string
   onChange?: (value: string) => void
-  disabled?: boolean
   className?: string
   required?: boolean
 }
@@ -23,7 +22,6 @@ export function CountrySelect({
   value,
   defaultValue,
   onChange,
-  disabled = false,
   className = fieldClassSm,
   required = false,
 }: CountrySelectProps) {
@@ -32,24 +30,20 @@ export function CountrySelect({
   const options = getOptions(savedValue)
 
   return (
-    <>
-      {disabled && isControlled && name && <input type="hidden" name={name} value={value} />}
-      <select
-        name={disabled || !name ? undefined : name}
-        className={`${className}${disabled ? " cursor-not-allowed bg-gray-50 text-gray-600" : ""}`}
-        value={isControlled ? value : undefined}
-        defaultValue={!isControlled ? savedValue ?? "" : undefined}
-        disabled={disabled}
-        required={required}
-        onChange={onChange ? (event) => onChange(event.target.value) : undefined}
-      >
-        <option value="">Select country</option>
-        {options.map((country) => (
-          <option key={country} value={country}>
-            {country}
-          </option>
-        ))}
-      </select>
-    </>
+    <select
+      name={name}
+      className={className}
+      value={isControlled ? value : undefined}
+      defaultValue={!isControlled ? savedValue ?? "" : undefined}
+      required={required}
+      onChange={onChange ? (event) => onChange(event.target.value) : undefined}
+    >
+      <option value="">Select country</option>
+      {options.map((country) => (
+        <option key={country} value={country}>
+          {country}
+        </option>
+      ))}
+    </select>
   )
 }

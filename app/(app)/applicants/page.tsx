@@ -14,7 +14,7 @@ export default async function ApplicantsPage({ searchParams }: { searchParams: P
     .order("created_at", { ascending: false })
 
   if (error) {
-    return <div className="p-6 text-red-500">Error loading applicants</div>
+    return <div className="text-red-500">Error loading applicants</div>
   }
 
   const list = (applicants ?? []).map((a) => ({
@@ -28,12 +28,13 @@ export default async function ApplicantsPage({ searchParams }: { searchParams: P
     status: a.status ?? null,
     notes: a.notes ?? null,
     contact_number: a.contact_number ?? null,
+    active_cellphone: a.active_cellphone ?? null,
     email: a.email ?? null,
     date_applied: a.date_applied ?? null,
   }))
 
   return (
-    <div className="p-6">
+    <div>
       {success === "added" && (
         <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">
           Applicant added successfully.
@@ -44,16 +45,11 @@ export default async function ApplicantsPage({ searchParams }: { searchParams: P
           Applicant updated successfully.
         </div>
       )}
-      {success === "deployed" && (
-        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">
-          Applicant deployed.
-        </div>
-      )}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Applicants</h1>
         <Link
           href="/applicants/add"
-          className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          className="shrink-0 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
           Add Applicant
         </Link>

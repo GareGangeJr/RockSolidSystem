@@ -1,7 +1,7 @@
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { updateMonitoring } from "../../actions"
 import { BackButton } from "@/components/BackButton"
-import { MonitoringFormFields } from "@/components/monitoring/MonitoringFormFields"
+import { MonitoringDeploymentFormFields } from "@/components/monitoring/MonitoringDeploymentFormFields"
 import { MonitoringPageNav } from "@/components/monitoring/MonitoringPageNav"
 import { hasOpenConcern, normalizeConcernEntriesFromRecord } from "@/lib/monitoring-entries"
 
@@ -19,7 +19,7 @@ export default async function EditMonitoringPage({
 
   if (Number.isNaN(monitoringId))
     return (
-      <div className="p-6">
+      <div>
         <p className="font-semibold text-red-500">Invalid ID</p>
         <BackButton href="/monitoring" />
       </div>
@@ -33,7 +33,7 @@ export default async function EditMonitoringPage({
 
   if (fetchError || !monitoring)
     return (
-      <div className="p-6">
+      <div>
         <p className="font-semibold text-red-500">Record not found</p>
         <BackButton href="/monitoring" />
       </div>
@@ -43,7 +43,7 @@ export default async function EditMonitoringPage({
   const openConcern = hasOpenConcern(normalizeConcernEntriesFromRecord(record))
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div>
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-xl font-semibold text-gray-900">Edit Monitoring</h1>
@@ -53,14 +53,14 @@ export default async function EditMonitoringPage({
           </div>
         </div>
 
-        {error === "status" && message && (
+        {(error === "status" || error === "save") && message && (
           <div className="mb-4 rounded-md bg-red-100 px-4 py-3 text-red-800">{decodeURIComponent(message)}</div>
         )}
 
         <form action={updateMonitoring} className="rounded-lg border border-gray-200 bg-white shadow-sm">
           <input type="hidden" name="id" value={monitoringId} />
           <div className="space-y-6 p-6">
-            <MonitoringFormFields data={record} hasOpenConcern={openConcern} />
+            <MonitoringDeploymentFormFields data={record} hasOpenConcern={openConcern} />
 
             <button
               type="submit"

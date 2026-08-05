@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { X } from "lucide-react"
 
 type FilePreview = {
@@ -14,17 +14,10 @@ type FilePreviewModalProps = {
   onClose: () => void
 }
 
-export function FilePreviewModal({ preview, onClose }: FilePreviewModalProps) {
+function FilePreviewModalBody({ preview, onClose }: { preview: FilePreview; onClose: () => void }) {
   const [actualSize, setActualSize] = useState(false)
 
-  useEffect(() => {
-    setActualSize(false)
-  }, [preview?.url])
-
-  if (!preview) return null
-
   function handleClose() {
-    setActualSize(false)
     onClose()
   }
 
@@ -60,12 +53,19 @@ export function FilePreviewModal({ preview, onClose }: FilePreviewModalProps) {
           {preview.pdf ? (
             <iframe src={preview.url} className="h-[80vh] w-full border" title={preview.name} />
           ) : actualSize ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img src={preview.url} alt={preview.name} className="block" />
           ) : (
+            // eslint-disable-next-line @next/next/no-img-element
             <img src={preview.url} alt={preview.name} className="mx-auto block max-h-[80vh] w-full object-contain" />
           )}
         </div>
       </div>
     </div>
   )
+}
+
+export function FilePreviewModal({ preview, onClose }: FilePreviewModalProps) {
+  if (!preview) return null
+  return <FilePreviewModalBody key={preview.url} preview={preview} onClose={onClose} />
 }

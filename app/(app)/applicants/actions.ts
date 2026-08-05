@@ -16,8 +16,8 @@ export async function addApplicant(formData: FormData) {
   try {
     payload = buildApplicantInsertPayload(formData)
   } catch (error) {
-    console.error("Invalid position fields:", error)
-    redirect("/applicants/add")
+    const message = error instanceof Error ? error.message : "Could not save applicant."
+    redirect(`/applicants/add?error=save&message=${encodeURIComponent(message)}`)
   }
 
   const { data: inserted, error: insertError } = await supabase
@@ -101,8 +101,8 @@ export async function updateApplicant(formData: FormData) {
   try {
     payload = buildApplicantInsertPayload(formData)
   } catch (error) {
-    console.error("Invalid position fields:", error)
-    redirect(`/applicants/${id}/edit`)
+    const message = error instanceof Error ? error.message : "Could not save applicant."
+    redirect(`/applicants/${id}/edit?error=save&message=${encodeURIComponent(message)}`)
   }
 
   const { data: current } = await supabase.from("applicants").select("status").eq("id", id).maybeSingle()
@@ -125,8 +125,9 @@ export async function updateApplicant(formData: FormData) {
 
   const { error: updateError } = await supabase.from("applicants").update(payload).eq("id", id)
   if (updateError) {
-    console.error("Error updating applicant:", updateError)
-    redirect(`/applicants/${id}/edit`)
+    redirect(
+      `/applicants/${id}/edit?error=save&message=${encodeURIComponent(updateError.message || "Could not save applicant.")}`
+    )
   }
 
   await logActivity({
@@ -137,11 +138,20 @@ export async function updateApplicant(formData: FormData) {
 
   const jobOrderId = Number(formData.get("job_order_id"))
   if (jobOrderId) {
-    const placementResult = await createPlacement(supabase, id, jobOrderId)
-    if (placementResult.error) {
-      redirect(`/applicants/${id}/edit?error=placement&message=${encodeURIComponent(placementResult.error.message)}`)
+    const { data: existingPlacement } = await supabase
+      .from("placements")
+      .select("id")
+      .eq("applicant_id", id)
+      .eq("job_order_id", jobOrderId)
+      .maybeSingle()
+
+    if (!existingPlacement) {
+      const placementResult = await createPlacement(supabase, id, jobOrderId)
+      if (placementResult.error) {
+        redirect(`/applicants/${id}/edit?error=placement&message=${encodeURIComponent(placementResult.error.message)}`)
+      }
+      revalidatePath("/job-orders")
     }
-    revalidatePath("/job-orders")
   }
 
   revalidatePath("/applicants")

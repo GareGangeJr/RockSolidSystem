@@ -75,10 +75,6 @@ async function getTodayLogsForEmployee(employeeId: number) {
 }
 
 export async function getAttendanceToday(employeeNumber: string) {
-  if (process.env.NEXT_PUBLIC_ATTENDANCE_KIOSK !== "true") {
-    return { error: "Time in/out is only available on the office attendance PC." }
-  }
-
   const { employee, error } = await getEmployeeByNumber(employeeNumber)
   if (error || !employee) return { error, employee: null }
 
@@ -95,10 +91,6 @@ export async function getAttendanceToday(employeeNumber: string) {
 }
 
 export async function logAttendance(logType: AttendanceLogType, employeeNumber: string) {
-  if (process.env.NEXT_PUBLIC_ATTENDANCE_KIOSK !== "true") {
-    return { error: "Time in/out is only available on the office attendance PC." }
-  }
-
   const { employee, error } = await getEmployeeByNumber(employeeNumber)
   if (error || !employee) return { error }
 

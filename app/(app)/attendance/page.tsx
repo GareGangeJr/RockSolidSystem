@@ -1,10 +1,8 @@
 import { createSupabaseServer } from "@/lib/supabase/server"
-import AttendanceClock from "@/components/AttendanceClock"
 import AttendanceList, { type AttendanceListRow } from "@/components/AttendanceList"
 
 export default async function AttendancePage() {
   const supabase = await createSupabaseServer()
-  const kiosk = process.env.NEXT_PUBLIC_ATTENDANCE_KIOSK === "true"
 
   const { data: logs, error } = await supabase
     .from("attendance_logs")
@@ -32,12 +30,10 @@ export default async function AttendancePage() {
   })
 
   return (
-    <div className="space-y-8 p-6">
-      <div>
+    <div>
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Attendance</h1>
       </div>
-
-      {kiosk && <AttendanceClock />}
 
       <div>
         <h2 className="mb-4 text-lg font-semibold text-gray-900">Attendance Logs</h2>

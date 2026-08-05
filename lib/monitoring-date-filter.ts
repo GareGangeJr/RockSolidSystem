@@ -2,7 +2,6 @@ import {
   normalizeConcernEntriesFromRecord,
   normalizeHistoryEntriesFromRecord,
 } from "@/lib/monitoring-entries"
-import { isDeploymentInDateRange } from "@/lib/reports/date-range"
 
 export const MONITORING_DATE_FILTER_FIELDS = [
   { value: "deployment_date", label: "Departure Date" },
@@ -42,18 +41,4 @@ export function getMonitoringDatesForField(
   }
 
   return dates
-}
-
-export function monitoringRecordMatchesDateRange(
-  record: Record<string, unknown>,
-  field: MonitoringDateFilterField,
-  fromDate: string | null,
-  toDate: string | null
-): boolean {
-  if (!fromDate && !toDate) return true
-
-  const dates = getMonitoringDatesForField(record, field)
-  if (dates.length === 0) return false
-
-  return dates.some((day) => isDeploymentInDateRange(day, fromDate, toDate))
 }

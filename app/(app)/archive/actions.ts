@@ -117,10 +117,7 @@ export async function archiveFileRecord(
 
   if (error) {
     console.error(`Error archiving ${table} ${fileId}:`, error)
-    const message = error.message.includes("archived_at")
-      ? `${error.message} Run supabase/add_archived_at.sql in Supabase first.`
-      : error.message
-    return { error: { message } }
+    return { error: { message: error.message } }
   }
 
   if (!data?.length) {

@@ -13,7 +13,7 @@ export default async function JobOrdersPage({ searchParams }: { searchParams: Pr
     .order("created_at", { ascending: false })
 
   if (error) {
-    return <div className="p-6 text-red-500">Error loading job orders</div>
+    return <div className="text-red-500">Error loading job orders</div>
   }
 
   const jobOrderIds = (orders ?? []).map((order) => order.id)
@@ -42,7 +42,7 @@ export default async function JobOrdersPage({ searchParams }: { searchParams: Pr
   }))
 
   return (
-    <div className="p-6">
+    <div>
       {success === "added" && (
         <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">
           Job order added successfully.

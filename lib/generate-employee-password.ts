@@ -14,11 +14,3 @@ export function generateEmployeePassword(employee: EmployeePasswordInput): strin
   const fallback = (employee.employee_number ?? "emp001").replace(/[^a-zA-Z0-9]/g, "").toLowerCase()
   return fallback.length >= 6 ? fallback : `${fallback}123`
 }
-
-export function describeEmployeePassword(employee: EmployeePasswordInput): string {
-  const dob = employee.date_of_birth?.slice(0, 10) ?? ""
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dob)) {
-    return "their birthday (MMDDYYYY format)"
-  }
-  return "their employee number"
-}

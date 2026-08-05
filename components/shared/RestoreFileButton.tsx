@@ -10,14 +10,13 @@ type RestoreFileButtonProps = {
   fileId: number
   entityId: number
   name: string
-  className?: string
 }
 
-export function RestoreFileButton({ table, fileId, entityId, name, className }: RestoreFileButtonProps) {
+export function RestoreFileButton({ table, fileId, entityId, name }: RestoreFileButtonProps) {
   const router = useRouter()
 
   async function handleClick() {
-    if (!confirm("Are you sure you want to restore this?")) return
+    if (!confirm(`Are you sure you want to restore ${name}?`)) return
 
     const result = await restoreFileRecord(table, fileId, entityId)
     if (result.error) {
@@ -32,10 +31,7 @@ export function RestoreFileButton({ table, fileId, entityId, name, className }: 
     <button
       type="button"
       onClick={handleClick}
-      className={
-        className ??
-        "rounded p-1 text-gray-600 hover:bg-green-100 hover:text-green-600"
-      }
+      className="rounded p-1 text-gray-600 hover:bg-green-100 hover:text-green-600"
       title="Restore"
     >
       <RotateCcw className="h-4 w-4" />

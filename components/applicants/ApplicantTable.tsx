@@ -21,6 +21,7 @@ type ApplicantRow = Pick<
   | "status"
   | "notes"
   | "contact_number"
+  | "active_cellphone"
   | "email"
   | "date_applied"
 >
@@ -34,18 +35,22 @@ function formatAppliedDate(dateApplied: string | null, createdAt: string) {
   return val.length >= 10 ? val.slice(0, 10) : val
 }
 
+const actionClass = "rounded-md p-1.5 text-gray-500 hover:bg-gray-100"
+
 export function ApplicantTable({ applicants }: { applicants: ApplicantRow[] }) {
   return (
     <SearchTable
       rows={applicants}
       rowKey={(row) => row.id}
       searchPlaceholder="Search name, ID, position, contact, email..."
+      tableClassName="min-w-[920px]"
       searchMatch={(row, query) => {
         const haystack = [
           formatApplicantRef(row.id),
           fullName(row),
           row.position_applied,
           row.contact_number,
+          row.active_cellphone,
           row.email,
           row.notes,
         ]
@@ -69,30 +74,72 @@ export function ApplicantTable({ applicants }: { applicants: ApplicantRow[] }) {
         },
       ]}
       columns={[
-        { header: "Applicant ID", cell: (row) => formatApplicantRef(row.id) },
-        { header: "Name", cell: (row) => fullName(row) },
-        { header: "Position", cell: (row) => row.position_applied ?? "--" },
-        { header: "Type", cell: (row) => resolveApplicantType(row.applicant_type, row.position_applied) ?? "--" },
+        {
+          header: "Applicant ID",
+          className: "whitespace-nowrap",
+          cell: (row) => (
+            <span className="font-medium text-gray-900">{formatApplicantRef(row.id)}</span>
+          ),
+        },
+        {
+          header: "Applicant",
+          className: "min-w-[200px] max-w-[260px]",
+          cell: (row) => (
+            <div className="space-y-0.5">
+              <div className="font-medium leading-snug text-gray-900">{fullName(row) || "--"}</div>
+              {row.active_cellphone?.trim() ? (
+                <div className="truncate text-xs text-gray-500">{row.active_cellphone.trim()}</div>
+              ) : null}
+            </div>
+          ),
+        },
+        {
+          header: "Position",
+          className: "min-w-[180px] max-w-[240px]",
+          cell: (row) => {
+            const type = resolveApplicantType(row.applicant_type, row.position_applied)
+            return (
+              <div className="space-y-0.5">
+                <div className="leading-snug text-gray-900">{row.position_applied ?? "--"}</div>
+                {type && <div className="text-xs text-gray-500">{type}</div>}
+              </div>
+            )
+          },
+        },
         {
           header: "Status",
+          className: "whitespace-nowrap",
           cell: (row) => <ApplicantStatusSelect applicantId={row.id} currentStatus={row.status} />,
         },
-        { header: "Contact", cell: (row) => row.contact_number ?? "--" },
         {
           header: "Date Applied",
+          className: "whitespace-nowrap text-gray-600",
           cell: (row) => formatAppliedDate(row.date_applied, row.created_at),
         },
         {
           header: "Actions",
+          className: "whitespace-nowrap",
           cell: (row) => (
-            <div className="flex items-center gap-2">
-              <Link href={`/applicants/${row.id}/files`} className="rounded p-1 text-gray-600 hover:bg-purple-100 hover:text-purple-600" title="Files">
+            <div className="flex items-center gap-1">
+              <Link
+                href={`/applicants/${row.id}/files`}
+                className={`${actionClass} hover:bg-purple-100 hover:text-purple-600`}
+                title="Files"
+              >
                 <FolderOpen className="h-4 w-4" />
               </Link>
-              <Link href={`/applicants/${row.id}`} className="rounded p-1 text-gray-600 hover:bg-blue-100 hover:text-blue-600" title="View">
+              <Link
+                href={`/applicants/${row.id}`}
+                className={`${actionClass} hover:bg-blue-100 hover:text-blue-600`}
+                title="View"
+              >
                 <Eye className="h-4 w-4" />
               </Link>
-              <Link href={`/applicants/${row.id}/edit`} className="rounded p-1 text-gray-600 hover:bg-yellow-100 hover:text-yellow-600" title="Edit">
+              <Link
+                href={`/applicants/${row.id}/edit`}
+                className={`${actionClass} hover:bg-yellow-100 hover:text-yellow-600`}
+                title="Edit"
+              >
                 <Pencil className="h-4 w-4" />
               </Link>
               <ArchiveButton table="applicants" id={row.id} name={fullName(row) || `Applicant ${row.id}`} />

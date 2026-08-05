@@ -9,6 +9,7 @@ import {
   GENDER_OPTIONS,
 } from "@/lib/status-options"
 import { displayDate, displayValue, fieldClassSm, formGridClass, labelClassSm, sectionTitleClassSm } from "@/lib/form-ui"
+import { NumericInput } from "@/components/shared/NumericInput"
 import type { Employee } from "@/types/entities"
 
 type Props = {
@@ -125,7 +126,7 @@ export function EmployeeFormFields({ data }: Props) {
           </div>
           <div>
             <label className={labelClassSm}>Contact Number</label>
-            <input name="contact_number" defaultValue={val(data?.contact_number)} className={fieldClassSm} required />
+            <NumericInput name="contact_number" defaultValue={val(data?.contact_number)} className={fieldClassSm} required />
           </div>
           <div>
             <label className={labelClassSm}>Email</label>
@@ -143,19 +144,19 @@ export function EmployeeFormFields({ data }: Props) {
         <div className={formGridClass}>
           <div>
             <label className={labelClassSm}>SSS Number</label>
-            <input name="sss_number" defaultValue={val(data?.sss_number)} className={fieldClassSm} />
+            <NumericInput name="sss_number" defaultValue={val(data?.sss_number)} className={fieldClassSm} />
           </div>
           <div>
             <label className={labelClassSm}>PhilHealth Number</label>
-            <input name="philhealth_number" defaultValue={val(data?.philhealth_number)} className={fieldClassSm} />
+            <NumericInput name="philhealth_number" defaultValue={val(data?.philhealth_number)} className={fieldClassSm} />
           </div>
           <div>
             <label className={labelClassSm}>Pag-IBIG Number</label>
-            <input name="pagibig_number" defaultValue={val(data?.pagibig_number)} className={fieldClassSm} />
+            <NumericInput name="pagibig_number" defaultValue={val(data?.pagibig_number)} className={fieldClassSm} />
           </div>
           <div>
             <label className={labelClassSm}>TIN Number</label>
-            <input name="tin_number" defaultValue={val(data?.tin_number)} className={fieldClassSm} />
+            <NumericInput name="tin_number" defaultValue={val(data?.tin_number)} className={fieldClassSm} />
           </div>
         </div>
       </div>
@@ -165,11 +166,12 @@ export function EmployeeFormFields({ data }: Props) {
         <div className={formGridClass}>
           <div>
             <label className={labelClassSm}>Basic Salary</label>
-            <input
+            <NumericInput
               name="basic_salary"
+              allowDecimal
               defaultValue={val(data?.basic_salary)}
               className={fieldClassSm}
-              placeholder="Ex: 25,000 PHP"
+              placeholder="Ex: 25000"
             />
           </div>
           <div>
@@ -201,7 +203,7 @@ export function EmployeeFormFields({ data }: Props) {
           </div>
           <div>
             <label className={labelClassSm}>Contact Number</label>
-            <input
+            <NumericInput
               name="emergency_contact_number"
               defaultValue={val(data?.emergency_contact_number)}
               className={fieldClassSm}

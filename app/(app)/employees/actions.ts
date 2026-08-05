@@ -68,7 +68,9 @@ export async function addEmployee(formData: FormData) {
     .limit(1)
 
   if (queryError) {
-    console.error("Query error:", queryError)
+    redirect(
+      `/employees/add?error=save&message=${encodeURIComponent(queryError.message || "Could not generate employee number.")}`
+    )
   }
 
   let nextNumber = 1
@@ -86,7 +88,6 @@ export async function addEmployee(formData: FormData) {
     date_hired: formData.get("date_hired") || null,
     employment_status: (formData.get("employment_status") as string) || "Active",
     employment_type: formData.get("employment_type") as string,
-    
     last_name: formData.get("last_name") as string,
     first_name: formData.get("first_name") as string,
     middle_name: formData.get("middle_name") as string || null,
@@ -96,19 +97,15 @@ export async function addEmployee(formData: FormData) {
     contact_number: formData.get("contact_number") as string,
     email: formData.get("email") as string,
     current_address: formData.get("current_address") as string,
-    
     sss_number: formData.get("sss_number") as string || null,
     philhealth_number: formData.get("philhealth_number") as string || null,
     pagibig_number: formData.get("pagibig_number") as string || null,
     tin_number: formData.get("tin_number") as string || null,
-    
     basic_salary: formData.get("basic_salary") as string || null,
     allowances: formData.get("allowances") as string || null,
-    
     emergency_contact_name: formData.get("emergency_contact_name") as string || null,
     emergency_contact_relationship: formData.get("emergency_contact_relationship") as string || null,
     emergency_contact_number: formData.get("emergency_contact_number") as string || null,
-    
     contract_start_date: formData.get("contract_start_date") || null,
     contract_end_date: formData.get("contract_end_date") || null,
     notes: formData.get("notes") as string || null,
@@ -137,13 +134,12 @@ export async function updateEmployee(formData: FormData) {
   const id = Number(formData.get("id"))
   if (!id) redirect("/employees")
 
-  await supabase.from("employees").update({
+  const { error: updateError } = await supabase.from("employees").update({
     position: formData.get("position") as string,
     department: formData.get("department") as string,
     date_hired: formData.get("date_hired") || null,
     employment_status: (formData.get("employment_status") as string) || "Active",
     employment_type: formData.get("employment_type") as string,
-    
     last_name: formData.get("last_name") as string,
     first_name: formData.get("first_name") as string,
     middle_name: formData.get("middle_name") as string || null,
@@ -153,29 +149,28 @@ export async function updateEmployee(formData: FormData) {
     contact_number: formData.get("contact_number") as string,
     email: formData.get("email") as string,
     current_address: formData.get("current_address") as string,
-    
     sss_number: formData.get("sss_number") as string || null,
     philhealth_number: formData.get("philhealth_number") as string || null,
     pagibig_number: formData.get("pagibig_number") as string || null,
     tin_number: formData.get("tin_number") as string || null,
-    
     basic_salary: formData.get("basic_salary") as string || null,
     allowances: formData.get("allowances") as string || null,
-    
     emergency_contact_name: formData.get("emergency_contact_name") as string || null,
     emergency_contact_relationship: formData.get("emergency_contact_relationship") as string || null,
     emergency_contact_number: formData.get("emergency_contact_number") as string || null,
-    
     contract_start_date: formData.get("contract_start_date") || null,
     contract_end_date: formData.get("contract_end_date") || null,
     notes: formData.get("notes") as string || null,
   }).eq("id", id)
 
+  if (updateError) {
+    redirect(
+      `/employees/${id}/edit?error=save&message=${encodeURIComponent(updateError.message || "Could not update employee.")}`
+    )
+  }
+
   const employmentStatus = (formData.get("employment_status") as string) || "Active"
   const loginSync = await syncEmployeeLoginAccess(id, employmentStatus)
-  if (loginSync.error) {
-    console.error("Failed to sync employee login access:", loginSync.error.message)
-  }
 
   const { data: emp } = await supabase
     .from("employees")
@@ -191,6 +186,10 @@ export async function updateEmployee(formData: FormData) {
 
   revalidatePath("/employees")
   revalidatePath(`/employees/${id}`)
+  if (loginSync.error) {
+    console.error("Failed to sync employee login access:", loginSync.error.message)
+    redirect("/employees?success=updated&warning=login")
+  }
   redirect("/employees?success=updated")
 }
 

@@ -39,7 +39,7 @@ export function ApplicantStatusSelect({ applicantId, currentStatus }: Props) {
       <select
         value={currentStatus ?? "New Applicant"}
         onChange={handleChange}
-        className="w-full max-w-[180px] rounded border border-gray-300 px-2 py-1 text-sm"
+        className="min-w-[150px] rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-sm"
       >
         {options.map((opt) => (
           <option key={opt} value={opt}>

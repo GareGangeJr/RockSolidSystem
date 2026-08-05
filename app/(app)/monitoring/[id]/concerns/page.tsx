@@ -21,7 +21,7 @@ export default async function MonitoringConcernsPage({
 
   if (Number.isNaN(monitoringId))
     return (
-      <div className="p-6">
+      <div>
         <p className="font-semibold text-red-500">Invalid ID</p>
         <BackButton href="/monitoring" />
       </div>
@@ -35,7 +35,7 @@ export default async function MonitoringConcernsPage({
 
   if (fetchError || !monitoring)
     return (
-      <div className="p-6">
+      <div>
         <p className="font-semibold text-red-500">Record not found</p>
         <BackButton href="/monitoring" />
       </div>
@@ -46,7 +46,7 @@ export default async function MonitoringConcernsPage({
   const initialHistory = normalizeHistoryEntriesFromRecord(record)
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div>
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-xl font-semibold text-gray-900">Concerns & History</h1>

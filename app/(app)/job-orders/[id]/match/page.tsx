@@ -44,7 +44,7 @@ export default async function Page({
 
   if (Number.isNaN(numericId))
     return (
-      <div className="p-6">
+      <div>
         <p className="text-red-500">Invalid ID</p>
         <BackButton href="/job-orders" />
       </div>
@@ -58,7 +58,7 @@ export default async function Page({
 
   if (jobError || !job)
     return (
-      <div className="p-6">
+      <div>
         <p className="text-red-500">Job order not found</p>
         <BackButton href="/job-orders" />
       </div>
@@ -102,7 +102,7 @@ export default async function Page({
   const others = scoredUnmatched.filter((applicant) => !isSuggestedMatch(applicant.match))
 
   return (
-    <div className="max-w-4xl p-6">
+    <div className="max-w-4xl">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Match Applicants - JO-{jobOrder.id}</h1>
         <BackButton href="/job-orders" />
@@ -112,8 +112,8 @@ export default async function Page({
         {jobOrder.job_title} at {jobOrder.company}
       </p>
 
-      {success === "unmatched" && (
-        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">Match removed.</div>
+      {success === "matched" && (
+        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">Applicant matched to this job order.</div>
       )}
       {success === "deployed" && (
         <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">

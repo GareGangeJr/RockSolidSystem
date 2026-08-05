@@ -14,7 +14,7 @@ export default async function MonitoringDetailPage({
 
   if (Number.isNaN(monitoringId))
     return (
-      <div className="p-6">
+      <div>
         <p className="font-semibold text-red-500">Invalid monitoring ID</p>
         <BackButton href="/monitoring" />
       </div>
@@ -28,7 +28,7 @@ export default async function MonitoringDetailPage({
 
   if (error || !monitoring)
     return (
-      <div className="p-6">
+      <div>
         <p className="font-semibold text-red-500">Record not found</p>
         <BackButton href="/monitoring" />
       </div>
@@ -48,7 +48,7 @@ export default async function MonitoringDetailPage({
   const isArchived = Boolean(monitoring.archived_at)
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div>
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-xl font-semibold text-gray-900">View Monitoring</h1>

@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
   LayoutDashboard,
@@ -41,7 +42,7 @@ export default function Sidebar({ role }: { role: AccessRole }) {
 
   return (
     <aside className="w-64 border-r bg-blue-100 min-h-screen flex flex-col">
-      <img src="/logo123.png" alt="Rock Solid Logo" className="w-32 mx-auto" />
+      <Image src="/logo123.png" alt="Rock Solid Logo" width={128} height={128} className="mx-auto w-32" priority />
 
       <div className="p-6 border-b border-gray-900 text-center">
         <h1 className="font-bold text-lg leading-5">

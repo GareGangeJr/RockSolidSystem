@@ -28,7 +28,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   }
 
   const role = await getAccessRole(supabase, user.id)
-  if (role !== "admin") {
+  if (!role) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

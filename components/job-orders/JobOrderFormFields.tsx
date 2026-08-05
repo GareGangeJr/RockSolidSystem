@@ -12,6 +12,7 @@ import {
 import { CountrySelect } from "@/components/shared/CountrySelect"
 import { SkillsChecklistField } from "@/components/applicants/skills-checklist-field"
 import { fieldClassSm, formGridClass, labelClassSm, sectionTitleClassSm } from "@/lib/form-ui"
+import { NumericInput } from "@/components/shared/NumericInput"
 
 type Props = {
   data?: Partial<JobOrderFormValues> & { id?: number }
@@ -72,7 +73,7 @@ export function JobOrderFormFields({ data }: Props) {
         <div className={formGridClass}>
           <div>
             <label className={labelClassSm}>Commercial Registration (C.R.) No.</label>
-            <input
+            <NumericInput
               name="commercial_registration"
               defaultValue={fieldValue(data?.commercial_registration)}
               className={fieldClassSm}
@@ -82,7 +83,7 @@ export function JobOrderFormFields({ data }: Props) {
           </div>
           <div>
             <label className={labelClassSm}>Company Contact</label>
-            <input
+            <NumericInput
               name="company_contact"
               defaultValue={fieldValue(data?.company_contact)}
               className={fieldClassSm}
@@ -153,22 +154,18 @@ export function JobOrderFormFields({ data }: Props) {
           </div>
           <div>
             <label className={labelClassSm}>Number of Workers</label>
-            <input
+            <NumericInput
               name="no_workers"
-              type="number"
-              defaultValue={data?.no_workers ?? 1}
-              min={1}
+              defaultValue={data?.no_workers != null ? String(data.no_workers) : "1"}
               className={fieldClassSm}
               required
             />
           </div>
           <div>
             <label className={labelClassSm}>Years Experience Required</label>
-            <input
+            <NumericInput
               name="years_exp_required"
-              type="number"
-              defaultValue={data?.years_exp_required ?? 0}
-              min={0}
+              defaultValue={data?.years_exp_required != null ? String(data.years_exp_required) : "0"}
               className={fieldClassSm}
               required
             />
@@ -187,11 +184,12 @@ export function JobOrderFormFields({ data }: Props) {
         <div className={formGridClass}>
           <div>
             <label className={labelClassSm}>Basic Salary</label>
-            <input
+            <NumericInput
               name="salary"
+              allowDecimal
               defaultValue={fieldValue(data?.salary)}
               className={fieldClassSm}
-              placeholder="Ex: 1700 SAR"
+              placeholder="Ex: 1700"
               required
             />
           </div>

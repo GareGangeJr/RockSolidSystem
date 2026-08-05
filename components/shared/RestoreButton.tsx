@@ -9,15 +9,13 @@ type RestoreButtonProps = {
   table: ArchivableTable
   id: number
   name: string
-  className?: string
-  label?: string
 }
 
-export function RestoreButton({ table, id, name, className, label }: RestoreButtonProps) {
+export function RestoreButton({ table, id, name }: RestoreButtonProps) {
   const router = useRouter()
 
   async function handleClick() {
-    if (!confirm("Are you sure you want to restore this?")) return
+    if (!confirm(`Are you sure you want to restore ${name}?`)) return
 
     const result = await restoreRecord(table, id)
     if (result.error) {
@@ -32,14 +30,10 @@ export function RestoreButton({ table, id, name, className, label }: RestoreButt
     <button
       type="button"
       onClick={handleClick}
-      className={
-        className ??
-        "rounded p-1 text-gray-600 hover:bg-green-100 hover:text-green-600"
-      }
+      className="rounded p-1 text-gray-600 hover:bg-green-100 hover:text-green-600"
       title="Restore"
     >
       <RotateCcw className="h-4 w-4" />
-      {label ? <span>{label}</span> : null}
     </button>
   )
 }

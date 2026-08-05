@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { fetchReportData, filterMonitoring, filterMonitoringByDateRange } from "@/lib/reports/fetch-report-data"
+import { fetchReportData, filterMonitoringByDateRange } from "@/lib/reports/fetch-report-data"
 import { formatReportRangeLabel, parseDateParam } from "@/lib/reports/date-range"
 import { generateReportsExcel } from "@/lib/reports/generate-excel"
 import { logActivity } from "@/lib/activity-log"
@@ -8,13 +8,6 @@ import { getAccessRole } from "@/lib/user-role"
 
 export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
-
-function reportRangeLabel(fromDate: string | null, toDate: string | null) {
-  if (!fromDate && !toDate) return "All time"
-  if (fromDate && toDate) return `${fromDate} to ${toDate}`
-  if (fromDate) return `From ${fromDate}`
-  return `To ${toDate}`
-}
 
 export async function GET(request: Request) {
   const supabase = await createSupabaseServer()
@@ -32,15 +25,12 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url)
-  const country = searchParams.get("country")
-  const status = searchParams.get("status")
   const fromDate = parseDateParam(searchParams.get("from"))
   const toDate = parseDateParam(searchParams.get("to"))
 
   try {
     const data = await fetchReportData()
-    let monitoring = filterMonitoring(data.monitoring, country, status)
-    monitoring = filterMonitoringByDateRange(monitoring, fromDate, toDate)
+    const monitoring = filterMonitoringByDateRange(data.monitoring, fromDate, toDate)
 
     const buffer = await generateReportsExcel({
       generatedAt: data.generatedAt,
@@ -60,7 +50,7 @@ export async function GET(request: Request) {
       action: "download",
       module: "reports",
       recordId: "Reports",
-      details: { status: reportRangeLabel(fromDate, toDate) },
+      details: { status: formatReportRangeLabel(fromDate, toDate) },
     })
 
     return new Response(new Uint8Array(buffer), {

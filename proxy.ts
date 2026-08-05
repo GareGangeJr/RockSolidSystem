@@ -10,7 +10,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  if (path.startsWith("/apply")) {
+  if (path.startsWith("/apply") || path.startsWith("/kiosk")) {
     return NextResponse.next()
   }
 

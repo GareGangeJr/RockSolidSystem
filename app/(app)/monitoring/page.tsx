@@ -17,7 +17,7 @@ export default async function MonitoringPage({
     .order("deployment_date", { ascending: false })
 
   if (monitoringError) return (
-    <div className="p-6">
+    <div>
       <h1 className="text-2xl font-bold">Monitoring</h1>
       <p className="text-red-500">Error: {monitoringError.message}</p>
     </div>
@@ -44,7 +44,7 @@ export default async function MonitoringPage({
     }) ?? []
 
   return (
-    <div className="p-6">
+    <div>
       <h1 className="mb-6 text-2xl font-bold">Deployment Monitoring</h1>
       {success === "updated" && (
         <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">Record updated.</div>

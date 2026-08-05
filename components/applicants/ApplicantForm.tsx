@@ -35,6 +35,7 @@ import {
   JobOrderSelectField,
   type OpenJobOrderOption,
 } from "@/components/applicants/job-order-select-field"
+import { NumericInput } from "@/components/shared/NumericInput"
 import type { Applicant, WorkExperience } from "@/types/entities"
 
 const STEPS = [
@@ -222,11 +223,11 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Contact Number</label>
-            <input name="contact_number" className={fieldClassSm} defaultValue={val(applicant?.contact_number)} {...personalReq} />
+            <NumericInput name="contact_number" className={fieldClassSm} defaultValue={val(applicant?.contact_number)} {...personalReq} />
           </div>
           <div>
             <label className={labelClassSm}>Active Cellphone</label>
-            <input name="active_cellphone" className={fieldClassSm} defaultValue={val(applicant?.active_cellphone)} {...personalReq} />
+            <NumericInput name="active_cellphone" className={fieldClassSm} defaultValue={val(applicant?.active_cellphone)} {...personalReq} />
           </div>
           <div>
             <label className={labelClassSm}>Email</label>
@@ -270,11 +271,11 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Height (cm)</label>
-            <input name="height_cm" type="number" step="0.01" className={fieldClassSm} defaultValue={val(applicant?.height_cm)} />
+            <NumericInput name="height_cm" allowDecimal className={fieldClassSm} defaultValue={val(applicant?.height_cm)} />
           </div>
           <div>
             <label className={labelClassSm}>Weight (kg)</label>
-            <input name="weight_kg" type="number" step="0.01" className={fieldClassSm} defaultValue={val(applicant?.weight_kg)} />
+            <NumericInput name="weight_kg" allowDecimal className={fieldClassSm} defaultValue={val(applicant?.weight_kg)} />
           </div>
           <div>
             <label className={labelClassSm}>Facebook Account</label>
@@ -292,7 +293,7 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Mother Contact</label>
-            <input name="mother_contact" className={fieldClassSm} defaultValue={val(applicant?.mother_contact)} {...familyCoreReq} />
+            <NumericInput name="mother_contact" className={fieldClassSm} defaultValue={val(applicant?.mother_contact)} {...familyCoreReq} />
           </div>
           <div>
             <label className={labelClassSm}>Father Full Name</label>
@@ -300,7 +301,7 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Father Contact</label>
-            <input name="father_contact" className={fieldClassSm} defaultValue={val(applicant?.father_contact)} {...familyCoreReq} />
+            <NumericInput name="father_contact" className={fieldClassSm} defaultValue={val(applicant?.father_contact)} {...familyCoreReq} />
           </div>
           <div>
             <label className={labelClassSm}>Spouse Name</label>
@@ -308,18 +309,16 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Spouse Age</label>
-            <input name="spouse_age" type="number" className={fieldClassSm} defaultValue={val(applicant?.spouse_age)} />
+            <NumericInput name="spouse_age" className={fieldClassSm} defaultValue={val(applicant?.spouse_age)} />
           </div>
           <div>
             <label className={labelClassSm}>Spouse Contact</label>
-            <input name="spouse_contact" className={fieldClassSm} defaultValue={val(applicant?.spouse_contact)} />
+            <NumericInput name="spouse_contact" className={fieldClassSm} defaultValue={val(applicant?.spouse_contact)} />
           </div>
           <div>
             <label className={labelClassSm}>Number of Children</label>
-            <input
+            <NumericInput
               name="number_of_children"
-              type="number"
-              min={0}
               className={fieldClassSm}
               defaultValue={val(applicant?.number_of_children)}
               {...familyCoreReq}
@@ -327,7 +326,7 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Children Ages</label>
-            <input name="children_ages" className={fieldClassSm} defaultValue={val(applicant?.children_ages)} />
+            <NumericInput name="children_ages" allowedChars=", " className={fieldClassSm} defaultValue={val(applicant?.children_ages)} />
           </div>
           <div>
             <label className={labelClassSm}>Children Caretaker</label>
@@ -349,7 +348,7 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Contact Number</label>
-            <input name="emergency_contact_number" className={fieldClassSm} defaultValue={val(applicant?.emergency_contact_number)} {...emergencyReq} />
+            <NumericInput name="emergency_contact_number" className={fieldClassSm} defaultValue={val(applicant?.emergency_contact_number)} {...emergencyReq} />
           </div>
           <div>
             <label className={labelClassSm}>Address</label>
@@ -373,7 +372,7 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Age</label>
-            <input name="beneficiary1_age" type="number" className={fieldClassSm} defaultValue={val(applicant?.beneficiary1_age)} />
+            <NumericInput name="beneficiary1_age" className={fieldClassSm} defaultValue={val(applicant?.beneficiary1_age)} />
           </div>
           <div>
             <label className={labelClassSm}>Relationship</label>
@@ -381,7 +380,7 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Contact</label>
-            <input name="beneficiary1_contact" className={fieldClassSm} defaultValue={val(applicant?.beneficiary1_contact)} {...beneficiary1Req} />
+            <NumericInput name="beneficiary1_contact" className={fieldClassSm} defaultValue={val(applicant?.beneficiary1_contact)} {...beneficiary1Req} />
           </div>
         </div>
 
@@ -397,7 +396,7 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Age</label>
-            <input name="beneficiary2_age" type="number" className={fieldClassSm} defaultValue={val(applicant?.beneficiary2_age)} />
+            <NumericInput name="beneficiary2_age" className={fieldClassSm} defaultValue={val(applicant?.beneficiary2_age)} />
           </div>
           <div>
             <label className={labelClassSm}>Relationship</label>
@@ -405,7 +404,7 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Contact</label>
-            <input name="beneficiary2_contact" className={fieldClassSm} defaultValue={val(applicant?.beneficiary2_contact)} />
+            <NumericInput name="beneficiary2_contact" className={fieldClassSm} defaultValue={val(applicant?.beneficiary2_contact)} />
           </div>
         </div>
       </section>
@@ -474,11 +473,9 @@ export function ApplicantForm({
         <div className={formGridClass}>
           <div>
             <label className={labelClassSm}>Years of Experience</label>
-            <input
+            <NumericInput
               name="years_of_exp"
-              type="number"
-              min={0}
-              defaultValue={isEdit && applicant?.years_of_exp != null ? Number(applicant.years_of_exp) : 0}
+              defaultValue={isEdit && applicant?.years_of_exp != null ? String(Number(applicant.years_of_exp)) : "0"}
               className={fieldClassSm}
               {...skillsReq}
             />

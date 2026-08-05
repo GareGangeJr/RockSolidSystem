@@ -18,7 +18,7 @@ export default async function EditPage({
 
   if (Number.isNaN(numericId)) {
     return (
-      <div className="p-6">
+      <div>
         <p className="text-red-500">Invalid ID</p>
         <BackButton href="/applicants" />
       </div>
@@ -29,7 +29,7 @@ export default async function EditPage({
 
   if (error || !data) {
     return (
-      <div className="p-6">
+      <div>
         <p className="text-red-500">Applicant not found</p>
         <BackButton href="/applicants" />
       </div>
@@ -39,26 +39,21 @@ export default async function EditPage({
   const { openJobOrders, defaultJobOrderId } = await fetchOpenJobOrdersForApplicantForm(supabase, numericId)
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-900">Edit Applicant</h1>
-          <BackButton href="/applicants" />
-        </div>
-
-        {queryError === "status" && message && (
-          <div className="mb-4 rounded-md bg-red-100 px-4 py-3 text-red-800">{decodeURIComponent(message)}</div>
-        )}
-        {queryError === "placement" && message && (
-          <div className="mb-4 rounded-md bg-red-100 px-4 py-3 text-red-800">{decodeURIComponent(message)}</div>
-        )}
-
-        <ApplicantForm
-          applicant={data as Applicant}
-          openJobOrders={openJobOrders}
-          defaultJobOrderId={defaultJobOrderId}
-        />
+    <div>
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold text-gray-900">Edit Applicant</h1>
+        <BackButton href="/applicants" />
       </div>
+
+      {(queryError === "status" || queryError === "placement" || queryError === "save") && message && (
+        <div className="mb-4 rounded-md bg-red-100 px-4 py-3 text-red-800">{decodeURIComponent(message)}</div>
+      )}
+
+      <ApplicantForm
+        applicant={data as Applicant}
+        openJobOrders={openJobOrders}
+        defaultJobOrderId={defaultJobOrderId}
+      />
     </div>
   )
 }

@@ -38,9 +38,7 @@ export default function EmployeeFilesPage() {
       .order("created_at", { ascending: false })
 
     if (error) {
-      alert(error.message.includes("archived_at")
-        ? `${error.message}\n\nRun supabase/add_archived_at.sql in Supabase SQL Editor.`
-        : error.message)
+      alert(error.message)
       setLoading(false)
       return
     }
@@ -86,7 +84,7 @@ export default function EmployeeFilesPage() {
   }
 
   async function archiveFile(fileId: number, fileName: string) {
-    if (!confirm("Are you sure you want to archive this?")) return
+    if (!confirm(`Are you sure you want to archive ${fileName}?`)) return
 
     const result = await archiveFileRecord("employee_files", fileId, employeeId)
     if (result.error) {
@@ -112,9 +110,7 @@ export default function EmployeeFilesPage() {
 
       if (cancelled) return
       if (error) {
-        alert(error.message.includes("archived_at")
-          ? `${error.message}\n\nRun supabase/add_archived_at.sql in Supabase SQL Editor.`
-          : error.message)
+        alert(error.message)
         setLoading(false)
         return
       }
@@ -126,10 +122,10 @@ export default function EmployeeFilesPage() {
     }
   }, [employeeId, supabase])
 
-  if (isNaN(employeeId)) return <div className="p-6 text-red-500">Invalid employee ID</div>
+  if (isNaN(employeeId)) return <div className="text-red-500">Invalid employee ID</div>
 
   return (
-    <div className="p-6 max-w-5xl">
+    <div className="max-w-5xl">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-semibold">Employee Files</h1>
 

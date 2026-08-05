@@ -1,5 +1,6 @@
 import { fieldClassSm, formGridClass, labelClassSm, sectionTitleClassSm } from "@/lib/form-ui"
 import { formatMonitoringDateForInput } from "@/lib/monitoring-sync"
+import { NumericInput } from "@/components/shared/NumericInput"
 
 type MonitoringData = Record<string, unknown>
 
@@ -60,11 +61,12 @@ export function MonitoringDeploymentFormFields({ data, hasOpenConcern = false }:
         </div>
         <div>
           <label className={labelClassSm}>Salary Amount</label>
-          <input
+          <NumericInput
             name="salary_amount"
+            allowDecimal
             defaultValue={formatValue(data.salary_amount)}
             className={fieldClassSm}
-            placeholder="Ex: 1500 SAR"
+            placeholder="Ex: 1500"
           />
         </div>
         <div>

@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useState } from "react"
 import { createSupabaseBrowser } from "@/lib/supabase/browser"
 import { checkEmployeeLoginAllowed } from "@/app/(app)/employees/actions"
@@ -45,7 +46,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
       <div className="grid w-full max-w-4xl gap-6 md:grid-cols-2">
         <form onSubmit={handleLogin} className="w-full space-y-4 rounded-lg border bg-white p-6">
-          <img src="/logo123.png" alt="Rock Solid Logo" className="mx-auto mb-4 w-24" />
+          <Image src="/logo123.png" alt="Rock Solid Logo" width={96} height={96} className="mx-auto mb-4 w-24" priority />
           <div className="text-center">
             <h1 className="text-2xl font-bold">Rock Solid Manpower System</h1>
             <p className="mt-1 text-sm text-gray-500">Admin & staff sign in</p>
@@ -53,12 +54,12 @@ export default function LoginPage() {
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Email</label>
-            <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Password</label>
-            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <Input type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
 
           <Button type="submit" className="mx-auto block w-1/2" disabled={loading}>

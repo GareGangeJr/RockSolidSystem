@@ -19,9 +19,9 @@ export async function addJobOrder(formData: FormData) {
     .single()
 
   if (error || !inserted) {
-    console.error("Error adding job order:", error)
-    revalidatePath("/job-orders")
-    redirect("/job-orders")
+    redirect(
+      `/job-orders/add?error=save&message=${encodeURIComponent(error?.message ?? "Could not save job order.")}`
+    )
   }
 
   await logActivity({ action: "create", module: "job_orders", recordId: inserted.id })
@@ -98,7 +98,7 @@ export async function deleteMatch(formData: FormData) {
   revalidatePath("/job-orders")
   revalidatePath("/monitoring")
   revalidatePath(`/job-orders/${jobOrderId}/match`)
-  redirect(`/job-orders/${jobOrderId}/match?success=unmatched`)
+  redirect(`/job-orders/${jobOrderId}/match`)
 }
 
 export async function deployMatchedApplicant(formData: FormData) {
@@ -172,9 +172,9 @@ export async function updateJobOrder(formData: FormData) {
     .eq("id", id)
 
   if (error) {
-    console.error("Error updating job order:", error)
-    revalidatePath("/job-orders")
-    redirect("/job-orders")
+    redirect(
+      `/job-orders/${id}/edit?error=save&message=${encodeURIComponent(error.message || "Could not save job order.")}`
+    )
   }
 
   await logActivity({ action: "update", module: "job_orders", recordId: id })

@@ -24,15 +24,12 @@ export default async function ActivityLogsPage() {
   }))
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Activity Logs</h1>
 
       {error ? (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
           Could not load activity logs.
-          {error.message.includes("activity_logs") && (
-            <span> Run supabase/activity_logs.sql in Supabase SQL Editor first.</span>
-          )}
         </div>
       ) : (
         <ActivityLogList rows={rows} />

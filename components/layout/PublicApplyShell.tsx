@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { Briefcase, Users } from "lucide-react"
 
@@ -15,7 +16,7 @@ export default function PublicApplyShell({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen flex bg-slate-50">
       <aside className="flex min-h-screen w-64 flex-col border-r bg-blue-100">
-        <img src="/logo123.png" alt="Rock Solid Logo" className="mx-auto w-32" />
+        <Image src="/logo123.png" alt="Rock Solid Logo" width={128} height={128} className="mx-auto w-32" priority />
 
         <div className="border-b border-gray-900 p-6 text-center">
           <h1 className="text-lg font-bold leading-5">

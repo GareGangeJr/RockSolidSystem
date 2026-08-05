@@ -25,7 +25,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const id = Number(idParam)
 
   if (Number.isNaN(id)) return (
-    <div className="p-6">
+    <div>
       <p className="font-semibold text-red-500">Invalid applicant ID</p>
       <BackButton href="/applicants" />
     </div>
@@ -34,14 +34,14 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const { data, error } = await supabase.from("applicants").select("*").eq("id", id).maybeSingle()
 
   if (error) return (
-    <div className="p-6">
+    <div>
       <p className="font-semibold text-red-500">Error: {error.message}</p>
       <BackButton href="/applicants" />
     </div>
   )
 
   if (!data) return (
-    <div className="p-6">
+    <div>
       <p className="font-semibold text-red-500">Applicant not found.</p>
       <BackButton href="/applicants" />
     </div>
@@ -55,7 +55,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const gridLayoutStyles = formGridClass
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div>
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-900">View Applicant</h1>

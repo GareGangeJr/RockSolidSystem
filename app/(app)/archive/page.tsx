@@ -60,12 +60,9 @@ export default async function ArchivePage() {
     employeeFilesError
   if (error) {
     return (
-      <div className="p-6">
+      <div>
         <h1 className="text-2xl font-semibold text-gray-900">Archive</h1>
-        <p className="mt-2 text-red-500">
-          Error loading archive: {error.message}. If this mentions <code>archived_at</code>, run{" "}
-          <code>supabase/add_archived_at.sql</code> in Supabase first.
-        </p>
+        <p className="mt-2 text-red-500">Error loading archive: {error.message}</p>
       </div>
     )
   }
@@ -99,7 +96,7 @@ export default async function ArchivePage() {
   ])
 
   return (
-    <div className="p-6">
+    <div>
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">Archive</h1>
       </div>

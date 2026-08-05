@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type ReactNode } from "react"
 import { isDeploymentInDateRange } from "@/lib/reports/date-range"
+import { cn } from "@/lib/utils"
 
 export type TableFilter<T> = {
   id: string
@@ -19,6 +20,8 @@ export type DateRangeFilterConfig<T> = {
 export type TableColumn<T> = {
   header: string
   cell: (row: T) => ReactNode
+  className?: string
+  headerClassName?: string
 }
 
 type SearchTableProps<T> = {
@@ -30,6 +33,7 @@ type SearchTableProps<T> = {
   dateRangeFilter?: DateRangeFilterConfig<T>
   columns: TableColumn<T>[]
   emptyMessage?: string
+  tableClassName?: string
 }
 
 const dateInputClass =
@@ -44,6 +48,7 @@ export function SearchTable<T>({
   dateRangeFilter,
   columns,
   emptyMessage = "No records found.",
+  tableClassName,
 }: SearchTableProps<T>) {
   const [search, setSearch] = useState("")
   const [filterValues, setFilterValues] = useState<Record<string, string>>(() =>
@@ -151,12 +156,18 @@ export function SearchTable<T>({
         </button>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow">
-        <table className="w-full text-sm">
+      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow">
+        <table className={cn("w-full text-sm", tableClassName)}>
           <thead className="bg-gray-50">
             <tr>
               {columns.map((col) => (
-                <th key={col.header} className="p-3 text-left font-medium">
+                <th
+                  key={col.header}
+                  className={cn(
+                    "px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-600",
+                    col.headerClassName
+                  )}
+                >
                   {col.header}
                 </th>
               ))}
@@ -164,9 +175,9 @@ export function SearchTable<T>({
           </thead>
           <tbody>
             {filtered.map((row) => (
-              <tr key={rowKey(row)} className="border-t border-gray-100">
+              <tr key={rowKey(row)} className="border-t border-gray-100 hover:bg-slate-50/80">
                 {columns.map((col) => (
-                  <td key={col.header} className="p-3">
+                  <td key={col.header} className={cn("px-4 py-4 align-middle text-gray-800", col.className)}>
                     {col.cell(row)}
                   </td>
                 ))}
@@ -174,7 +185,7 @@ export function SearchTable<T>({
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={columns.length} className="p-6 text-center text-gray-500">
+                <td colSpan={columns.length} className="px-4 py-10 text-center text-gray-500">
                   {emptyMessage}
                 </td>
               </tr>
