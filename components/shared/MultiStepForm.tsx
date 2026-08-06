@@ -97,11 +97,12 @@ export function MultiStepForm({
       >
         {hiddenFields}
 
-        <header className="border-b border-gray-100 bg-gray-50/80 px-6 py-5">
-          <p className="mb-3 text-sm font-medium uppercase tracking-wide text-gray-500">
+        <header className="border-b border-gray-100 bg-gray-50/80 px-4 py-4 sm:px-6 sm:py-5">
+          <p className="mb-1 text-sm font-medium text-gray-500">
             Step {step + 1} of {steps.length}
           </p>
-          <div className="flex flex-wrap gap-2">
+          <p className="mb-3 text-base font-semibold text-gray-900">{steps[step]}</p>
+          <div className="flex gap-1.5">
             {steps.map((label, index) => {
               const active = index === step
               const done = index < step
@@ -111,28 +112,17 @@ export function MultiStepForm({
                   type="button"
                   onClick={() => done && goTo(index)}
                   disabled={index > step}
-                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                    active
-                      ? "bg-blue-600 text-white"
-                      : done
-                        ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                        : "bg-gray-200 text-gray-500"
+                  aria-label={`Step ${index + 1}: ${label}`}
+                  className={`h-2 flex-1 rounded-full transition-colors ${
+                    active || done ? "bg-blue-600" : "bg-gray-200"
                   }`}
-                >
-                  {index + 1}. {label}
-                </button>
+                />
               )
             })}
           </div>
-          <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-gray-200">
-            <div
-              className="h-full rounded-full bg-blue-600 transition-all duration-300"
-              style={{ width: `${((step + 1) / steps.length) * 100}%` }}
-            />
-          </div>
         </header>
 
-        <div className="p-8">
+        <div className="p-4 sm:p-8">
           {panels.map((panel, index) => (
             <div
               key={steps[index]}
@@ -146,23 +136,23 @@ export function MultiStepForm({
           ))}
         </div>
 
-        <footer className="flex items-center justify-between gap-3 border-t border-gray-100 bg-gray-50/50 px-8 py-5">
+        <footer className="sticky bottom-0 flex items-center justify-between gap-2 border-t border-gray-100 bg-white px-4 py-3 sm:static sm:bg-gray-50/50 sm:px-8 sm:py-5">
           <div>
             {step > 0 && (
               <button
                 type="button"
                 onClick={handleBack}
-                className="rounded-md border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 hover:bg-gray-50"
+                className="rounded-md border border-gray-300 bg-white px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 sm:px-6"
               >
                 Back
               </button>
             )}
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3">
             {cancelHref && (
               <Link
                 href={cancelHref}
-                className="rounded-md border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 hover:bg-gray-50"
+                className="hidden rounded-md border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 sm:inline-flex"
               >
                 Cancel
               </Link>
@@ -171,7 +161,7 @@ export function MultiStepForm({
               <button
                 type="button"
                 onClick={handleNext}
-                className="rounded-md bg-blue-600 px-6 py-3 text-base font-medium text-white hover:bg-blue-700"
+                className="rounded-md bg-blue-600 px-5 py-3 text-base font-medium text-white hover:bg-blue-700 sm:px-6"
               >
                 Next
               </button>
@@ -180,7 +170,7 @@ export function MultiStepForm({
                 type="button"
                 onClick={handleSaveClick}
                 disabled={isPending}
-                className="rounded-md bg-blue-600 px-6 py-3 text-base font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-md bg-blue-600 px-5 py-3 text-base font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 sm:px-6"
               >
                 {isPending ? "Saving..." : submitLabel}
               </button>

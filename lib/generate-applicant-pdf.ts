@@ -15,17 +15,17 @@ const FONT_SIZE = 9
 const TITLE_SIZE = 16
 const SECTION_SIZE = 10
 
-const formatValue = (x: unknown) => (x != null && x !== "" ? String(x) : "—")
-const formatDate = (x: unknown) => (x != null && String(x).length >= 10 ? String(x).slice(0, 10) : "—")
+const formatValue = (x: unknown) => (x != null && x !== "" ? String(x) : "--")
+const formatDate = (x: unknown) => (x != null && String(x).length >= 10 ? String(x).slice(0, 10) : "--")
 
 function getAgeFromDob(dob: unknown): string {
-  if (!dob || String(dob).length < 10) return "—"
+  if (!dob || String(dob).length < 10) return "--"
   const birth = new Date(String(dob).slice(0, 10))
   const today = new Date()
   let age = today.getFullYear() - birth.getFullYear()
   const m = today.getMonth() - birth.getMonth()
   if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--
-  return age < 0 ? "—" : String(age)
+  return age < 0 ? "--" : String(age)
 }
 
 type WorkExp = {
@@ -218,7 +218,7 @@ export async function applicantToPdf(applicant: Record<string, unknown>): Promis
     pageNumber: 1,
   }
 
-  ctx = drawCompanyHeader(ctx, fullName === "— —" ? "Applicant" : fullName, ref)
+  ctx = drawCompanyHeader(ctx, fullName.trim() ? fullName : "Applicant", ref)
 
   ctx = drawSection(ctx, "APPLICATION")
   ctx = drawField(ctx, "Position Applied For", applicant.position_applied)

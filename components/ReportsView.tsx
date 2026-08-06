@@ -109,12 +109,6 @@ export default function ReportsView({
         <SummaryCard label="Matched to Jobs" value={summary.matchedApplicants} />
       </div>
 
-      <p className="text-sm text-gray-500">
-        {fromDate || toDate
-          ? `Showing deployments${fromDate ? ` from ${formatDate(fromDate)}` : ""}${toDate ? ` to ${formatDate(toDate)}` : ""}.`
-          : "Showing all deployments. Pick a from and to date to filter the report."}
-      </p>
-
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold text-gray-900">Placements by Country</h2>

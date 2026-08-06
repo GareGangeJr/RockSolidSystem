@@ -33,7 +33,7 @@ type SummaryInput = {
 type Column = { header: string; width: number; getValue: (row: MatchedApplicantSummaryRow, index: number) => string }
 
 function display(value: unknown) {
-  if (value == null || value === "") return "—"
+  if (value == null || value === "") return "--"
   return String(value)
 }
 

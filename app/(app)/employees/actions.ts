@@ -39,13 +39,13 @@ export async function checkEmployeeLoginAllowed() {
 
   const { data: emp } = await supabase
     .from("employees")
-    .select("employment_status")
+    .select("employment_status, archived_at")
     .eq("auth_user_id", user.id)
     .maybeSingle()
 
   if (!emp) return { allowed: true as const }
 
-  if (INACTIVE_EMPLOYMENT_STATUSES.has(emp.employment_status ?? "")) {
+  if (emp.archived_at || INACTIVE_EMPLOYMENT_STATUSES.has(emp.employment_status ?? "")) {
     return {
       allowed: false as const,
       message: "This login has been disabled because the employee is no longer active.",

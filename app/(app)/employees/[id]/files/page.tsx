@@ -126,7 +126,7 @@ export default function EmployeeFilesPage() {
 
   return (
     <div className="max-w-5xl">
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Employee Files</h1>
 
         <div className="flex items-center gap-3">
@@ -138,14 +138,14 @@ export default function EmployeeFilesPage() {
             onUploadSuccess={loadFiles}
           />
 
-          <BackButton href="/employees" />
+          <BackButton href={`/employees/${employeeId}`} />
         </div>
       </div>
 
       {loading && <div>Loading...</div>}
       {!loading && !files.length && <div className="text-gray-500">No files uploaded.</div>}
       {!loading && files.length > 0 && (
-        <div className="bg-white border rounded-lg overflow-hidden">
+        <div className="overflow-hidden rounded-lg border bg-white">
           <table className="w-full text-sm">
             <thead className="bg-gray-100">
               <tr>
@@ -164,7 +164,7 @@ export default function EmployeeFilesPage() {
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        className="px-3 py-1 rounded-md border hover:bg-blue-50 hover:text-blue-700"
+                        className="rounded-md border px-3 py-1 hover:bg-blue-50 hover:text-blue-700"
                         onClick={() => viewFile(f.file_path || "", f.file_name || "file")}
                         disabled={!f.file_path}
                       >
@@ -173,7 +173,7 @@ export default function EmployeeFilesPage() {
 
                       <button
                         type="button"
-                        className="px-3 py-1 rounded-md border hover:bg-gray-100"
+                        className="rounded-md border px-3 py-1 hover:bg-gray-100"
                         onClick={() => downloadFile(f.file_path || "", f.file_name || "file")}
                         disabled={!f.file_path}
                       >
@@ -182,7 +182,7 @@ export default function EmployeeFilesPage() {
 
                       <button
                         type="button"
-                        className="px-3 py-1 rounded-md border hover:bg-orange-50 hover:text-orange-700"
+                        className="rounded-md border px-3 py-1 hover:bg-orange-50 hover:text-orange-700"
                         onClick={() => archiveFile(f.id, f.file_name || "file")}
                       >
                         Archive

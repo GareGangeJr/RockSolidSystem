@@ -98,7 +98,7 @@ export async function deleteMatch(formData: FormData) {
   revalidatePath("/job-orders")
   revalidatePath("/monitoring")
   revalidatePath(`/job-orders/${jobOrderId}/match`)
-  redirect(`/job-orders/${jobOrderId}/match`)
+  redirect(`/job-orders/${jobOrderId}/match?success=unmatched`)
 }
 
 export async function deployMatchedApplicant(formData: FormData) {
@@ -109,6 +109,30 @@ export async function deployMatchedApplicant(formData: FormData) {
 
   if (!applicantId || !jobOrderId) {
     redirect(`/job-orders/${jobOrderId}/match?error=deploy&message=${encodeURIComponent("Invalid applicant or job order.")}`)
+  }
+
+  const { data: jobOrder } = await supabase
+    .from("job_orders")
+    .select("archived_at")
+    .eq("id", jobOrderId)
+    .maybeSingle()
+
+  if (jobOrder?.archived_at) {
+    redirect(
+      `/job-orders/${jobOrderId}/match?error=deploy&message=${encodeURIComponent("This job order is archived.")}`
+    )
+  }
+
+  const { data: applicantRecord } = await supabase
+    .from("applicants")
+    .select("status, archived_at")
+    .eq("id", applicantId)
+    .maybeSingle()
+
+  if (applicantRecord?.archived_at) {
+    redirect(
+      `/job-orders/${jobOrderId}/match?error=deploy&message=${encodeURIComponent("This applicant is archived.")}`
+    )
   }
 
   const { data: existingMonitoring } = await supabase
@@ -125,17 +149,11 @@ export async function deployMatchedApplicant(formData: FormData) {
     redirect(`/job-orders/${jobOrderId}/match?success=deployed`)
   }
 
-  const { data: applicant } = await supabase
-    .from("applicants")
-    .select("status")
-    .eq("id", applicantId)
-    .maybeSingle()
-
   const result = await applyApplicantStatusChange(
     supabase,
     applicantId,
     "Deployed",
-    applicant?.status ?? null,
+    applicantRecord?.status ?? null,
     jobOrderId
   )
 

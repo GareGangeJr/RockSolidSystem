@@ -2,22 +2,25 @@ import { createSupabaseServer } from "@/lib/supabase/server"
 import { createSupabaseAdmin } from "@/lib/supabase/admin"
 import { ArchiveView } from "@/components/archive/ArchiveView"
 import { formatApplicantRef } from "@/lib/format-applicant-ref"
+import { requireAuthRole } from "@/lib/require-role"
 
 function fullName(first: string | null, middle: string | null, last: string | null) {
   return [first, middle, last].filter(Boolean).join(" ")
 }
 
 export default async function ArchivePage() {
+  const role = await requireAuthRole()
+  const isAdmin = role === "admin"
   const supabase = await createSupabaseServer()
   const admin = createSupabaseAdmin()
 
   const [
     { data: applicants, error: applicantsError },
     { data: jobOrders, error: jobOrdersError },
-    { data: employees, error: employeesError },
+    employeesResult,
     { data: monitoringRecords, error: monitoringError },
     { data: applicantFiles, error: applicantFilesError },
-    { data: employeeFiles, error: employeeFilesError },
+    employeeFilesResult,
   ] = await Promise.all([
     supabase
       .from("applicants")
@@ -29,11 +32,13 @@ export default async function ArchivePage() {
       .select("id, company, country, job_title, status, archived_at")
       .not("archived_at", "is", null)
       .order("archived_at", { ascending: false }),
-    supabase
-      .from("employees")
-      .select("id, employee_number, first_name, middle_name, last_name, position, employment_status, archived_at")
-      .not("archived_at", "is", null)
-      .order("archived_at", { ascending: false }),
+    isAdmin
+      ? admin
+          .from("employees")
+          .select("id, employee_number, first_name, middle_name, last_name, position, employment_status, archived_at")
+          .not("archived_at", "is", null)
+          .order("archived_at", { ascending: false })
+      : Promise.resolve({ data: [], error: null }),
     supabase
       .from("monitoring")
       .select("id, applicant_id, job_order_id, deployment_status, archived_at")
@@ -44,12 +49,19 @@ export default async function ArchivePage() {
       .select("id, applicant_id, file_name, file_path, archived_at")
       .not("archived_at", "is", null)
       .order("archived_at", { ascending: false }),
-    admin
-      .from("employee_files")
-      .select("id, employee_id, file_name, file_path, archived_at")
-      .not("archived_at", "is", null)
-      .order("archived_at", { ascending: false }),
+    isAdmin
+      ? admin
+          .from("employee_files")
+          .select("id, employee_id, file_name, file_path, archived_at")
+          .not("archived_at", "is", null)
+          .order("archived_at", { ascending: false })
+      : Promise.resolve({ data: [], error: null }),
   ])
+
+  const employees = employeesResult.data
+  const employeesError = employeesResult.error
+  const employeeFiles = employeeFilesResult.data
+  const employeeFilesError = employeeFilesResult.error
 
   const error =
     applicantsError ??
@@ -89,10 +101,12 @@ export default async function ArchivePage() {
       .from("applicants")
       .select("id, first_name, middle_name, last_name")
       .in("id", archivedApplicantIds.length > 0 ? archivedApplicantIds : [0]),
-    supabase
-      .from("employees")
-      .select("id, first_name, middle_name, last_name, employee_number")
-      .in("id", archivedEmployeeIds.length > 0 ? archivedEmployeeIds : [0]),
+    isAdmin
+      ? admin
+          .from("employees")
+          .select("id, first_name, middle_name, last_name, employee_number")
+          .in("id", archivedEmployeeIds.length > 0 ? archivedEmployeeIds : [0])
+      : Promise.resolve({ data: [] }),
   ])
 
   return (

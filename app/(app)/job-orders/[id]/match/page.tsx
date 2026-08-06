@@ -52,7 +52,7 @@ export default async function Page({
 
   const { data: job, error: jobError } = await supabase
     .from("job_orders")
-    .select("id, job_title, company, country, gender, years_exp_required, skills_required")
+    .select("id, job_title, company, country, gender, years_exp_required, skills_required, archived_at")
     .eq("id", numericId)
     .maybeSingle()
 
@@ -61,6 +61,14 @@ export default async function Page({
       <div>
         <p className="text-red-500">Job order not found</p>
         <BackButton href="/job-orders" />
+      </div>
+    )
+
+  if (job.archived_at)
+    return (
+      <div>
+        <p className="text-red-500">This job order is archived. Matching is not available.</p>
+        <BackButton href="/archive" />
       </div>
     )
 
@@ -90,6 +98,7 @@ export default async function Page({
     .select(
       "id, first_name, last_name, position_applied, country_applying_for, gender, years_of_exp, skills, status"
     )
+    .is("archived_at", null)
 
   const all = (applicants || []) as ApplicantRow[]
   const matched = all.filter((applicant) => matchedIds.includes(applicant.id))
@@ -114,6 +123,9 @@ export default async function Page({
 
       {success === "matched" && (
         <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">Applicant matched to this job order.</div>
+      )}
+      {success === "unmatched" && (
+        <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">Match removed.</div>
       )}
       {success === "deployed" && (
         <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">
@@ -161,9 +173,11 @@ export default async function Page({
                         Deployed
                       </Link>
                     ) : (
-                      <DeployMatchForm applicantId={applicant.id} jobOrderId={jobOrder.id} />
+                      <>
+                        <DeployMatchForm applicantId={applicant.id} jobOrderId={jobOrder.id} />
+                        <DeleteMatchForm applicantId={applicant.id} jobOrderId={jobOrder.id} />
+                      </>
                     )}
-                    <DeleteMatchForm applicantId={applicant.id} jobOrderId={jobOrder.id} />
                   </div>
                 </li>
               )

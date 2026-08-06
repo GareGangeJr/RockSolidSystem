@@ -16,6 +16,7 @@ export default async function PublicApplyPage({
     .from("job_orders")
     .select("id, job_title, company, country")
     .eq("status", "Open")
+    .is("archived_at", null)
     .order("created_at", { ascending: false })
 
   const openJobOrders: OpenJobOrderOption[] = (orders ?? []).map((order) => ({
@@ -30,12 +31,10 @@ export default async function PublicApplyPage({
     : null
 
   return (
-    <div className="mx-auto max-w-6xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Application</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Fill out the form below to apply.
-        </p>
+    <div>
+      <div className="mb-4">
+        <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Application</h1>
+        <p className="mt-1 text-sm text-gray-600">Fill out the form below to apply.</p>
       </div>
 
       {success === "submitted" && (

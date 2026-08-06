@@ -1,7 +1,8 @@
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { BackButton } from "@/components/BackButton"
-import { ViewPageActions } from "@/components/shared/ViewPageActions"
+import { ViewPageActions, viewPageLinkClassName } from "@/components/shared/ViewPageActions"
 import { EmployeeDetailsView } from "@/components/employees/EmployeeDetailsView"
+import Link from "next/link"
 
 export default async function ViewEmployeePage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createSupabaseServer()
@@ -35,9 +36,17 @@ export default async function ViewEmployeePage({ params }: { params: Promise<{ i
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-900">View Employee</h1>
           {isArchived ? (
-            <BackButton href="/archive" />
+            <ViewPageActions backHref="/archive">
+              <Link href={`/employees/${id}/files`} className={viewPageLinkClassName}>
+                Files
+              </Link>
+            </ViewPageActions>
           ) : (
-            <ViewPageActions editHref={`/employees/${id}/edit`} backHref="/employees" />
+            <ViewPageActions editHref={`/employees/${id}/edit`} backHref="/employees">
+              <Link href={`/employees/${id}/files`} className={viewPageLinkClassName}>
+                Files
+              </Link>
+            </ViewPageActions>
           )}
         </div>
 

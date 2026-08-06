@@ -58,7 +58,7 @@ export async function proxy(request: NextRequest) {
   if (user && isAdminOnlyPath(path)) {
     const role = await getAccessRole(supabase, user.id)
     if (role === "staff") {
-      return NextResponse.redirect(new URL("/", request.url))
+      return NextResponse.redirect(new URL("/?error=access", request.url))
     }
   }
 

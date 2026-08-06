@@ -24,9 +24,9 @@ export default async function PublicJobOrdersPage() {
   }))
 
   return (
-    <div className="mx-auto max-w-6xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Available Job Orders</h1>
+    <div>
+      <div className="mb-4">
+        <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Available Jobs</h1>
         <p className="mt-1 text-sm text-gray-600">Open positions you can apply for.</p>
       </div>
 

@@ -6,7 +6,7 @@ import DashboardView, {
   type RecentDeployment,
   type StatCard,
 } from "@/components/DashboardView"
-import { APPLICANT_TYPE_OPTIONS, STATUS_OPTIONS } from "@/lib/status-options"
+import { APPLICANT_TYPE_FILTER_OPTIONS, STATUS_OPTIONS, resolveApplicantType } from "@/lib/status-options"
 
 function countByField(rows: { [key: string]: unknown }[], field: string, defaults: readonly string[] = []) {
   const map = new Map<string, number>()
@@ -40,7 +40,12 @@ function formatDate(value: string | null) {
   return new Date(value).toLocaleDateString()
 }
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>
+}) {
+  const { error } = await searchParams
   const supabase = await createSupabaseServer()
 
   const [
@@ -75,7 +80,13 @@ export default async function Home() {
   ]
 
   const statusCounts = countByField(applicantRows, "status", STATUS_OPTIONS)
-  const typeCounts = countByField(applicantRows, "applicant_type", APPLICANT_TYPE_OPTIONS)
+  const typeCounts = countByField(
+    applicantRows.map((row) => ({
+      applicant_type: resolveApplicantType(row.applicant_type, row.position_applied) ?? "Unknown",
+    })),
+    "applicant_type",
+    APPLICANT_TYPE_FILTER_OPTIONS
+  )
 
   const jobOrderMap = new Map(jobOrderRows.map((j) => [j.id, j]))
   const applicantMap = new Map(applicantRows.map((a) => [a.id, a]))
@@ -120,6 +131,11 @@ export default async function Home() {
 
   return (
     <div>
+      {error === "access" && (
+        <div className="mb-4 rounded-md bg-amber-100 px-4 py-3 text-amber-900">
+          Access denied. That page is for admin only.
+        </div>
+      )}
       <DashboardView
         stats={stats}
         statusCounts={statusCounts}

@@ -4,7 +4,7 @@ import { createSupabaseServer } from "@/lib/supabase/server"
 import { createSupabaseAdmin } from "@/lib/supabase/admin"
 import type { ArchivableTable, ArchivableFileTable } from "@/lib/archive"
 import { logActivity } from "@/lib/activity-log"
-import { requireUser } from "@/lib/require-role"
+import { requireAdmin, requireUser } from "@/lib/require-role"
 import { revalidatePath } from "next/cache"
 
 const REVALIDATE_PATHS: Record<ArchivableTable, string[]> = {
@@ -43,18 +43,36 @@ async function resolveArchiveRecordId(
 }
 
 export async function archiveRecord(table: ArchivableTable, id: number) {
-  await requireUser()
+  if (table === "employees") await requireAdmin()
+  else await requireUser()
   const supabase = await createSupabaseServer()
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from(table)
     .update({ archived_at: new Date().toISOString() })
     .eq("id", id)
     .is("archived_at", null)
+    .select("id")
 
   if (error) {
     console.error(`Error archiving ${table} ${id}:`, error)
     return { error: { message: error.message } }
+  }
+
+  if (!data?.length) {
+    return { error: { message: "Could not archive record. It may already be archived." } }
+  }
+
+  if (table === "employees") {
+    const adminClient = createSupabaseAdmin()
+    const { data: emp } = await adminClient
+      .from("employees")
+      .select("auth_user_id")
+      .eq("id", id)
+      .maybeSingle()
+    if (emp?.auth_user_id) {
+      await adminClient.auth.admin.updateUserById(emp.auth_user_id, { ban_duration: "876000h" })
+    }
   }
 
   const recordId = await resolveArchiveRecordId(supabase, table, id)
@@ -72,18 +90,39 @@ export async function archiveRecord(table: ArchivableTable, id: number) {
 }
 
 export async function restoreRecord(table: ArchivableTable, id: number) {
-  await requireUser()
+  if (table === "employees") await requireAdmin()
+  else await requireUser()
   const supabase = await createSupabaseServer()
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from(table)
     .update({ archived_at: null })
     .eq("id", id)
     .not("archived_at", "is", null)
+    .select("id")
 
   if (error) {
     console.error(`Error restoring ${table} ${id}:`, error)
     return { error: { message: error.message } }
+  }
+
+  if (!data?.length) {
+    return { error: { message: "Could not restore record. It may already be restored." } }
+  }
+
+  if (table === "employees") {
+    const adminClient = createSupabaseAdmin()
+    const { data: emp } = await adminClient
+      .from("employees")
+      .select("auth_user_id, employment_status")
+      .eq("id", id)
+      .maybeSingle()
+    if (emp?.auth_user_id) {
+      const inactive = emp.employment_status === "Resigned" || emp.employment_status === "Terminated"
+      await adminClient.auth.admin.updateUserById(emp.auth_user_id, {
+        ban_duration: inactive ? "876000h" : "none",
+      })
+    }
   }
 
   const recordId = await resolveArchiveRecordId(supabase, table, id)
@@ -105,7 +144,8 @@ export async function archiveFileRecord(
   fileId: number,
   entityId: number
 ) {
-  await requireUser()
+  if (table === "employee_files") await requireAdmin()
+  else await requireUser()
   const supabase = createSupabaseAdmin()
 
   const { data, error } = await supabase
@@ -154,7 +194,8 @@ export async function restoreFileRecord(
   fileId: number,
   entityId: number
 ) {
-  await requireUser()
+  if (table === "employee_files") await requireAdmin()
+  else await requireUser()
   const supabase = createSupabaseAdmin()
 
   const { data, error } = await supabase

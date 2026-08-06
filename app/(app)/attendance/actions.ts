@@ -27,7 +27,7 @@ async function getEmployeeByNumber(employeeNumber: string) {
   const admin = createSupabaseAdmin()
   const { data: employee, error } = await admin
     .from("employees")
-    .select("id, first_name, last_name, employee_number, employment_status")
+    .select("id, first_name, last_name, employee_number, employment_status, archived_at")
     .eq("employee_number", normalized)
     .maybeSingle()
 
@@ -37,6 +37,13 @@ async function getEmployeeByNumber(employeeNumber: string) {
 
   if (!employee) {
     return { employee: null, error: "Employee ID not found." }
+  }
+
+  if (employee.archived_at) {
+    return {
+      employee: null,
+      error: "This employee account is no longer active.",
+    }
   }
 
   if (employee.employment_status === "Resigned" || employee.employment_status === "Terminated") {

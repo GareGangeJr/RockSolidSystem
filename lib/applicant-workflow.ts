@@ -75,7 +75,7 @@ export async function createPlacement(
 
   const { data: job } = await supabase
     .from("job_orders")
-    .select("no_workers, status")
+    .select("no_workers, status, archived_at")
     .eq("id", jobOrderId)
     .maybeSingle()
 
@@ -83,8 +83,26 @@ export async function createPlacement(
     return { error: { message: "Job order not found." } }
   }
 
+  if (job.archived_at) {
+    return { error: { message: "This job order is archived." } }
+  }
+
   if (job.status === "Closed") {
     return { error: { message: "This job order is closed." } }
+  }
+
+  const { data: applicant } = await supabase
+    .from("applicants")
+    .select("id, archived_at")
+    .eq("id", applicantId)
+    .maybeSingle()
+
+  if (!applicant) {
+    return { error: { message: "Applicant not found." } }
+  }
+
+  if (applicant.archived_at) {
+    return { error: { message: "This applicant is archived." } }
   }
 
   const { count } = await supabase
