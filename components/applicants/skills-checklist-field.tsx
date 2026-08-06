@@ -70,9 +70,6 @@ export function SkillsChecklistField({
           )
         })}
       </div>
-      {required && selected.length === 0 && (
-        <p className="mt-2 text-xs text-gray-500">Select at least one skill.</p>
-      )}
       <input type="hidden" name={name} value={submittedValue} required={required} />
     </div>
   )

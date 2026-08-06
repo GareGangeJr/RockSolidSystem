@@ -38,9 +38,6 @@ export function MonitoringConcernsHistoryForm({
     <div className="space-y-6">
       <div>
         <h2 className={sectionTitleClassSm}>Concerns</h2>
-        <p className="mb-3 text-xs text-gray-500">
-          Each concern must include type, date reported, and status. Action taken is optional.
-        </p>
         <div className="space-y-4">
           {concerns.map((concern, index) => (
             <div key={index} className="rounded-md border border-gray-200 p-4">
@@ -148,7 +145,6 @@ export function MonitoringConcernsHistoryForm({
             <div className={`${fieldClassSm} cursor-not-allowed bg-gray-50 text-gray-600`}>
               {formatDisplayDate(deploymentDate)}
             </div>
-            <p className="mt-1 text-xs text-gray-500">Edit on Deployment page.</p>
           </div>
           <div>
             <label className={labelClassSm}>Last Status Update</label>

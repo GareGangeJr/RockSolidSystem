@@ -28,7 +28,6 @@ export function MonitoringDeploymentFormFields({ data, hasOpenConcern = false }:
             defaultValue={formatMonitoringDateForInput(data.deployment_date)}
             className={fieldClassSm}
           />
-          <p className="mt-1 text-xs text-gray-500">Single departure date used across monitoring and history.</p>
         </div>
         <div>
           <label className={labelClassSm}>Deployment Status</label>
@@ -38,13 +37,10 @@ export function MonitoringDeploymentFormFields({ data, hasOpenConcern = false }:
             className={fieldClassSm}
           >
             <option value="Deployed" disabled={hasOpenConcern}>
-              Deployed{hasOpenConcern ? " (resolve open concerns first)" : ""}
+              Deployed
             </option>
             <option value="Deployed(With Concerns)">Deployed(With Concerns)</option>
           </select>
-          {hasOpenConcern && (
-            <p className="mt-1 text-xs text-amber-700">Open concerns require Deployed(With Concerns) status.</p>
-          )}
         </div>
         <div>
           <label className={labelClassSm}>Employer Name</label>

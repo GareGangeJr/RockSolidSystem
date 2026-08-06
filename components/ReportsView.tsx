@@ -1,6 +1,7 @@
 "use client"
 
 import { Download } from "lucide-react"
+import Link from "next/link"
 import { useMemo, useState } from "react"
 import type {
   CountryCount,
@@ -186,14 +187,24 @@ export default function ReportsView({
                 {filteredDeployments.map((row) => (
                   <tr key={row.monitoringId} className="border-t border-gray-100">
                     <td className="p-3">
-                      <div className="font-medium">{row.applicantName}</div>
+                      <Link
+                        href={`/applicants/${row.applicantId}`}
+                        className="font-medium text-blue-600 hover:underline"
+                      >
+                        {row.applicantName}
+                      </Link>
                       <div className="text-xs text-gray-500">
                         {formatApplicantRef(row.applicantId)}
                       </div>
                     </td>
                     <td className="p-3">{row.positionApplied}</td>
                     <td className="p-3">
-                      <div>JO-{row.jobOrderId}</div>
+                      <Link
+                        href={`/job-orders/${row.jobOrderId}`}
+                        className="text-blue-600 hover:underline"
+                      >
+                        JO-{row.jobOrderId}
+                      </Link>
                       <div className="text-xs text-gray-500">{row.jobTitle}</div>
                     </td>
                     <td className="p-3">{row.company}</td>
@@ -201,7 +212,14 @@ export default function ReportsView({
                     <td className="p-3">{row.employerName || "--"}</td>
                     <td className="p-3">{formatDate(row.deploymentDate)}</td>
                     <td className="p-3">{row.deploymentStatus}</td>
-                    <td className="p-3">{row.concernStatus || "--"}</td>
+                    <td className="p-3">
+                      <Link
+                        href={`/monitoring/${row.monitoringId}/concerns`}
+                        className="text-blue-600 hover:underline"
+                      >
+                        {row.concernStatus || "--"}
+                      </Link>
+                    </td>
                   </tr>
                 ))}
               </tbody>
