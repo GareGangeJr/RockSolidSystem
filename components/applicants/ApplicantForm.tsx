@@ -364,7 +364,6 @@ export function ApplicantForm({
               name="number_of_children"
               className={fieldClassSm}
               defaultValue={val(applicant?.number_of_children)}
-              {...familyCoreReq}
             />
           </div>
           <div>

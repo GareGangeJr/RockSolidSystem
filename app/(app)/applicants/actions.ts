@@ -2,7 +2,7 @@
 
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { buildApplicantInsertPayload } from "@/lib/applicant-insert"
-import { applyApplicantStatusChange, createPlacement, isManualDeployAttempt } from "@/lib/applicant-workflow"
+import { applyApplicantStatusChange, isManualDeployAttempt } from "@/lib/applicant-workflow"
 import { logActivity } from "@/lib/activity-log"
 import { requireUser } from "@/lib/require-role"
 import { revalidatePath } from "next/cache"
@@ -40,15 +40,7 @@ export async function addApplicant(formData: FormData) {
     recordId: inserted.id,
   })
 
-  const jobOrderId = Number(formData.get("job_order_id"))
-  if (jobOrderId) {
-    const placementResult = await createPlacement(supabase, inserted.id, jobOrderId)
-    if (placementResult.error) {
-      redirect(`/applicants/${inserted.id}/edit?error=placement&message=${encodeURIComponent(placementResult.error.message)}`)
-    }
-    revalidatePath("/job-orders")
-  }
-
+  // Job order selection only pre-fills position/country — matching is done on the match page.
   const initialStatus = (payload.status as string) || "New Applicant"
   if (isManualDeployAttempt(initialStatus, "New Applicant")) {
     redirect(
@@ -136,24 +128,7 @@ export async function updateApplicant(formData: FormData) {
     recordId: id,
   })
 
-  const jobOrderId = Number(formData.get("job_order_id"))
-  if (jobOrderId) {
-    const { data: existingPlacement } = await supabase
-      .from("placements")
-      .select("id")
-      .eq("applicant_id", id)
-      .eq("job_order_id", jobOrderId)
-      .maybeSingle()
-
-    if (!existingPlacement) {
-      const placementResult = await createPlacement(supabase, id, jobOrderId)
-      if (placementResult.error) {
-        redirect(`/applicants/${id}/edit?error=placement&message=${encodeURIComponent(placementResult.error.message)}`)
-      }
-      revalidatePath("/job-orders")
-    }
-  }
-
+  // Job order selection only pre-fills position/country — matching is done on the match page.
   revalidatePath("/applicants")
   revalidatePath(`/applicants/${id}`)
   redirect("/applicants?success=updated")
