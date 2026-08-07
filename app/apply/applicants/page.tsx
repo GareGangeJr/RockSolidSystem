@@ -2,12 +2,14 @@ import { createSupabaseAdmin } from "@/lib/supabase/admin"
 import { ApplicantForm } from "@/components/applicants/ApplicantForm"
 import type { OpenJobOrderOption } from "@/components/applicants/job-order-select-field"
 
+export const dynamic = "force-dynamic"
+
 export default async function PublicApplyPage({
   searchParams,
 }: {
-  searchParams: Promise<{ success?: string; error?: string; warning?: string; message?: string; job_order?: string }>
+  searchParams: Promise<{ success?: string; error?: string; message?: string; job_order?: string }>
 }) {
-  const { success, error, warning, message, job_order } = await searchParams
+  const { success, error, message, job_order } = await searchParams
   const defaultJobOrderId = Number(job_order)
   const preselectedJobOrderId = Number.isNaN(defaultJobOrderId) ? undefined : defaultJobOrderId
 
@@ -40,17 +42,6 @@ export default async function PublicApplyPage({
       {success === "submitted" && (
         <div className="mb-4 rounded-md bg-green-100 px-4 py-3 text-green-800">
           Application submitted successfully. Thank you for applying!
-          {warning === "placement" && message && (
-            <p className="mt-2 text-sm">
-              Note: Your application was saved, but we could not link it to the selected job order (
-              {decodeURIComponent(message)}).
-            </p>
-          )}
-          {warning === "job_closed" && (
-            <p className="mt-2 text-sm">
-              Note: Your application was saved, but the selected job order is no longer open.
-            </p>
-          )}
         </div>
       )}
       {error === "submit" && (
@@ -61,6 +52,13 @@ export default async function PublicApplyPage({
       {error === "invalid" && (
         <div className="mb-4 rounded-md bg-red-100 px-4 py-3 text-red-800">
           Please check required fields and try again.
+        </div>
+      )}
+      {error === "underage" && (
+        <div className="mb-4 rounded-md bg-red-100 px-4 py-3 text-red-800">
+          {message
+            ? decodeURIComponent(message)
+            : "Applicants must be at least 18 years old."}
         </div>
       )}
 

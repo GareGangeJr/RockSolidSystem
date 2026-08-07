@@ -27,6 +27,8 @@ export async function addJobOrder(formData: FormData) {
   await logActivity({ action: "create", module: "job_orders", recordId: inserted.id })
 
   revalidatePath("/job-orders")
+  revalidatePath("/apply/job-orders")
+  revalidatePath("/apply/applicants")
   redirect("/job-orders?success=added")
 }
 
@@ -45,6 +47,9 @@ export async function updateJobOrderStatus(jobOrderId: number, newStatus: string
     details: { status: newStatus },
   })
   revalidatePath("/job-orders")
+  revalidatePath("/apply/job-orders")
+  revalidatePath(`/apply/job-orders/${jobOrderId}`)
+  revalidatePath("/apply/applicants")
   return { error: null }
 }
 
@@ -71,6 +76,9 @@ export async function matchToJob(formData: FormData) {
   revalidatePath("/applicants")
   revalidatePath("/job-orders")
   revalidatePath(`/job-orders/${jobOrderId}/match`)
+  revalidatePath("/apply/job-orders")
+  revalidatePath(`/apply/job-orders/${jobOrderId}`)
+  revalidatePath("/apply/applicants")
   redirect(`/job-orders/${jobOrderId}/match?success=matched`)
 }
 
@@ -98,6 +106,9 @@ export async function deleteMatch(formData: FormData) {
   revalidatePath("/job-orders")
   revalidatePath("/monitoring")
   revalidatePath(`/job-orders/${jobOrderId}/match`)
+  revalidatePath("/apply/job-orders")
+  revalidatePath(`/apply/job-orders/${jobOrderId}`)
+  revalidatePath("/apply/applicants")
   redirect(`/job-orders/${jobOrderId}/match?success=unmatched`)
 }
 
@@ -174,6 +185,9 @@ export async function deployMatchedApplicant(formData: FormData) {
   revalidatePath("/job-orders")
   revalidatePath("/monitoring")
   revalidatePath(`/job-orders/${jobOrderId}/match`)
+  revalidatePath("/apply/job-orders")
+  revalidatePath(`/apply/job-orders/${jobOrderId}`)
+  revalidatePath("/apply/applicants")
   redirect(`/job-orders/${jobOrderId}/match?success=deployed`)
 }
 
@@ -200,5 +214,8 @@ export async function updateJobOrder(formData: FormData) {
   revalidatePath("/job-orders")
   revalidatePath(`/job-orders/${id}`)
   revalidatePath(`/job-orders/${id}/edit`)
+  revalidatePath("/apply/job-orders")
+  revalidatePath(`/apply/job-orders/${id}`)
+  revalidatePath("/apply/applicants")
   redirect("/job-orders?success=updated")
 }

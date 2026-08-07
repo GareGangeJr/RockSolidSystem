@@ -15,14 +15,14 @@ export default function PublicApplyShell({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="sticky top-0 z-20 border-b border-gray-200 bg-white">
-        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
+        <div className="mx-auto flex max-w-4xl items-center gap-3 px-4 py-3">
           <Image src="/logo123.png" alt="Rock Solid Logo" width={48} height={48} className="h-12 w-12 shrink-0" priority />
           <div className="min-w-0">
             <p className="truncate text-sm font-bold leading-tight text-gray-900">Rock Solid Manpower</p>
             <p className="text-xs text-gray-500">Online Application</p>
           </div>
         </div>
-        <nav className="mx-auto flex max-w-3xl gap-1 px-4 pb-3">
+        <nav className="mx-auto flex max-w-4xl gap-1 px-4 pb-3">
           {nav.map((item) => {
             const active = pathname.startsWith(item.href)
             return (
@@ -40,7 +40,7 @@ export default function PublicApplyShell({ children }: { children: React.ReactNo
         </nav>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-4 pb-10 sm:py-6">{children}</main>
+      <main className="mx-auto max-w-4xl px-4 py-4 pb-10 sm:py-6">{children}</main>
     </div>
   )
 }

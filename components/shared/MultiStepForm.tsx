@@ -8,6 +8,7 @@ type MultiStepFormProps = {
   submitLabel: string
   cancelHref?: string
   hiddenFields?: ReactNode
+  nextDisabled?: boolean
   onSubmit: (formData: FormData) => void | Promise<{ error?: string } | void>
   children: ReactNode
 }
@@ -17,6 +18,7 @@ export function MultiStepForm({
   submitLabel,
   cancelHref,
   hiddenFields,
+  nextDisabled = false,
   onSubmit,
   children,
 }: MultiStepFormProps) {
@@ -33,10 +35,14 @@ export function MultiStepForm({
     const panel = panelRefs.current[index]
     if (!panel) return true
     const fields = panel.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
-      "input[required], select[required], textarea[required]"
+      "input, select, textarea"
     )
     for (const field of fields) {
-      if (!field.reportValidity()) return false
+      if (field.disabled) continue
+      if (!field.checkValidity()) {
+        field.reportValidity()
+        return false
+      }
     }
     return true
   }
@@ -47,7 +53,7 @@ export function MultiStepForm({
   }
 
   function handleNext() {
-    if (!validateStep(step)) return
+    if (nextDisabled || !validateStep(step)) return
     goTo(Math.min(step + 1, steps.length - 1))
   }
 
@@ -161,7 +167,8 @@ export function MultiStepForm({
               <button
                 type="button"
                 onClick={handleNext}
-                className="rounded-md bg-blue-600 px-5 py-3 text-base font-medium text-white hover:bg-blue-700 sm:px-6"
+                disabled={nextDisabled}
+                className="rounded-md bg-blue-600 px-5 py-3 text-base font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 sm:px-6"
               >
                 Next
               </button>

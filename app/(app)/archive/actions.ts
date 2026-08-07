@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache"
 
 const REVALIDATE_PATHS: Record<ArchivableTable, string[]> = {
   applicants: ["/applicants", "/archive"],
-  job_orders: ["/job-orders", "/archive", "/apply/job-orders"],
+  job_orders: ["/job-orders", "/archive", "/apply/job-orders", "/apply/applicants"],
   employees: ["/employees", "/archive"],
   monitoring: ["/monitoring", "/archive"],
 }
@@ -20,7 +20,10 @@ function revalidateFor(table: ArchivableTable, id: number) {
   }
 
   if (table === "applicants") revalidatePath(`/applicants/${id}`)
-  if (table === "job_orders") revalidatePath(`/job-orders/${id}`)
+  if (table === "job_orders") {
+    revalidatePath(`/job-orders/${id}`)
+    revalidatePath(`/apply/job-orders/${id}`)
+  }
   if (table === "employees") revalidatePath(`/employees/${id}`)
   if (table === "monitoring") revalidatePath(`/monitoring/${id}`)
 }

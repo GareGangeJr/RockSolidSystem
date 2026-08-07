@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { addApplicant, updateApplicant } from "@/app/(app)/applicants/actions"
 import { submitOnlineApplication } from "@/app/apply/actions"
 import { MultiStepForm } from "@/components/shared/MultiStepForm"
@@ -46,6 +46,20 @@ const STEPS = [
   "Skills & Final",
 ] as const
 
+const readOnlyFieldClass = `${fieldClassSm} cursor-not-allowed bg-gray-50 text-gray-600`
+const MIN_APPLICANT_AGE = 18
+
+function ageFromDob(dob: string): string {
+  if (!dob || dob.length < 10) return ""
+  const [year, month, day] = dob.slice(0, 10).split("-").map(Number)
+  if (!year || !month || !day) return ""
+  const today = new Date()
+  let age = today.getFullYear() - year
+  const monthDiff = today.getMonth() + 1 - month
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < day)) age--
+  return age < 0 ? "" : String(age)
+}
+
 type ApplicantFormProps = {
   mode?: "admin" | "public"
   applicant?: Applicant
@@ -76,6 +90,23 @@ export function ApplicantForm({
 
   const val = (field: unknown) => (isEdit ? displayValue(field as string | null) : undefined)
   const dat = (field: unknown) => (isEdit ? displayDate(field as string | null) : undefined)
+
+  const [beneficiary1Dob, setBeneficiary1Dob] = useState(() => dat(applicant?.beneficiary1_dob) ?? "")
+  const [beneficiary2Dob, setBeneficiary2Dob] = useState(() => dat(applicant?.beneficiary2_dob) ?? "")
+  const [dateOfBirth, setDateOfBirth] = useState(() => dat(applicant?.date_of_birth) ?? "")
+  const dateOfBirthRef = useRef<HTMLInputElement>(null)
+  const beneficiary1Age = ageFromDob(beneficiary1Dob)
+  const beneficiary2Age = ageFromDob(beneficiary2Dob)
+  const applicantAge = ageFromDob(dateOfBirth)
+  const isUnderage =
+    Boolean(dateOfBirth) && (applicantAge === "" || Number(applicantAge) < MIN_APPLICANT_AGE)
+  const underageMessage = "Applicants must be at least 18 years old."
+
+  useEffect(() => {
+    const input = dateOfBirthRef.current
+    if (!input) return
+    input.setCustomValidity(isUnderage ? underageMessage : "")
+  }, [isUnderage])
 
   async function handleSubmit(formData: FormData) {
     if (isPublic) return submitOnlineApplication(formData)
@@ -120,6 +151,7 @@ export function ApplicantForm({
       steps={STEPS}
       submitLabel={isEdit ? "Save Changes" : isPublic ? "Submit Application" : "Save Applicant"}
       cancelHref={isEdit ? `/applicants/${applicant!.id}` : undefined}
+      nextDisabled={isUnderage}
       onSubmit={handleSubmit}
       hiddenFields={isEdit ? <input type="hidden" name="id" value={applicant!.id} /> : undefined}
     >
@@ -235,7 +267,18 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>Date of Birth</label>
-            <input name="date_of_birth" type="date" className={fieldClassSm} defaultValue={dat(applicant?.date_of_birth)} {...personalReq} />
+            <input
+              ref={dateOfBirthRef}
+              name="date_of_birth"
+              type="date"
+              className={fieldClassSm}
+              value={dateOfBirth}
+              onChange={(e) => setDateOfBirth(e.target.value)}
+              {...personalReq}
+            />
+            {isUnderage && (
+              <p className="mt-1 text-xs text-red-600">{underageMessage}</p>
+            )}
           </div>
           <div>
             <label className={labelClassSm}>Place of Birth</label>
@@ -368,11 +411,24 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>DOB</label>
-            <input name="beneficiary1_dob" type="date" className={fieldClassSm} defaultValue={dat(applicant?.beneficiary1_dob)} {...beneficiary1Req} />
+            <input
+              name="beneficiary1_dob"
+              type="date"
+              className={fieldClassSm}
+              value={beneficiary1Dob}
+              onChange={(e) => setBeneficiary1Dob(e.target.value)}
+              {...beneficiary1Req}
+            />
           </div>
           <div>
             <label className={labelClassSm}>Age</label>
-            <NumericInput name="beneficiary1_age" className={fieldClassSm} defaultValue={val(applicant?.beneficiary1_age)} />
+            <input
+              name="beneficiary1_age"
+              className={readOnlyFieldClass}
+              value={beneficiary1Age}
+              readOnly
+              tabIndex={-1}
+            />
           </div>
           <div>
             <label className={labelClassSm}>Relationship</label>
@@ -392,11 +448,23 @@ export function ApplicantForm({
           </div>
           <div>
             <label className={labelClassSm}>DOB</label>
-            <input name="beneficiary2_dob" type="date" className={fieldClassSm} defaultValue={dat(applicant?.beneficiary2_dob)} />
+            <input
+              name="beneficiary2_dob"
+              type="date"
+              className={fieldClassSm}
+              value={beneficiary2Dob}
+              onChange={(e) => setBeneficiary2Dob(e.target.value)}
+            />
           </div>
           <div>
             <label className={labelClassSm}>Age</label>
-            <NumericInput name="beneficiary2_age" className={fieldClassSm} defaultValue={val(applicant?.beneficiary2_age)} />
+            <input
+              name="beneficiary2_age"
+              className={readOnlyFieldClass}
+              value={beneficiary2Age}
+              readOnly
+              tabIndex={-1}
+            />
           </div>
           <div>
             <label className={labelClassSm}>Relationship</label>

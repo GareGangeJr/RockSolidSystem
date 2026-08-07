@@ -2,6 +2,7 @@
 
 import { createSupabaseAdmin } from "@/lib/supabase/admin"
 import { logActivity } from "@/lib/activity-log"
+import { assertOfficeNetwork } from "@/lib/kiosk-access"
 import { revalidatePath } from "next/cache"
 
 type AttendanceLogType = "time_in" | "time_out"
@@ -82,6 +83,9 @@ async function getTodayLogsForEmployee(employeeId: number) {
 }
 
 export async function getAttendanceToday(employeeNumber: string) {
+  const network = await assertOfficeNetwork()
+  if (!network.ok) return { error: network.error, employee: null }
+
   const { employee, error } = await getEmployeeByNumber(employeeNumber)
   if (error || !employee) return { error, employee: null }
 
@@ -98,6 +102,9 @@ export async function getAttendanceToday(employeeNumber: string) {
 }
 
 export async function logAttendance(logType: AttendanceLogType, employeeNumber: string) {
+  const network = await assertOfficeNetwork()
+  if (!network.ok) return { error: network.error }
+
   const { employee, error } = await getEmployeeByNumber(employeeNumber)
   if (error || !employee) return { error }
 

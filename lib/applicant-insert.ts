@@ -36,14 +36,17 @@ function parseWorkExperiences(formData: FormData): WorkExperienceItem[] {
 }
 
 function getAgeFromDob(dob: string | null): number | null {
-  if (!dob) return null
-  const birth = new Date(dob)
+  if (!dob || dob.length < 10) return null
+  const [year, month, day] = dob.slice(0, 10).split("-").map(Number)
+  if (!year || !month || !day) return null
   const today = new Date()
-  let age = today.getFullYear() - birth.getFullYear()
-  const m = today.getMonth() - birth.getMonth()
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--
+  let age = today.getFullYear() - year
+  const monthDiff = today.getMonth() + 1 - month
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < day)) age--
   return age < 0 ? null : age
 }
+
+const MIN_APPLICANT_AGE = 18
 
 export type ApplicantInsertPayload = Record<string, unknown>
 
@@ -60,6 +63,11 @@ export function buildApplicantInsertPayload(
   const positionApplied = resolvePositionFromForm(formData, "position_applied", { required: true })
   const secondChoicePosition = resolvePositionFromForm(formData, "second_choice_position")
   const dob = optionalDate(formData.get("date_of_birth"))
+  const age = getAgeFromDob(dob)
+
+  if (dob && (age === null || age < MIN_APPLICANT_AGE)) {
+    throw new Error("Applicants must be at least 18 years old.")
+  }
 
   return {
     first_name: formData.get("first_name") as string,
@@ -80,7 +88,7 @@ export function buildApplicantInsertPayload(
     provincial_address: getOptionalString(formData, "provincial_address"),
     active_cellphone: getOptionalString(formData, "active_cellphone"),
     date_of_birth: dob,
-    age: getAgeFromDob(dob),
+    age,
     place_of_birth: getOptionalString(formData, "place_of_birth"),
     religion: getOptionalString(formData, "religion"),
     civil_status: getOptionalString(formData, "civil_status"),

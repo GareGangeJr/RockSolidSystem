@@ -1,6 +1,8 @@
 import { createSupabaseAdmin } from "@/lib/supabase/admin"
 import { PublicJobOrderTable } from "@/components/apply/PublicJobOrderTable"
 
+export const dynamic = "force-dynamic"
+
 export default async function PublicJobOrdersPage() {
   const supabase = createSupabaseAdmin()
 

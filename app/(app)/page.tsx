@@ -51,12 +51,15 @@ export default async function Home({
   const [
     { data: applicants },
     { data: jobOrders },
-    { data: monitoringRecords },
+    { data: monitoringForCountries },
+    { data: recentMonitoring },
     { count: openJobOrders },
   ] = await Promise.all([
     supabase.from("applicants").select("id, first_name, last_name, position_applied, status, applicant_type, created_at").is("archived_at", null).order("created_at", { ascending: false }),
     supabase.from("job_orders").select("id, status, country").is("archived_at", null),
-    supabase.from("monitoring").select("id, applicant_id, job_order_id, deployment_status, deployment_date").is("archived_at", null).order("deployment_date", { ascending: false }).limit(10),
+    // Full set for country distribution (do not limit — chart must reflect all deployments)
+    supabase.from("monitoring").select("job_order_id").is("archived_at", null),
+    supabase.from("monitoring").select("id, applicant_id, job_order_id, deployment_status, deployment_date").is("archived_at", null).order("deployment_date", { ascending: false }).limit(5),
     supabase.from("job_orders").select("*", { count: "exact", head: true }).eq("status", "Open").is("archived_at", null),
   ])
 
@@ -92,7 +95,7 @@ export default async function Home({
   const applicantMap = new Map(applicantRows.map((a) => [a.id, a]))
 
   const countryMap = new Map<string, number>()
-  for (const record of monitoringRecords ?? []) {
+  for (const record of monitoringForCountries ?? []) {
     const country = jobOrderMap.get(record.job_order_id)?.country?.trim() || "Unknown"
     countryMap.set(country, (countryMap.get(country) ?? 0) + 1)
   }
@@ -116,7 +119,7 @@ export default async function Home({
     date: formatDate(a.created_at),
   }))
 
-  const recentDeployments: RecentDeployment[] = (monitoringRecords ?? []).slice(0, 5).map((m) => {
+  const recentDeployments: RecentDeployment[] = (recentMonitoring ?? []).map((m) => {
     const applicant = applicantMap.get(m.applicant_id)
     const jobOrder = jobOrderMap.get(m.job_order_id)
     return {

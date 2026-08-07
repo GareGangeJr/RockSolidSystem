@@ -2,7 +2,6 @@
 
 import { createSupabaseAdmin } from "@/lib/supabase/admin"
 import { buildApplicantInsertPayload } from "@/lib/applicant-insert"
-import { createPlacement } from "@/lib/applicant-workflow"
 import { getOnlineApplicantType } from "@/lib/status-options"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
@@ -17,10 +16,13 @@ export async function submitOnlineApplication(formData: FormData) {
     })
   } catch (error) {
     console.error("Invalid online application:", error)
+    const message = error instanceof Error ? error.message : ""
+    if (message.toLowerCase().includes("18")) {
+      redirect(`/apply/applicants?error=underage&message=${encodeURIComponent(message)}`)
+    }
     redirect("/apply/applicants?error=invalid")
   }
 
-  const jobOrderId = Number(formData.get("job_order_id"))
   const supabase = createSupabaseAdmin()
 
   const { data: inserted, error: insertError } = await supabase
@@ -34,26 +36,10 @@ export async function submitOnlineApplication(formData: FormData) {
     redirect("/apply/applicants?error=submit")
   }
 
-  if (jobOrderId) {
-    const { data: jobOrder } = await supabase
-      .from("job_orders")
-      .select("id, status")
-      .eq("id", jobOrderId)
-      .maybeSingle()
-
-    if (!jobOrder || jobOrder.status === "Closed") {
-      redirect("/apply/applicants?success=submitted&warning=job_closed")
-    }
-
-    const placementResult = await createPlacement(supabase, inserted.id, jobOrderId)
-    if (placementResult.error) {
-      redirect(
-        `/apply/applicants?success=submitted&warning=placement&message=${encodeURIComponent(placementResult.error.message)}`
-      )
-    }
-  }
-
+  // Job order selection only pre-fills position/country — matching is done by staff.
   revalidatePath("/applicants")
   revalidatePath("/job-orders")
+  revalidatePath("/apply/applicants")
+  revalidatePath("/apply/job-orders")
   redirect("/apply/applicants?success=submitted")
 }

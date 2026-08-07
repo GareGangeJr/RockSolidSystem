@@ -11,7 +11,12 @@ export type ActivityLogInput = {
   actorLabel?: string
 }
 
-export async function logActivity(input: ActivityLogInput) {
+/**
+ * Writes an activity log entry. Returns false if auditing failed.
+ * Callers may keep the business action successful (best-effort audit),
+ * but should treat a false return as an incomplete audit trail.
+ */
+export async function logActivity(input: ActivityLogInput): Promise<boolean> {
   try {
     const supabase = await createSupabaseServer()
     const {
@@ -61,9 +66,23 @@ export async function logActivity(input: ActivityLogInput) {
     })
 
     if (error) {
-      console.error("Failed to write activity log:", error.message)
+      console.error("[activity-log] write failed:", {
+        action: input.action,
+        module: input.module,
+        recordId: input.recordId,
+        message: error.message,
+      })
+      return false
     }
+
+    return true
   } catch (error) {
-    console.error("Failed to write activity log:", error)
+    console.error("[activity-log] unexpected failure:", {
+      action: input.action,
+      module: input.module,
+      recordId: input.recordId,
+      error,
+    })
+    return false
   }
 }

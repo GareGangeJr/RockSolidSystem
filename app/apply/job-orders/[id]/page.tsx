@@ -2,6 +2,8 @@ import Link from "next/link"
 import { createSupabaseAdmin } from "@/lib/supabase/admin"
 import { JobOrderDetailsView } from "@/components/job-orders/JobOrderDetailsView"
 
+export const dynamic = "force-dynamic"
+
 export default async function PublicJobOrderDetailPage({
   params,
 }: {
